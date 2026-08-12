@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minha Vida Financeira | Pro Dark Edition</title>
+    <title>Minha Vida Financeira | Edição Master</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -11,22 +11,22 @@
     <style>
         :root { --bg: #020617; --card: #0f172a; --border: #1e293b; }
         body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: #f1f5f9; overflow: hidden; }
-        .tab-content { display: none; height: calc(100vh - 120px); overflow-y: auto; padding-bottom: 100px; }
+        .tab-content { display: none; height: calc(100vh - 120px); overflow-y: auto; padding-bottom: 120px; }
         .tab-content.active { display: block; }
         .card { background: var(--card); border: 1px solid var(--border); border-radius: 1.5rem; }
         input, select, textarea { background: #1e293b !important; border: 1px solid #334155 !important; color: white !important; outline: none; padding: 12px; border-radius: 12px; width: 100%; }
         .positive { color: #10b981; }
         .negative { color: #f43f5e; }
-        .warning { color: #f59e0b; }
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        .strikethrough { text-decoration: line-through; opacity: 0.5; }
         @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(244, 63, 94, 0); } 100% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0); } }
         .alert-vencido { animation: pulse-red 2s infinite; border: 2px solid #f43f5e !important; }
     </style>
 </head>
 <body class="antialiased">
 
-    <!-- NAV MOBILE -->
+    <!-- MOBILE NAV -->
     <nav class="fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 flex justify-around p-4 z-50 md:hidden">
         <button onclick="showTab('dashboard')" class="nav-icon text-indigo-500"><i data-lucide="layout-dashboard"></i></button>
         <button onclick="showTab('receitas')" class="nav-icon text-slate-400"><i data-lucide="trending-up"></i></button>
@@ -35,20 +35,20 @@
     </nav>
 
     <div class="flex h-screen overflow-hidden">
-        <!-- SIDEBAR DESKTOP -->
+        <!-- SIDEBAR -->
         <aside class="hidden md:flex flex-col w-72 bg-slate-950 border-r border-slate-800 p-6">
             <div class="flex items-center gap-3 mb-10">
                 <div class="bg-indigo-600 p-2 rounded-xl shadow-lg"><i data-lucide="wallet" class="text-white"></i></div>
-                <h1 class="text-lg font-black tracking-tighter">MINHA VIDA <span class="text-indigo-500">FINANCEIRA</span></h1>
+                <h1 class="text-lg font-black tracking-tighter">MINHA VIDA <span class="text-indigo-500">FINANC.</span></h1>
             </div>
             <nav class="space-y-2 flex-1">
-                <button onclick="showTab('dashboard')" class="flex items-center gap-3 w-full p-3 rounded-xl hover:bg-slate-900 transition font-semibold" id="link-dashboard"><i data-lucide="layout-dashboard" class="w-5 h-5"></i> Dashboard</button>
-                <button onclick="showTab('receitas')" class="flex items-center gap-3 w-full p-3 rounded-xl hover:bg-slate-900 transition font-semibold text-slate-400"><i data-lucide="trending-up" class="w-5 h-5 text-emerald-500"></i> Receitas</button>
-                <button onclick="showTab('despesas')" class="flex items-center gap-3 w-full p-3 rounded-xl hover:bg-slate-900 transition font-semibold text-slate-400"><i data-lucide="trending-down" class="w-5 h-5 text-rose-500"></i> Despesas</button>
-                <button onclick="showTab('investimentos')" class="flex items-center gap-3 w-full p-3 rounded-xl hover:bg-slate-900 transition font-semibold text-slate-400"><i data-lucide="line-chart" class="w-5 h-5 text-amber-500"></i> Investimentos</button>
+                <button onclick="showTab('dashboard')" class="flex items-center gap-3 w-full p-3 rounded-xl hover:bg-slate-900 transition font-semibold" id="link-dashboard"><i data-lucide="layout-dashboard"></i> Dashboard</button>
+                <button onclick="showTab('receitas')" class="flex items-center gap-3 w-full p-3 rounded-xl hover:bg-slate-900 transition font-semibold text-slate-400"><i data-lucide="trending-up" class="text-emerald-500"></i> Receitas</button>
+                <button onclick="showTab('despesas')" class="flex items-center gap-3 w-full p-3 rounded-xl hover:bg-slate-900 transition font-semibold text-slate-400"><i data-lucide="trending-down" class="text-rose-500"></i> Despesas</button>
+                <button onclick="showTab('investimentos')" class="flex items-center gap-3 w-full p-3 rounded-xl hover:bg-slate-900 transition font-semibold text-slate-400"><i data-lucide="line-chart" class="text-amber-500"></i> Investimentos</button>
             </nav>
-            <div class="mt-auto p-4 bg-indigo-950/20 border border-indigo-500/20 rounded-2xl">
-                <p class="text-[10px] text-indigo-300 font-bold uppercase tracking-widest mb-1">Patrimônio Líquido</p>
+            <div class="mt-auto p-4 bg-indigo-950/20 border border-indigo-500/20 rounded-2xl text-center">
+                <p class="text-[10px] text-indigo-300 font-bold uppercase mb-1 tracking-widest">Patrimônio Consolidado</p>
                 <h3 id="side-patrimonio" class="text-xl font-black text-white">R$ 0,00</h3>
             </div>
         </aside>
@@ -61,111 +61,91 @@
                     <p id="current-date" class="text-slate-500 text-sm font-medium capitalize"></p>
                 </div>
                 <div class="flex gap-2">
-                    <button onclick="syncQuotes()" class="bg-slate-900 border border-slate-800 p-3 rounded-xl text-indigo-400 transition hover:text-white" title="Sincronizar B3">
-                        <i data-lucide="refresh-cw" id="sync-icon"></i>
-                    </button>
-                    <button onclick="clearData()" class="bg-slate-900 border border-slate-800 p-3 rounded-xl text-rose-500 hover:bg-rose-500/10">
-                        <i data-lucide="trash-2"></i>
-                    </button>
+                    <button onclick="syncQuotes()" class="bg-slate-900 border border-slate-800 p-3 rounded-xl text-indigo-400 hover:text-white transition"><i data-lucide="refresh-cw" id="sync-icon"></i></button>
+                    <button onclick="clearData()" class="bg-slate-900 border border-slate-800 p-3 rounded-xl text-rose-500"><i data-lucide="trash-2"></i></button>
                 </div>
             </header>
 
             <!-- DASHBOARD -->
             <section id="dashboard" class="tab-content active space-y-6">
-                <!-- Banner Alerta de Contas Vencidas -->
-                <div id="alert-zone" class="hidden"></div>
-
-                <!-- Resumo -->
+                <div id="alert-zone"></div>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div class="card p-5 border-emerald-500/20 bg-emerald-500/5">
-                        <p class="text-emerald-500 text-[10px] font-bold uppercase tracking-widest">Total Receitas</p>
-                        <h3 id="dash-receitas" class="text-2xl font-black">R$ 0,00</h3>
+                        <p class="text-emerald-500 text-[10px] font-bold uppercase tracking-widest">Saldo em Conta</p>
+                        <h3 id="dash-saldo-real" class="text-2xl font-black">R$ 0,00</h3>
                     </div>
                     <div class="card p-5 border-rose-500/20 bg-rose-500/5">
-                        <p class="text-rose-500 text-[10px] font-bold uppercase tracking-widest">Contas Vencidas/Hoje</p>
-                        <h3 id="dash-despesas" class="text-2xl font-black">R$ 0,00</h3>
+                        <p class="text-rose-500 text-[10px] font-bold uppercase tracking-widest">Contas em Atraso</p>
+                        <h3 id="dash-atraso" class="text-2xl font-black">R$ 0,00</h3>
                     </div>
                     <div class="card p-5 border-amber-500/20 bg-amber-500/5">
-                        <p class="text-amber-500 text-[10px] font-bold uppercase tracking-widest">Previsão (A vencer)</p>
-                        <h3 id="dash-previsao" class="text-2xl font-black">R$ 0,00</h3>
+                        <p class="text-amber-500 text-[10px] font-bold uppercase tracking-widest">Total Investido</p>
+                        <h3 id="dash-investido" class="text-2xl font-black text-amber-500">R$ 0,00</h3>
                     </div>
                     <div class="card p-5 border-indigo-500/20 bg-indigo-500/5">
-                        <p class="text-indigo-400 text-[10px] font-bold uppercase tracking-widest">Saldo Previsto</p>
-                        <h3 id="dash-saldo-previsto" class="text-2xl font-black">R$ 0,00</h3>
+                        <p class="text-indigo-400 text-[10px] font-bold uppercase tracking-widest">Patrimônio Geral</p>
+                        <h3 id="dash-patrimonio-geral" class="text-2xl font-black">R$ 0,00</h3>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="lg:col-span-2 card p-6">
-                        <h4 class="font-bold mb-6 flex items-center gap-2"><i data-lucide="bar-chart-3" class="text-indigo-500"></i> Ganhos x Gastos</h4>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="card p-6">
+                        <h4 class="font-bold mb-4 flex items-center gap-2"><i data-lucide="bar-chart-3" class="text-indigo-500"></i> Fluxo do Mês</h4>
                         <canvas id="chartFluxo"></canvas>
                     </div>
                     <div class="card p-6">
-                        <h4 class="font-bold mb-4 flex items-center gap-2"><i data-lucide="calendar-clock" class="text-amber-500"></i> Próximos 7 Dias</h4>
-                        <div id="lista-proximos" class="space-y-3 overflow-y-auto max-h-[300px]"></div>
+                        <h4 class="font-bold mb-4 flex items-center gap-2"><i data-lucide="calendar-clock" class="text-amber-500"></i> Agenda de Contas</h4>
+                        <div id="lista-agenda" class="space-y-3 max-h-[300px] overflow-y-auto"></div>
                     </div>
                 </div>
             </section>
 
             <!-- RECEITAS -->
-            <section id="receitas" class="tab-content space-y-6">
+            <section id="receitas" class="tab-content space-y-4">
                 <div class="flex justify-between items-center bg-slate-900/50 p-6 rounded-3xl border border-slate-800">
-                    <h3 class="text-xl font-bold text-emerald-500">Gerenciar Receitas</h3>
-                    <button onclick="openModal('modal-receita')" class="bg-emerald-600 text-white px-6 py-3 rounded-2xl font-bold flex items-center gap-2 hover:bg-emerald-500">
-                        <i data-lucide="plus-circle"></i> Adicionar Receita
-                    </button>
+                    <h3 class="text-xl font-bold text-emerald-500">Minhas Receitas</h3>
+                    <button onclick="openForm('receita')" class="bg-emerald-600 text-white px-6 py-3 rounded-2xl font-bold flex items-center gap-2 hover:bg-emerald-500 transition"><i data-lucide="plus"></i> Add Receita</button>
                 </div>
                 <div id="lista-receitas" class="grid gap-3"></div>
             </section>
 
             <!-- DESPESAS -->
-            <section id="despesas" class="tab-content space-y-6">
+            <section id="despesas" class="tab-content space-y-4">
                 <div class="flex justify-between items-center bg-slate-900/50 p-6 rounded-3xl border border-slate-800">
-                    <h3 class="text-xl font-bold text-rose-500">Gerenciar Despesas</h3>
-                    <button onclick="openModal('modal-despesa')" class="bg-rose-600 text-white px-6 py-3 rounded-2xl font-bold flex items-center gap-2 hover:bg-rose-500">
-                        <i data-lucide="minus-circle"></i> Adicionar Despesa
-                    </button>
+                    <h3 class="text-xl font-bold text-rose-500">Minhas Despesas</h3>
+                    <button onclick="openForm('despesa')" class="bg-rose-600 text-white px-6 py-3 rounded-2xl font-bold flex items-center gap-2 hover:bg-rose-500 transition"><i data-lucide="plus"></i> Add Despesa</button>
                 </div>
                 <div id="lista-despesas" class="grid gap-3"></div>
             </section>
 
             <!-- INVESTIMENTOS -->
             <section id="investimentos" class="tab-content space-y-6">
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                     <div class="card bg-indigo-600 p-8 rounded-[2.5rem] relative overflow-hidden">
-                        <div class="relative z-10">
-                            <p class="text-indigo-100 font-bold text-xs uppercase tracking-widest">Renda Variável (B3)</p>
-                            <h2 id="total-rv" class="text-5xl font-black text-white mt-2">R$ 0,00</h2>
-                            <button onclick="openModal('modal-rv')" class="mt-6 bg-white text-indigo-900 px-6 py-2 rounded-xl font-bold text-sm">Novo Ativo</button>
-                        </div>
-                        <i data-lucide="trending-up" class="absolute right-[-20px] bottom-[-20px] w-48 h-48 text-white/10"></i>
+                        <p class="text-xs uppercase font-bold text-indigo-100 opacity-70">Ações e FIIs</p>
+                        <h2 id="total-rv" class="text-4xl font-black text-white mt-1">R$ 0,00</h2>
+                        <button onclick="openForm('rv')" class="mt-4 bg-white/20 px-4 py-2 rounded-xl text-xs font-bold border border-white/30 hover:bg-white/30 transition">Add Ativo</button>
                     </div>
                     <div class="card bg-emerald-600 p-8 rounded-[2.5rem] relative overflow-hidden">
-                        <div class="relative z-10">
-                            <p class="text-emerald-100 font-bold text-xs uppercase tracking-widest">Renda Fixa</p>
-                            <h2 id="total-rf" class="text-5xl font-black text-white mt-2">R$ 0,00</h2>
-                            <button onclick="openModal('modal-rf')" class="mt-6 bg-white text-emerald-900 px-6 py-2 rounded-xl font-bold text-sm">Novo Título</button>
-                        </div>
-                        <i data-lucide="lock" class="absolute right-[-20px] bottom-[-20px] w-48 h-48 text-white/10"></i>
+                        <p class="text-xs uppercase font-bold text-emerald-100 opacity-70">Renda Fixa</p>
+                        <h2 id="total-rf" class="text-4xl font-black text-white mt-1">R$ 0,00</h2>
+                        <button onclick="openForm('rf')" class="mt-4 bg-white/20 px-4 py-2 rounded-xl text-xs font-bold border border-white/30 hover:bg-white/30 transition">Add Título</button>
                     </div>
                 </div>
-                
                 <div class="card overflow-hidden">
-                    <div class="p-4 border-b border-slate-800 bg-slate-900/50 font-bold text-sm uppercase tracking-widest">Carteira de Ativos</div>
                     <div class="overflow-x-auto">
-                        <table class="w-full text-left">
-                            <thead class="text-[10px] font-black uppercase text-slate-500 border-b border-slate-800">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-slate-900 text-slate-500 uppercase font-black text-[10px]">
                                 <tr>
-                                    <th class="p-4">Ticker</th>
-                                    <th class="p-4">Qtd</th>
-                                    <th class="p-4">Cotação</th>
-                                    <th class="p-4">Investido</th>
-                                    <th class="p-4">Valor Atual</th>
-                                    <th class="p-4">Resultado</th>
-                                    <th class="p-4"></th>
+                                    <th class="p-4">Tipo/Ativo</th>
+                                    <th class="p-4">Qtd / Valor Aplicado</th>
+                                    <th class="p-4">Cotação Atual</th>
+                                    <th class="p-4">Total Atual</th>
+                                    <th class="p-4">Lucro/Prej.</th>
+                                    <th class="p-4">Ações</th>
                                 </tr>
                             </thead>
-                            <tbody id="corpo-rv" class="text-sm font-medium"></tbody>
+                            <tbody id="corpo-investimentos" class="font-medium"></tbody>
                         </table>
                     </div>
                 </div>
@@ -173,106 +153,156 @@
         </main>
     </div>
 
-    <!-- MODAIS -->
-    <!-- Modal Receita -->
-    <div id="modal-receita" class="fixed inset-0 bg-black/90 backdrop-blur-sm hidden z-[100] flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-[2.5rem] max-w-md w-full p-8 shadow-2xl">
-            <h3 class="text-2xl font-black text-emerald-500 mb-6">Nova Receita</h3>
-            <form id="form-receita" class="space-y-4">
-                <input type="text" id="rec-desc" placeholder="Ex: Salário" required>
-                <div class="grid grid-cols-2 gap-4">
-                    <input type="number" step="0.01" id="rec-valor" placeholder="Valor R$" required>
-                    <input type="date" id="rec-data" required>
-                </div>
-                <select id="rec-freq">
-                    <option value="única">Única</option>
-                    <option value="mensal">Mensal (Recorrente)</option>
-                </select>
-                <button type="submit" class="w-full bg-emerald-600 p-4 rounded-2xl font-bold text-white text-lg hover:bg-emerald-500 transition">Salvar Receita</button>
-                <button type="button" onclick="closeModal('modal-receita')" class="w-full text-slate-500 font-bold text-sm mt-2">Cancelar</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal Despesa -->
-    <div id="modal-despesa" class="fixed inset-0 bg-black/90 backdrop-blur-sm hidden z-[100] flex items-center justify-center p-4">
+    <!-- MODAL ÚNICO PARA CADASTRO/EDIÇÃO -->
+    <div id="modal-form" class="fixed inset-0 bg-black/90 backdrop-blur-sm hidden z-[100] flex items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-800 rounded-[2.5rem] max-w-md w-full p-8 shadow-2xl overflow-y-auto max-h-[90vh]">
-            <h3 class="text-2xl font-black text-rose-500 mb-6">Nova Despesa</h3>
-            <form id="form-despesa" class="space-y-4">
-                <input type="text" id="des-desc" placeholder="Ex: Conta de Luz" required>
-                <div class="grid grid-cols-2 gap-4">
-                    <input type="number" step="0.01" id="des-valor" placeholder="Valor R$" required>
-                    <input type="date" id="des-venc" required>
-                </div>
-                <select id="des-cat">
-                    <option>Moradia</option><option>Alimentação</option><option>Transporte</option><option>Saúde</option><option>Assinaturas</option><option>Outros</option>
-                </select>
-                <div>
-                    <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Anexar Comprovante (Opcional)</label>
-                    <input type="file" id="des-anexo" class="text-xs">
-                </div>
-                <button type="submit" class="w-full bg-rose-600 p-4 rounded-2xl font-bold text-white text-lg hover:bg-rose-500 transition">Salvar Despesa</button>
-                <button type="button" onclick="closeModal('modal-despesa')" class="w-full text-slate-500 font-bold text-sm mt-2">Cancelar</button>
-            </form>
-        </div>
-    </div>
+            <h3 id="form-title" class="text-2xl font-black mb-6">Lançamento</h3>
+            <form id="main-form" class="space-y-4">
+                <input type="hidden" id="form-type">
+                <input type="hidden" id="form-index">
 
-    <!-- Modal RV -->
-    <div id="modal-rv" class="fixed inset-0 bg-black/90 backdrop-blur-sm hidden z-[100] flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-[2.5rem] max-w-md w-full p-8">
-            <h3 class="text-2xl font-black text-indigo-400 mb-6">Novo Ativo B3</h3>
-            <form id="form-rv" class="space-y-4">
-                <input type="text" id="rv-ticker" placeholder="Ticker (Ex: PETR4)" class="uppercase font-bold" required>
-                <div class="grid grid-cols-2 gap-4">
-                    <input type="number" id="rv-qtd" placeholder="Qtd" required>
-                    <input type="number" step="0.01" id="rv-pm" placeholder="Preço Médio" required>
+                <div id="field-desc">
+                    <label class="text-[10px] font-black uppercase text-slate-500 ml-1">Descrição / Nome do Ativo</label>
+                    <input type="text" id="inp-desc" placeholder="Ex: Salário, Conta de Luz, PETR4..." required>
                 </div>
-                <button type="submit" class="w-full bg-indigo-600 p-4 rounded-2xl font-bold text-white">Salvar Ativo</button>
-                <button type="button" onclick="closeModal('modal-rv')" class="w-full text-slate-500 font-bold text-sm mt-2">Cancelar</button>
-            </form>
-        </div>
-    </div>
 
-    <!-- Modal RF -->
-    <div id="modal-rf" class="fixed inset-0 bg-black/90 backdrop-blur-sm hidden z-[100] flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-[2.5rem] max-w-md w-full p-8">
-            <h3 class="text-2xl font-black text-emerald-400 mb-6">Renda Fixa</h3>
-            <form id="form-rf" class="space-y-4">
-                <input type="text" id="rf-nome" placeholder="Ex: CDB Banco Inter 102%" required>
                 <div class="grid grid-cols-2 gap-4">
-                    <input type="number" step="0.01" id="rf-valor" placeholder="Valor Aplicado" required>
-                    <input type="date" id="rf-venc" required>
+                    <div id="field-valor">
+                        <label id="lbl-valor" class="text-[10px] font-black uppercase text-slate-500 ml-1">Valor R$</label>
+                        <input type="number" step="0.01" id="inp-valor" placeholder="0.00" required>
+                    </div>
+                    <div id="field-data">
+                        <label id="lbl-data" class="text-[10px] font-black uppercase text-slate-500 ml-1">Data</label>
+                        <input type="date" id="inp-data" required>
+                    </div>
                 </div>
-                <button type="submit" class="w-full bg-emerald-600 p-4 rounded-2xl font-bold text-white">Salvar Título</button>
-                <button type="button" onclick="closeModal('modal-rf')" class="w-full text-slate-500 font-bold text-sm mt-2">Cancelar</button>
+
+                <div id="field-extra" class="grid grid-cols-2 gap-4 hidden">
+                    <div>
+                        <label class="text-[10px] font-black uppercase text-slate-500 ml-1">Qtd</label>
+                        <input type="number" id="inp-qtd" placeholder="Quantidade">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-black uppercase text-slate-500 ml-1">Preço Médio</label>
+                        <input type="number" step="0.01" id="inp-pm" placeholder="R$">
+                    </div>
+                </div>
+
+                <div id="field-cat">
+                    <label class="text-[10px] font-black uppercase text-slate-500 ml-1">Categoria</label>
+                    <select id="inp-cat">
+                        <option>Geral</option><option>Moradia</option><option>Alimentação</option><option>Saúde</option><option>Investimentos</option><option>Lazer</option>
+                    </select>
+                </div>
+
+                <button type="submit" id="btn-save" class="w-full bg-indigo-600 p-4 rounded-2xl font-black text-white text-lg hover:bg-indigo-500 transition shadow-xl shadow-indigo-500/20">Confirmar Lançamento</button>
+                <button type="button" onclick="closeModal()" class="w-full text-slate-500 font-bold text-sm mt-2">Cancelar</button>
             </form>
         </div>
     </div>
 
     <script>
-        // --- LOGICA DE DADOS ---
-        let state = JSON.parse(localStorage.getItem('minhavidafinanceira_vFinal')) || {
+        // --- MOTOR DE DADOS ---
+        let state = JSON.parse(localStorage.getItem('minhavidafinanceira_v4')) || {
             receitas: [],
             despesas: [],
             investRV: [],
             investRF: []
         };
 
-        const save = () => localStorage.setItem('minhavidafinanceira_vFinal', JSON.stringify(state));
+        const save = () => localStorage.setItem('minhavidafinanceira_v4', JSON.stringify(state));
         const fmt = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
 
         // --- NAVEGAÇÃO ---
         function showTab(id) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.nav-icon, aside button').forEach(b => b.classList.replace('text-indigo-500', 'text-slate-400'));
             document.getElementById(id).classList.add('active');
             document.getElementById('tab-title').innerText = id.charAt(0).toUpperCase() + id.slice(1);
             render();
             lucide.createIcons();
         }
 
-        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
-        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+        // --- FORMULÁRIO (ADD / EDIT) ---
+        function openForm(type, index = -1) {
+            const form = document.getElementById('main-form');
+            form.reset();
+            document.getElementById('form-type').value = type;
+            document.getElementById('form-index').value = index;
+            document.getElementById('form-title').innerText = index === -1 ? `Novo(a) ${type}` : `Editar ${type}`;
+            
+            // Reset de campos específicos
+            document.getElementById('field-extra').classList.add('hidden');
+            document.getElementById('lbl-valor').innerText = "Valor R$";
+            document.getElementById('lbl-data').innerText = "Data";
+
+            if (type === 'rv') {
+                document.getElementById('field-extra').classList.remove('hidden');
+                document.getElementById('field-valor').classList.add('hidden');
+                document.getElementById('field-data').classList.add('hidden');
+                document.getElementById('field-cat').classList.add('hidden');
+            } else {
+                document.getElementById('field-valor').classList.remove('hidden');
+                document.getElementById('field-data').classList.remove('hidden');
+                document.getElementById('field-cat').classList.remove('hidden');
+            }
+
+            // Se for edição, preencher dados
+            if (index !== -1) {
+                const item = type === 'rv' ? state.investRV[index] : type === 'rf' ? state.investRF[index] : type === 'receita' ? state.receitas[index] : state.despesas[index];
+                document.getElementById('inp-desc').value = item.descricao || item.ticker || item.nome;
+                if (type === 'rv') {
+                    document.getElementById('inp-qtd').value = item.qtd;
+                    document.getElementById('inp-pm').value = item.pm;
+                } else {
+                    document.getElementById('inp-valor').value = item.valor;
+                    document.getElementById('inp-data').value = item.data || item.venc;
+                    document.getElementById('inp-cat').value = item.categoria || 'Geral';
+                }
+            }
+
+            document.getElementById('modal-form').classList.remove('hidden');
+        }
+
+        function closeModal() { document.getElementById('modal-form').classList.add('hidden'); }
+
+        document.getElementById('main-form').onsubmit = (e) => {
+            e.preventDefault();
+            const type = document.getElementById('form-type').value;
+            const index = parseInt(document.getElementById('form-index').value);
+
+            const newItem = {
+                id: index === -1 ? Date.now() : state[type === 'receita' ? 'receitas' : type === 'despesa' ? 'despesas' : type === 'rv' ? 'investRV' : 'investRF'][index].id,
+                status: index === -1 ? 'pendente' : state[type === 'receita' ? 'receitas' : type === 'despesa' ? 'despesas' : type === 'rv' ? 'investRV' : 'investRF'][index].status
+            };
+
+            if (type === 'rv') {
+                newItem.ticker = document.getElementById('inp-desc').value.toUpperCase();
+                newItem.qtd = parseFloat(document.getElementById('inp-qtd').value);
+                newItem.pm = parseFloat(document.getElementById('inp-pm').value);
+                newItem.cotacao = index !== -1 ? state.investRV[index].cotacao : 0;
+            } else {
+                newItem.descricao = document.getElementById('inp-desc').value;
+                newItem.nome = newItem.descricao;
+                newItem.valor = parseFloat(document.getElementById('inp-valor').value);
+                newItem.data = document.getElementById('inp-data').value;
+                newItem.venc = newItem.data;
+                newItem.categoria = document.getElementById('inp-cat').value;
+            }
+
+            if (index === -1) {
+                if (type === 'receita') state.receitas.push(newItem);
+                else if (type === 'despesa') state.despesas.push(newItem);
+                else if (type === 'rv') state.investRV.push(newItem);
+                else if (type === 'rf') state.investRF.push(newItem);
+            } else {
+                if (type === 'receita') state.receitas[index] = newItem;
+                else if (type === 'despesa') state.despesas[index] = newItem;
+                else if (type === 'rv') state.investRV[index] = newItem;
+                else if (type === 'rf') state.investRF[index] = newItem;
+            }
+
+            save(); closeModal(); render();
+        };
 
         // --- SINCRONIZAÇÃO B3 ---
         async function syncQuotes() {
@@ -288,181 +318,168 @@
                     if (find) a.cotacao = find.regularMarketPrice;
                 });
                 save(); render();
-            } catch (e) { console.error("Erro cotação:", e); }
+            } catch (e) { console.error(e); }
             finally { icon.classList.remove('animate-spin'); }
         }
 
-        // --- RENDERIZAÇÃO CENTRAL ---
+        // --- BAIXA / STATUS ---
+        function toggleStatus(type, index) {
+            const list = type === 'receita' ? state.receitas : state.despesas;
+            list[index].status = list[index].status === 'pendente' ? 'pago' : 'pendente';
+            save(); render();
+        }
+
+        // --- RENDERIZAÇÃO ---
         function render() {
             const hoje = new Date().toISOString().split('T')[0];
-            const hojeMais7 = new Date(); hojeMais7.setDate(hojeMais7.getDate() + 7);
-            const dataLimite = hojeMais7.toISOString().split('T')[0];
-
-            // Cálculos
-            const totalRec = state.receitas.reduce((acc, c) => acc + c.valor, 0);
-            const vencidas = state.despesas.filter(d => d.venc < hoje);
-            const aVencer = state.despesas.filter(d => d.venc >= hoje);
             
-            const totalVencido = vencidas.reduce((acc, c) => acc + c.valor, 0);
-            const totalPrevisao = aVencer.reduce((acc, c) => acc + c.valor, 0);
-            const totalRV = state.investRV.reduce((acc, c) => acc + (c.qtd * (c.cotacao || 0)), 0);
-            const totalRF = state.investRF.reduce((acc, c) => acc + c.valor, 0);
+            // Cálculos Dashboard
+            const recRecebidas = state.receitas.filter(r => r.status === 'pago').reduce((a,c) => a + c.valor, 0);
+            const desPagas = state.despesas.filter(d => d.status === 'pago').reduce((a,c) => a + c.valor, 0);
+            const totalRV = state.investRV.reduce((a,c) => a + (c.qtd * (c.cotacao || 0)), 0);
+            const totalRF = state.investRF.reduce((a,c) => a + c.valor, 0);
+            const totalInvestido = totalRV + totalRF;
+
+            const saldoReal = recRecebidas - desPagas;
+            const patrimonioGeral = saldoReal + totalInvestido;
+
+            const vencidas = state.despesas.filter(d => d.venc < hoje && d.status === 'pendente');
+            const totalVencido = vencidas.reduce((a,c) => a + c.valor, 0);
 
             // Dashboard UI
-            document.getElementById('dash-receitas').innerText = fmt(totalRec);
-            document.getElementById('dash-despesas').innerText = fmt(totalVencido);
-            document.getElementById('dash-previsao').innerText = fmt(totalPrevisao);
-            document.getElementById('dash-saldo-previsto').innerText = fmt(totalRec - totalVencido - totalPrevisao);
-            document.getElementById('side-patrimonio').innerText = fmt(totalRec - totalVencido + totalRV + totalRF);
+            document.getElementById('dash-saldo-real').innerText = fmt(saldoReal);
+            document.getElementById('dash-investido').innerText = fmt(totalInvestido);
+            document.getElementById('dash-atraso').innerText = fmt(totalVencido);
+            document.getElementById('dash-patrimonio-geral').innerText = fmt(patrimonioGeral);
+            document.getElementById('side-patrimonio').innerText = fmt(patrimonioGeral);
 
-            // Alert Zone
+            // Alerta no Dashboard
             const alertZone = document.getElementById('alert-zone');
-            if(vencidas.length > 0) {
-                alertZone.classList.remove('hidden');
+            if (vencidas.length > 0) {
                 alertZone.innerHTML = `
                     <div class="card p-4 alert-vencido bg-rose-500/10 flex items-center justify-between mb-6">
-                        <div class="flex items-center gap-3">
-                            <i data-lucide="alert-circle" class="text-rose-500"></i>
-                            <p class="font-bold text-sm">Você possui ${vencidas.length} conta(s) atrasada(s)! Total: <span class="text-rose-500">${fmt(totalVencido)}</span></p>
-                        </div>
-                        <button onclick="showTab('despesas')" class="bg-rose-600 text-white text-[10px] px-3 py-1 rounded-lg font-black uppercase">Resolver</button>
-                    </div>
-                `;
-            } else { alertZone.classList.add('hidden'); }
+                        <p class="text-sm font-bold"><i data-lucide="alert-circle" class="inline w-4 h-4 mr-2"></i> Você tem ${vencidas.length} conta(s) vencida(s)!</p>
+                        <button onclick="showTab('despesas')" class="bg-rose-600 px-3 py-1 rounded-lg text-[10px] font-black uppercase">Ver Agora</button>
+                    </div>`;
+            } else { alertZone.innerHTML = ''; }
 
-            // Widget Próximos 7 dias
-            const proximos = state.despesas.filter(d => d.venc >= hoje && d.venc <= dataLimite).sort((a,b) => a.venc > b.venc ? 1 : -1);
-            document.getElementById('lista-proximos').innerHTML = proximos.map(d => `
-                <div class="p-3 bg-slate-900 border-l-4 border-amber-500 rounded-xl flex justify-between items-center">
-                    <div><p class="text-xs font-bold text-white">${d.descricao}</p><p class="text-[10px] text-amber-500 font-bold uppercase">Vence ${d.venc.split('-').reverse().join('/')}</p></div>
-                    <p class="text-sm font-black">${fmt(d.valor)}</p>
+            // Agenda
+            const agenda = [...state.despesas].filter(d => d.status === 'pendente').sort((a,b) => a.venc > b.venc ? 1 : -1);
+            document.getElementById('lista-agenda').innerHTML = agenda.map(d => `
+                <div class="p-3 bg-slate-900 border-l-4 ${d.venc < hoje ? 'border-rose-500' : 'border-amber-500'} rounded-xl flex justify-between items-center">
+                    <div><p class="text-xs font-bold text-white">${d.descricao}</p><p class="text-[10px] opacity-50 uppercase">${d.venc.split('-').reverse().join('/')}</p></div>
+                    <p class="text-xs font-black">${fmt(d.valor)}</p>
                 </div>
-            `).join('') || '<p class="text-xs text-slate-600 text-center py-10 italic">Nenhuma conta para os próximos 7 dias</p>';
+            `).join('') || '<p class="text-xs text-center opacity-40 py-10 italic">Nenhum compromisso pendente.</p>';
 
             // Listas
-            renderListReceitas();
-            renderListDespesas(hoje);
-            renderListRV();
-            renderCharts(totalRec, totalVencido + totalPrevisao);
+            renderReceitas();
+            renderDespesas(hoje);
+            renderInvestimentos();
+            renderCharts(recRecebidas, desPagas);
             lucide.createIcons();
         }
 
-        function renderListReceitas() {
+        function renderReceitas() {
             document.getElementById('lista-receitas').innerHTML = state.receitas.map((r, i) => `
                 <div class="card p-4 flex justify-between items-center group">
                     <div class="flex items-center gap-4">
-                        <div class="bg-emerald-500/10 p-3 rounded-2xl text-emerald-500"><i data-lucide="trending-up"></i></div>
-                        <div><p class="font-bold text-white">${r.descricao}</p><p class="text-xs text-slate-500">${r.data.split('-').reverse().join('/')}</p></div>
-                    </div>
-                    <div class="flex items-center gap-4">
-                        <p class="font-black text-emerald-500 text-lg">${fmt(r.valor)}</p>
-                        <button onclick="deleteItem('receitas', ${i})" class="text-slate-600 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function renderListDespesas(hoje) {
-            document.getElementById('lista-despesas').innerHTML = state.despesas.map((d, i) => {
-                const vencida = d.venc < hoje;
-                return `
-                <div class="card p-4 flex justify-between items-center group ${vencida ? 'border-rose-500/50 bg-rose-500/5' : ''}">
-                    <div class="flex items-center gap-4">
-                        <div class="p-3 rounded-2xl ${vencida ? 'bg-rose-500/20 text-rose-500' : 'bg-slate-800 text-slate-500'}"><i data-lucide="${vencida ? 'alert-triangle' : 'trending-down'}"></i></div>
-                        <div>
-                            <p class="font-bold text-white">${d.descricao}</p>
-                            <p class="text-[10px] font-black uppercase ${vencida ? 'text-rose-500' : 'text-slate-500'}">${vencida ? 'Atrasada' : 'Vence'} em ${d.venc.split('-').reverse().join('/')}</p>
+                        <button onclick="toggleStatus('receita', ${i})" class="w-8 h-8 rounded-full border-2 ${r.status === 'pago' ? 'bg-emerald-500 border-emerald-500' : 'border-slate-700'} flex items-center justify-center transition">
+                            ${r.status === 'pago' ? '<i data-lucide="check" class="text-white w-4 h-4"></i>' : ''}
+                        </button>
+                        <div onclick="openForm('receita', ${i})" class="cursor-pointer">
+                            <p class="font-bold text-white ${r.status === 'pago' ? 'strikethrough' : ''}">${r.descricao}</p>
+                            <p class="text-xs text-slate-500">${r.data.split('-').reverse().join('/')}</p>
                         </div>
                     </div>
                     <div class="flex items-center gap-4">
-                        <p class="font-black ${vencida ? 'text-rose-500' : 'text-white'} text-lg">${fmt(d.valor)}</p>
-                        <button onclick="deleteItem('despesas', ${i})" class="text-slate-600 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        <p class="font-black text-emerald-500 text-lg">${fmt(r.valor)}</p>
+                        <button onclick="deleteItem('receitas', ${i})" class="text-slate-700 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                     </div>
-                </div>
-            `}).join('');
+                </div>`).join('');
         }
 
-        function renderListRV() {
-            const corpo = document.getElementById('corpo-rv');
-            let rows = state.investRV.map((a, i) => {
-                const atual = a.cotacao || 0;
+        function renderDespesas(hoje) {
+            document.getElementById('lista-despesas').innerHTML = state.despesas.map((d, i) => {
+                const vencida = d.venc < hoje && d.status === 'pendente';
+                return `
+                <div class="card p-4 flex justify-between items-center group ${vencida ? 'border-rose-500/50 bg-rose-500/5' : ''}">
+                    <div class="flex items-center gap-4">
+                        <button onclick="toggleStatus('despesa', ${i})" class="w-8 h-8 rounded-full border-2 ${d.status === 'pago' ? 'bg-indigo-500 border-indigo-500' : 'border-slate-700'} flex items-center justify-center transition">
+                            ${d.status === 'pago' ? '<i data-lucide="check" class="text-white w-4 h-4"></i>' : ''}
+                        </button>
+                        <div onclick="openForm('despesa', ${i})" class="cursor-pointer">
+                            <p class="font-bold text-white ${d.status === 'pago' ? 'strikethrough' : ''}">${d.descricao}</p>
+                            <p class="text-[10px] font-black uppercase ${vencida ? 'text-rose-500' : 'text-slate-500'}">${vencida ? 'Atrasada' : 'Vence em'} ${d.venc.split('-').reverse().join('/')}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <p class="font-black ${d.status === 'pago' ? 'text-slate-500' : vencida ? 'text-rose-500' : 'text-white'} text-lg">${fmt(d.valor)}</p>
+                        <button onclick="deleteItem('despesas', ${i})" class="text-slate-700 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function renderInvestimentos() {
+            const corpo = document.getElementById('corpo-investimentos');
+            let rvHTML = state.investRV.map((a, i) => {
                 const totalInvestido = a.qtd * a.pm;
-                const totalAtual = a.qtd * atual;
+                const totalAtual = a.qtd * (a.cotacao || 0);
                 const lucro = totalAtual - totalInvestido;
                 return `
-                    <tr class="border-b border-slate-800 hover:bg-white/5 transition">
-                        <td class="p-4 font-black text-white">${a.ticker}</td>
-                        <td class="p-4">${a.qtd}</td>
-                        <td class="p-4 font-bold text-indigo-400">${fmt(atual)}</td>
-                        <td class="p-4 text-slate-500 text-xs">${fmt(totalInvestido)}</td>
-                        <td class="p-4 font-black">${fmt(totalAtual)}</td>
-                        <td class="p-4 font-black ${lucro >= 0 ? 'text-emerald-500' : 'text-rose-500'}">${fmt(lucro)}</td>
-                        <td class="p-4 text-right"><button onclick="deleteItem('investRV', ${i})" class="text-slate-700 hover:text-rose-500"><i data-lucide="x-circle" class="w-4 h-4"></i></button></td>
-                    </tr>
-                `;
-            });
+                <tr class="border-b border-slate-800 hover:bg-white/5 transition">
+                    <td class="p-4 font-black text-white cursor-pointer" onclick="openForm('rv', ${i})">${a.ticker}</td>
+                    <td class="p-4">${a.qtd} x ${fmt(a.pm)}</td>
+                    <td class="p-4 font-bold text-indigo-400">${fmt(a.cotacao || 0)}</td>
+                    <td class="p-4 font-black">${fmt(totalAtual)}</td>
+                    <td class="p-4 font-black ${lucro >= 0 ? 'text-emerald-500' : 'text-rose-500'}">${fmt(lucro)}</td>
+                    <td class="p-4"><button onclick="deleteItem('investRV', ${i})" class="text-slate-700"><i data-lucide="x-circle"></i></button></td>
+                </tr>`;
+            }).join('');
 
-            const rowsRF = state.investRF.map((f, i) => `
+            let rfHTML = state.investRF.map((f, i) => `
                 <tr class="border-b border-slate-800 bg-emerald-500/5 transition">
-                    <td class="p-4 font-black text-emerald-500">[RF] ${f.nome}</td>
+                    <td class="p-4 font-black text-emerald-500 cursor-pointer" onclick="openForm('rf', ${i})">${f.nome}</td>
+                    <td class="p-4">${fmt(f.valor)}</td>
                     <td class="p-4">-</td>
-                    <td class="p-4">-</td>
-                    <td class="p-4 text-slate-500 text-xs">${fmt(f.valor)}</td>
                     <td class="p-4 font-black">${fmt(f.valor)}</td>
-                    <td class="p-4 text-slate-500 italic text-[10px]">Venc. ${f.venc.split('-').reverse().join('/')}</td>
-                    <td class="p-4 text-right"><button onclick="deleteItem('investRF', ${i})" class="text-slate-700 hover:text-rose-500"><i data-lucide="x-circle" class="w-4 h-4"></i></button></td>
-                </tr>
-            `);
-
-            corpo.innerHTML = rows.join('') + rowsRF.join('');
+                    <td class="p-4 text-xs italic opacity-50">Renda Fixa</td>
+                    <td class="p-4"><button onclick="deleteItem('investRF', ${i})" class="text-slate-700"><i data-lucide="x-circle"></i></button></td>
+                </tr>`).join('');
+            
+            corpo.innerHTML = rvHTML + rfHTML;
+            document.getElementById('total-rv').innerText = fmt(state.investRV.reduce((a,c) => a + (c.qtd * (c.cotacao || 0)), 0));
+            document.getElementById('total-rf').innerText = fmt(state.investRF.reduce((a,c) => a + c.valor, 0));
         }
 
-        // --- GRÁFICOS ---
+        // --- CHART ---
         let fChart;
         function renderCharts(r, d) {
             const ctx = document.getElementById('chartFluxo').getContext('2d');
             if (fChart) fChart.destroy();
-            Chart.defaults.color = '#64748b';
             fChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: ['Mês Atual'],
+                    labels: ['Realizado'],
                     datasets: [
-                        { label: 'Ganhos', data: [r], backgroundColor: '#10b981', borderRadius: 10 },
-                        { label: 'Gastos', data: [d], backgroundColor: '#f43f5e', borderRadius: 10 }
+                        { label: 'Recebido', data: [r], backgroundColor: '#10b981', borderRadius: 8 },
+                        { label: 'Pago', data: [d], backgroundColor: '#6366f1', borderRadius: 8 }
                     ]
                 },
                 options: { plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { grid: { display: false } } } }
             });
         }
 
-        // --- HANDLERS ---
-        document.getElementById('form-receita').onsubmit = (e) => {
-            e.preventDefault();
-            state.receitas.push({ descricao: document.getElementById('rec-desc').value, valor: parseFloat(document.getElementById('rec-valor').value), data: document.getElementById('rec-data').value });
-            save(); closeModal('modal-receita'); render(); e.target.reset();
+        // --- HELPERS ---
+        function deleteItem(type, i) { 
+            if(confirm('Tem certeza?')) {
+                state[type === 'receitas' ? 'receitas' : type === 'despesas' ? 'despesas' : type === 'investRV' ? 'investRV' : 'investRF'].splice(i, 1);
+                save(); render();
+            }
         }
 
-        document.getElementById('form-despesa').onsubmit = (e) => {
-            e.preventDefault();
-            state.despesas.push({ descricao: document.getElementById('des-desc').value, valor: parseFloat(document.getElementById('des-valor').value), venc: document.getElementById('des-venc').value, anexo: document.getElementById('des-anexo').value });
-            save(); closeModal('modal-despesa'); render(); e.target.reset();
-        }
-
-        document.getElementById('form-rv').onsubmit = (e) => {
-            e.preventDefault();
-            state.investRV.push({ ticker: document.getElementById('rv-ticker').value.toUpperCase().trim(), qtd: parseFloat(document.getElementById('rv-qtd').value), pm: parseFloat(document.getElementById('rv-pm').value), cotacao: 0 });
-            save(); closeModal('modal-rv'); syncQuotes(); e.target.reset();
-        }
-
-        document.getElementById('form-rf').onsubmit = (e) => {
-            e.preventDefault();
-            state.investRF.push({ nome: document.getElementById('rf-nome').value, valor: parseFloat(document.getElementById('rf-valor').value), venc: document.getElementById('rf-venc').value });
-            save(); closeModal('modal-rf'); render(); e.target.reset();
-        }
-
-        function deleteItem(type, i) { if(confirm('Excluir este item?')) { state[type].splice(i, 1); save(); render(); } }
-        function clearData() { if(confirm('ATENÇÃO: Apagar todos os seus dados permanentemente?')) { localStorage.clear(); location.reload(); } }
+        function clearData() { if(confirm('Resetar sistema?')) { localStorage.clear(); location.reload(); } }
 
         window.onload = () => {
             document.getElementById('current-date').innerText = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'full' }).format(new Date());
