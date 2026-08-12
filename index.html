@@ -3,467 +3,469 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minha Vida Financeira | Pro Dark</title>
+    <title>Minha Vida Financeira | Pro Dark Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --bg-main: #020617;
-            --bg-card: #0f172a;
-            --border: #1e293b;
-            --accent: #6366f1;
-        }
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg-main); color: #f1f5f9; }
-        .tab-content { display: none; }
+        :root { --bg: #020617; --card: #0f172a; --border: #1e293b; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: #f1f5f9; overflow: hidden; }
+        .tab-content { display: none; height: calc(100vh - 120px); overflow-y: auto; padding-bottom: 100px; }
         .tab-content.active { display: block; }
-        .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 1.5rem; }
-        input, select, textarea { 
-            background: #1e293b !important; 
-            border: 1px solid #334155 !important; 
-            color: white !important; 
-            outline: none;
-            padding: 12px;
-            border-radius: 12px;
-        }
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 1.5rem; }
+        input, select, textarea { background: #1e293b !important; border: 1px solid #334155 !important; color: white !important; outline: none; padding: 12px; border-radius: 12px; width: 100%; }
         .positive { color: #10b981; }
         .negative { color: #f43f5e; }
+        .warning { color: #f59e0b; }
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(244, 63, 94, 0); } 100% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0); } }
+        .alert-vencido { animation: pulse-red 2s infinite; border: 2px solid #f43f5e !important; }
     </style>
 </head>
 <body class="antialiased">
 
-    <!-- NAVEGAÇÃO MOBILE (APENAS CELULAR) -->
+    <!-- NAV MOBILE -->
     <nav class="fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 flex justify-around p-4 z-50 md:hidden">
-        <button onclick="showTab('dashboard')" class="flex flex-col items-center text-indigo-500"><i data-lucide="layout-dashboard"></i></button>
-        <button onclick="showTab('receitas')" class="flex flex-col items-center text-slate-400"><i data-lucide="trending-up"></i></button>
-        <button onclick="showTab('despesas')" class="flex flex-col items-center text-slate-400"><i data-lucide="trending-down"></i></button>
-        <button onclick="showTab('investimentos')" class="flex flex-col items-center text-slate-400"><i data-lucide="line-chart"></i></button>
+        <button onclick="showTab('dashboard')" class="nav-icon text-indigo-500"><i data-lucide="layout-dashboard"></i></button>
+        <button onclick="showTab('receitas')" class="nav-icon text-slate-400"><i data-lucide="trending-up"></i></button>
+        <button onclick="showTab('despesas')" class="nav-icon text-slate-400"><i data-lucide="trending-down"></i></button>
+        <button onclick="showTab('investimentos')" class="nav-icon text-slate-400"><i data-lucide="line-chart"></i></button>
     </nav>
 
     <div class="flex h-screen overflow-hidden">
-        <!-- SIDEBAR (DESKTOP) -->
+        <!-- SIDEBAR DESKTOP -->
         <aside class="hidden md:flex flex-col w-72 bg-slate-950 border-r border-slate-800 p-6">
             <div class="flex items-center gap-3 mb-10">
-                <div class="bg-indigo-600 p-2 rounded-xl shadow-lg shadow-indigo-500/20">
-                    <i data-lucide="wallet" class="text-white"></i>
-                </div>
+                <div class="bg-indigo-600 p-2 rounded-xl shadow-lg"><i data-lucide="wallet" class="text-white"></i></div>
                 <h1 class="text-lg font-black tracking-tighter">MINHA VIDA <span class="text-indigo-500">FINANCEIRA</span></h1>
             </div>
-
             <nav class="space-y-2 flex-1">
-                <button onclick="showTab('dashboard')" class="flex items-center gap-3 w-full p-3 rounded-xl hover:bg-slate-900 transition font-semibold active-tab" id="btn-dash">
-                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i> Dashboard
-                </button>
-                <button onclick="showTab('receitas')" class="flex items-center gap-3 w-full p-3 rounded-xl hover:bg-slate-900 transition font-semibold text-slate-400">
-                    <i data-lucide="trending-up" class="w-5 h-5 text-emerald-500"></i> Receitas
-                </button>
-                <button onclick="showTab('despesas')" class="flex items-center gap-3 w-full p-3 rounded-xl hover:bg-slate-900 transition font-semibold text-slate-400">
-                    <i data-lucide="trending-down" class="w-5 h-5 text-rose-500"></i> Despesas
-                </button>
-                <button onclick="showTab('investimentos')" class="flex items-center gap-3 w-full p-3 rounded-xl hover:bg-slate-900 transition font-semibold text-slate-400">
-                    <i data-lucide="line-chart" class="w-5 h-5 text-amber-500"></i> Investimentos
-                </button>
+                <button onclick="showTab('dashboard')" class="flex items-center gap-3 w-full p-3 rounded-xl hover:bg-slate-900 transition font-semibold" id="link-dashboard"><i data-lucide="layout-dashboard" class="w-5 h-5"></i> Dashboard</button>
+                <button onclick="showTab('receitas')" class="flex items-center gap-3 w-full p-3 rounded-xl hover:bg-slate-900 transition font-semibold text-slate-400"><i data-lucide="trending-up" class="w-5 h-5 text-emerald-500"></i> Receitas</button>
+                <button onclick="showTab('despesas')" class="flex items-center gap-3 w-full p-3 rounded-xl hover:bg-slate-900 transition font-semibold text-slate-400"><i data-lucide="trending-down" class="w-5 h-5 text-rose-500"></i> Despesas</button>
+                <button onclick="showTab('investimentos')" class="flex items-center gap-3 w-full p-3 rounded-xl hover:bg-slate-900 transition font-semibold text-slate-400"><i data-lucide="line-chart" class="w-5 h-5 text-amber-500"></i> Investimentos</button>
             </nav>
-
             <div class="mt-auto p-4 bg-indigo-950/20 border border-indigo-500/20 rounded-2xl">
-                <p class="text-[10px] text-indigo-300 font-bold uppercase tracking-widest mb-1">Patrimônio Consolidado</p>
+                <p class="text-[10px] text-indigo-300 font-bold uppercase tracking-widest mb-1">Patrimônio Líquido</p>
                 <h3 id="side-patrimonio" class="text-xl font-black text-white">R$ 0,00</h3>
             </div>
         </aside>
 
-        <!-- CONTEÚDO PRINCIPAL -->
-        <main class="flex-1 overflow-y-auto p-4 md:p-10 pb-24">
-            
-            <header class="flex flex-col md:flex-row justify-between md:items-center mb-10 gap-4">
+        <!-- MAIN -->
+        <main class="flex-1 p-4 md:p-10 overflow-hidden">
+            <header class="flex justify-between items-center mb-8">
                 <div>
                     <h2 id="tab-title" class="text-3xl font-black text-white tracking-tight">Dashboard</h2>
                     <p id="current-date" class="text-slate-500 text-sm font-medium capitalize"></p>
                 </div>
                 <div class="flex gap-2">
-                    <button onclick="syncQuotes()" class="bg-slate-900 border border-slate-800 p-3 rounded-xl text-indigo-400 hover:text-white transition" title="Sincronizar B3">
+                    <button onclick="syncQuotes()" class="bg-slate-900 border border-slate-800 p-3 rounded-xl text-indigo-400 transition hover:text-white" title="Sincronizar B3">
                         <i data-lucide="refresh-cw" id="sync-icon"></i>
                     </button>
-                    <button onclick="clearData()" class="bg-slate-900 border border-slate-800 p-3 rounded-xl text-rose-500 hover:bg-rose-500/10 transition">
+                    <button onclick="clearData()" class="bg-slate-900 border border-slate-800 p-3 rounded-xl text-rose-500 hover:bg-rose-500/10">
                         <i data-lucide="trash-2"></i>
                     </button>
                 </div>
             </header>
 
-            <!-- ABA DASHBOARD -->
-            <section id="dashboard" class="tab-content active space-y-8">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="card p-6 border-emerald-500/20 bg-emerald-500/5">
-                        <p class="text-emerald-500 text-xs font-bold uppercase tracking-wider mb-2">Total Receitas</p>
-                        <h3 id="dash-receitas" class="text-3xl font-black text-white">R$ 0,00</h3>
+            <!-- DASHBOARD -->
+            <section id="dashboard" class="tab-content active space-y-6">
+                <!-- Banner Alerta de Contas Vencidas -->
+                <div id="alert-zone" class="hidden"></div>
+
+                <!-- Resumo -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="card p-5 border-emerald-500/20 bg-emerald-500/5">
+                        <p class="text-emerald-500 text-[10px] font-bold uppercase tracking-widest">Total Receitas</p>
+                        <h3 id="dash-receitas" class="text-2xl font-black">R$ 0,00</h3>
                     </div>
-                    <div class="card p-6 border-rose-500/20 bg-rose-500/5">
-                        <p class="text-rose-500 text-xs font-bold uppercase tracking-wider mb-2">Total Despesas</p>
-                        <h3 id="dash-despesas" class="text-3xl font-black text-white">R$ 0,00</h3>
+                    <div class="card p-5 border-rose-500/20 bg-rose-500/5">
+                        <p class="text-rose-500 text-[10px] font-bold uppercase tracking-widest">Contas Vencidas/Hoje</p>
+                        <h3 id="dash-despesas" class="text-2xl font-black">R$ 0,00</h3>
                     </div>
-                    <div class="card p-6 border-indigo-500/20 bg-indigo-500/5">
-                        <p class="text-indigo-400 text-xs font-bold uppercase tracking-wider mb-2">Saldo em Conta</p>
-                        <h3 id="dash-saldo" class="text-3xl font-black text-white">R$ 0,00</h3>
+                    <div class="card p-5 border-amber-500/20 bg-amber-500/5">
+                        <p class="text-amber-500 text-[10px] font-bold uppercase tracking-widest">Previsão (A vencer)</p>
+                        <h3 id="dash-previsao" class="text-2xl font-black">R$ 0,00</h3>
+                    </div>
+                    <div class="card p-5 border-indigo-500/20 bg-indigo-500/5">
+                        <p class="text-indigo-400 text-[10px] font-bold uppercase tracking-widest">Saldo Previsto</p>
+                        <h3 id="dash-saldo-previsto" class="text-2xl font-black">R$ 0,00</h3>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <div class="card p-6">
-                        <h4 class="font-bold mb-6 flex items-center gap-2"><i data-lucide="bar-chart-3" class="text-indigo-500"></i> Fluxo de Caixa Mensal</h4>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 card p-6">
+                        <h4 class="font-bold mb-6 flex items-center gap-2"><i data-lucide="bar-chart-3" class="text-indigo-500"></i> Ganhos x Gastos</h4>
                         <canvas id="chartFluxo"></canvas>
                     </div>
                     <div class="card p-6">
-                        <h4 class="font-bold mb-6 flex items-center gap-2"><i data-lucide="pie-chart" class="text-indigo-500"></i> Gastos por Categoria</h4>
-                        <canvas id="chartCategorias"></canvas>
+                        <h4 class="font-bold mb-4 flex items-center gap-2"><i data-lucide="calendar-clock" class="text-amber-500"></i> Próximos 7 Dias</h4>
+                        <div id="lista-proximos" class="space-y-3 overflow-y-auto max-h-[300px]"></div>
                     </div>
                 </div>
             </section>
 
-            <!-- ABA RECEITAS -->
+            <!-- RECEITAS -->
             <section id="receitas" class="tab-content space-y-6">
                 <div class="flex justify-between items-center bg-slate-900/50 p-6 rounded-3xl border border-slate-800">
-                    <div>
-                        <h3 class="text-xl font-bold text-emerald-500">Gestão de Receitas</h3>
-                        <p class="text-slate-500 text-sm">Cadastre seus ganhos e rendimentos.</p>
-                    </div>
-                    <button onclick="openModal('modal-receita')" class="bg-emerald-600 text-white px-6 py-3 rounded-2xl font-bold hover:bg-emerald-500 transition flex items-center gap-2">
+                    <h3 class="text-xl font-bold text-emerald-500">Gerenciar Receitas</h3>
+                    <button onclick="openModal('modal-receita')" class="bg-emerald-600 text-white px-6 py-3 rounded-2xl font-bold flex items-center gap-2 hover:bg-emerald-500">
                         <i data-lucide="plus-circle"></i> Adicionar Receita
                     </button>
                 </div>
-                <div id="lista-receitas" class="grid gap-4"></div>
+                <div id="lista-receitas" class="grid gap-3"></div>
             </section>
 
-            <!-- ABA DESPESAS -->
+            <!-- DESPESAS -->
             <section id="despesas" class="tab-content space-y-6">
                 <div class="flex justify-between items-center bg-slate-900/50 p-6 rounded-3xl border border-slate-800">
-                    <div>
-                        <h3 class="text-xl font-bold text-rose-500">Gestão de Despesas</h3>
-                        <p class="text-slate-500 text-sm">Controle seus gastos e contas a pagar.</p>
-                    </div>
-                    <button onclick="openModal('modal-despesa')" class="bg-rose-600 text-white px-6 py-3 rounded-2xl font-bold hover:bg-rose-500 transition flex items-center gap-2">
+                    <h3 class="text-xl font-bold text-rose-500">Gerenciar Despesas</h3>
+                    <button onclick="openModal('modal-despesa')" class="bg-rose-600 text-white px-6 py-3 rounded-2xl font-bold flex items-center gap-2 hover:bg-rose-500">
                         <i data-lucide="minus-circle"></i> Adicionar Despesa
                     </button>
                 </div>
-                <div id="lista-despesas" class="grid gap-4"></div>
+                <div id="lista-despesas" class="grid gap-3"></div>
             </section>
 
-            <!-- ABA INVESTIMENTOS -->
-            <section id="investimentos" class="tab-content space-y-8">
-                <div class="bg-gradient-to-br from-indigo-900 to-indigo-700 p-8 rounded-[2.5rem] shadow-2xl relative overflow-hidden">
-                    <div class="relative z-10">
-                        <p class="text-indigo-100 font-semibold mb-1 uppercase tracking-widest text-xs">Total em Ativos (B3 + RF)</p>
-                        <h2 id="total-inv-global" class="text-5xl font-black text-white">R$ 0,00</h2>
-                        <div class="mt-6 flex gap-3">
-                            <button onclick="openModal('modal-rv')" class="bg-white text-indigo-900 px-5 py-2 rounded-xl font-bold text-sm hover:bg-indigo-50 transition">Add Ação/FII</button>
-                            <button onclick="openModal('modal-rf')" class="bg-indigo-800 text-white px-5 py-2 rounded-xl font-bold text-sm border border-indigo-500 hover:bg-indigo-900 transition">Add Renda Fixa</button>
+            <!-- INVESTIMENTOS -->
+            <section id="investimentos" class="tab-content space-y-6">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="card bg-indigo-600 p-8 rounded-[2.5rem] relative overflow-hidden">
+                        <div class="relative z-10">
+                            <p class="text-indigo-100 font-bold text-xs uppercase tracking-widest">Renda Variável (B3)</p>
+                            <h2 id="total-rv" class="text-5xl font-black text-white mt-2">R$ 0,00</h2>
+                            <button onclick="openModal('modal-rv')" class="mt-6 bg-white text-indigo-900 px-6 py-2 rounded-xl font-bold text-sm">Novo Ativo</button>
                         </div>
+                        <i data-lucide="trending-up" class="absolute right-[-20px] bottom-[-20px] w-48 h-48 text-white/10"></i>
                     </div>
-                    <i data-lucide="line-chart" class="absolute right-[-20px] bottom-[-20px] w-48 h-48 text-white/10"></i>
+                    <div class="card bg-emerald-600 p-8 rounded-[2.5rem] relative overflow-hidden">
+                        <div class="relative z-10">
+                            <p class="text-emerald-100 font-bold text-xs uppercase tracking-widest">Renda Fixa</p>
+                            <h2 id="total-rf" class="text-5xl font-black text-white mt-2">R$ 0,00</h2>
+                            <button onclick="openModal('modal-rf')" class="mt-6 bg-white text-emerald-900 px-6 py-2 rounded-xl font-bold text-sm">Novo Título</button>
+                        </div>
+                        <i data-lucide="lock" class="absolute right-[-20px] bottom-[-20px] w-48 h-48 text-white/10"></i>
+                    </div>
                 </div>
-
+                
                 <div class="card overflow-hidden">
-                    <table class="w-full text-left">
-                        <thead class="bg-slate-900/50 text-slate-500 text-[10px] font-black uppercase">
-                            <tr>
-                                <th class="p-4">Ativo</th>
-                                <th class="p-4">Qtd</th>
-                                <th class="p-4">P. Médio</th>
-                                <th class="p-4">Cotação Atual</th>
-                                <th class="p-4">Total</th>
-                                <th class="p-4">Resultado</th>
-                                <th class="p-4"></th>
-                            </tr>
-                        </thead>
-                        <tbody id="lista-rv" class="text-sm"></tbody>
-                    </table>
+                    <div class="p-4 border-b border-slate-800 bg-slate-900/50 font-bold text-sm uppercase tracking-widest">Carteira de Ativos</div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="text-[10px] font-black uppercase text-slate-500 border-b border-slate-800">
+                                <tr>
+                                    <th class="p-4">Ticker</th>
+                                    <th class="p-4">Qtd</th>
+                                    <th class="p-4">Cotação</th>
+                                    <th class="p-4">Investido</th>
+                                    <th class="p-4">Valor Atual</th>
+                                    <th class="p-4">Resultado</th>
+                                    <th class="p-4"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="corpo-rv" class="text-sm font-medium"></tbody>
+                        </table>
+                    </div>
                 </div>
             </section>
-
         </main>
     </div>
 
     <!-- MODAIS -->
     <!-- Modal Receita -->
     <div id="modal-receita" class="fixed inset-0 bg-black/90 backdrop-blur-sm hidden z-[100] flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-[2.5rem] max-w-md w-full p-8">
+        <div class="bg-slate-900 border border-slate-800 rounded-[2.5rem] max-w-md w-full p-8 shadow-2xl">
             <h3 class="text-2xl font-black text-emerald-500 mb-6">Nova Receita</h3>
             <form id="form-receita" class="space-y-4">
-                <input type="text" id="rec-desc" placeholder="Descrição (Ex: Salário)" class="w-full" required>
+                <input type="text" id="rec-desc" placeholder="Ex: Salário" required>
                 <div class="grid grid-cols-2 gap-4">
-                    <input type="number" step="0.01" id="rec-valor" placeholder="Valor R$" class="w-full" required>
-                    <input type="date" id="rec-data" class="w-full" required>
+                    <input type="number" step="0.01" id="rec-valor" placeholder="Valor R$" required>
+                    <input type="date" id="rec-data" required>
                 </div>
-                <select id="rec-cat" class="w-full">
-                    <option>Salário</option>
-                    <option>Investimentos</option>
-                    <option>Freelance</option>
-                    <option>Outros</option>
+                <select id="rec-freq">
+                    <option value="única">Única</option>
+                    <option value="mensal">Mensal (Recorrente)</option>
                 </select>
-                <button type="submit" class="w-full bg-emerald-600 p-4 rounded-2xl font-bold text-white text-lg">Salvar Entrada</button>
-                <button type="button" onclick="closeModal('modal-receita')" class="w-full text-slate-500 font-bold text-sm">Cancelar</button>
+                <button type="submit" class="w-full bg-emerald-600 p-4 rounded-2xl font-bold text-white text-lg hover:bg-emerald-500 transition">Salvar Receita</button>
+                <button type="button" onclick="closeModal('modal-receita')" class="w-full text-slate-500 font-bold text-sm mt-2">Cancelar</button>
             </form>
         </div>
     </div>
 
     <!-- Modal Despesa -->
     <div id="modal-despesa" class="fixed inset-0 bg-black/90 backdrop-blur-sm hidden z-[100] flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-[2.5rem] max-w-md w-full p-8">
+        <div class="bg-slate-900 border border-slate-800 rounded-[2.5rem] max-w-md w-full p-8 shadow-2xl overflow-y-auto max-h-[90vh]">
             <h3 class="text-2xl font-black text-rose-500 mb-6">Nova Despesa</h3>
             <form id="form-despesa" class="space-y-4">
-                <input type="text" id="des-desc" placeholder="O que você pagou?" class="w-full" required>
+                <input type="text" id="des-desc" placeholder="Ex: Conta de Luz" required>
                 <div class="grid grid-cols-2 gap-4">
-                    <input type="number" step="0.01" id="des-valor" placeholder="Valor R$" class="w-full" required>
-                    <input type="date" id="des-venc" class="w-full" required>
+                    <input type="number" step="0.01" id="des-valor" placeholder="Valor R$" required>
+                    <input type="date" id="des-venc" required>
                 </div>
-                <select id="des-cat-select" class="w-full"></select>
-                <button type="submit" class="w-full bg-rose-600 p-4 rounded-2xl font-bold text-white text-lg">Registrar Saída</button>
-                <button type="button" onclick="closeModal('modal-despesa')" class="w-full text-slate-500 font-bold text-sm">Cancelar</button>
+                <select id="des-cat">
+                    <option>Moradia</option><option>Alimentação</option><option>Transporte</option><option>Saúde</option><option>Assinaturas</option><option>Outros</option>
+                </select>
+                <div>
+                    <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Anexar Comprovante (Opcional)</label>
+                    <input type="file" id="des-anexo" class="text-xs">
+                </div>
+                <button type="submit" class="w-full bg-rose-600 p-4 rounded-2xl font-bold text-white text-lg hover:bg-rose-500 transition">Salvar Despesa</button>
+                <button type="button" onclick="closeModal('modal-despesa')" class="w-full text-slate-500 font-bold text-sm mt-2">Cancelar</button>
             </form>
         </div>
     </div>
 
-    <!-- Modal Renda Variável -->
+    <!-- Modal RV -->
     <div id="modal-rv" class="fixed inset-0 bg-black/90 backdrop-blur-sm hidden z-[100] flex items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-800 rounded-[2.5rem] max-w-md w-full p-8">
-            <h3 class="text-2xl font-black text-white mb-6">Adicionar Ativo B3</h3>
+            <h3 class="text-2xl font-black text-indigo-400 mb-6">Novo Ativo B3</h3>
             <form id="form-rv" class="space-y-4">
-                <input type="text" id="rv-ticker" placeholder="Ticker (Ex: PETR4)" class="w-full uppercase font-bold" required>
+                <input type="text" id="rv-ticker" placeholder="Ticker (Ex: PETR4)" class="uppercase font-bold" required>
                 <div class="grid grid-cols-2 gap-4">
-                    <input type="number" id="rv-qtd" placeholder="Qtd" class="w-full" required>
-                    <input type="number" step="0.01" id="rv-pm" placeholder="Preço Médio" class="w-full" required>
+                    <input type="number" id="rv-qtd" placeholder="Qtd" required>
+                    <input type="number" step="0.01" id="rv-pm" placeholder="Preço Médio" required>
                 </div>
-                <button type="submit" class="w-full bg-indigo-600 p-4 rounded-2xl font-bold text-white text-lg">Adicionar</button>
-                <button type="button" onclick="closeModal('modal-rv')" class="w-full text-slate-500 font-bold text-sm">Cancelar</button>
+                <button type="submit" class="w-full bg-indigo-600 p-4 rounded-2xl font-bold text-white">Salvar Ativo</button>
+                <button type="button" onclick="closeModal('modal-rv')" class="w-full text-slate-500 font-bold text-sm mt-2">Cancelar</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal RF -->
+    <div id="modal-rf" class="fixed inset-0 bg-black/90 backdrop-blur-sm hidden z-[100] flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-[2.5rem] max-w-md w-full p-8">
+            <h3 class="text-2xl font-black text-emerald-400 mb-6">Renda Fixa</h3>
+            <form id="form-rf" class="space-y-4">
+                <input type="text" id="rf-nome" placeholder="Ex: CDB Banco Inter 102%" required>
+                <div class="grid grid-cols-2 gap-4">
+                    <input type="number" step="0.01" id="rf-valor" placeholder="Valor Aplicado" required>
+                    <input type="date" id="rf-venc" required>
+                </div>
+                <button type="submit" class="w-full bg-emerald-600 p-4 rounded-2xl font-bold text-white">Salvar Título</button>
+                <button type="button" onclick="closeModal('modal-rf')" class="w-full text-slate-500 font-bold text-sm mt-2">Cancelar</button>
             </form>
         </div>
     </div>
 
     <script>
-        // --- MOTOR DE DADOS ---
-        let state = JSON.parse(localStorage.getItem('minhavidafinanceira_pro')) || {
+        // --- LOGICA DE DADOS ---
+        let state = JSON.parse(localStorage.getItem('minhavidafinanceira_vFinal')) || {
             receitas: [],
             despesas: [],
             investRV: [],
-            categorias: ['Moradia', 'Alimentação', 'Transporte', 'Lazer', 'Saúde', 'Assinaturas', 'Outros']
+            investRF: []
         };
 
-        const save = () => localStorage.setItem('minhavidafinanceira_pro', JSON.stringify(state));
+        const save = () => localStorage.setItem('minhavidafinanceira_vFinal', JSON.stringify(state));
         const fmt = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
 
         // --- NAVEGAÇÃO ---
         function showTab(id) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.nav-icon, aside button').forEach(b => b.classList.replace('text-indigo-500', 'text-slate-400'));
             document.getElementById(id).classList.add('active');
             document.getElementById('tab-title').innerText = id.charAt(0).toUpperCase() + id.slice(1);
-            lucide.createIcons();
             render();
+            lucide.createIcons();
         }
 
         function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
-        // --- COTAÇÕES REAIS (API B3/STATUSINVEST VIA BRAPI) ---
+        // --- SINCRONIZAÇÃO B3 ---
         async function syncQuotes() {
             if (state.investRV.length === 0) return;
             const icon = document.getElementById('sync-icon');
             icon.classList.add('animate-spin');
-
-            const tickers = state.investRV.map(a => a.ticker).join(',');
             try {
+                const tickers = state.investRV.map(a => a.ticker).join(',');
                 const res = await fetch(`https://brapi.dev/api/quote/${tickers}`);
                 const data = await res.json();
-                
-                state.investRV.forEach(ativo => {
-                    const find = data.results.find(r => r.symbol === ativo.ticker);
-                    if(find) ativo.cotacao = find.regularMarketPrice;
+                state.investRV.forEach(a => {
+                    const find = data.results.find(r => r.symbol === a.ticker);
+                    if (find) a.cotacao = find.regularMarketPrice;
                 });
-                save();
-                render();
-            } catch (e) {
-                console.error("Erro na cotação", e);
-            } finally {
-                icon.classList.remove('animate-spin');
-            }
+                save(); render();
+            } catch (e) { console.error("Erro cotação:", e); }
+            finally { icon.classList.remove('animate-spin'); }
         }
 
-        // --- RENDERIZAÇÃO ---
+        // --- RENDERIZAÇÃO CENTRAL ---
         function render() {
-            renderReceitas();
-            renderDespesas();
-            renderRV();
-            updateDashboard();
+            const hoje = new Date().toISOString().split('T')[0];
+            const hojeMais7 = new Date(); hojeMais7.setDate(hojeMais7.getDate() + 7);
+            const dataLimite = hojeMais7.toISOString().split('T')[0];
+
+            // Cálculos
+            const totalRec = state.receitas.reduce((acc, c) => acc + c.valor, 0);
+            const vencidas = state.despesas.filter(d => d.venc < hoje);
+            const aVencer = state.despesas.filter(d => d.venc >= hoje);
+            
+            const totalVencido = vencidas.reduce((acc, c) => acc + c.valor, 0);
+            const totalPrevisao = aVencer.reduce((acc, c) => acc + c.valor, 0);
+            const totalRV = state.investRV.reduce((acc, c) => acc + (c.qtd * (c.cotacao || 0)), 0);
+            const totalRF = state.investRF.reduce((acc, c) => acc + c.valor, 0);
+
+            // Dashboard UI
+            document.getElementById('dash-receitas').innerText = fmt(totalRec);
+            document.getElementById('dash-despesas').innerText = fmt(totalVencido);
+            document.getElementById('dash-previsao').innerText = fmt(totalPrevisao);
+            document.getElementById('dash-saldo-previsto').innerText = fmt(totalRec - totalVencido - totalPrevisao);
+            document.getElementById('side-patrimonio').innerText = fmt(totalRec - totalVencido + totalRV + totalRF);
+
+            // Alert Zone
+            const alertZone = document.getElementById('alert-zone');
+            if(vencidas.length > 0) {
+                alertZone.classList.remove('hidden');
+                alertZone.innerHTML = `
+                    <div class="card p-4 alert-vencido bg-rose-500/10 flex items-center justify-between mb-6">
+                        <div class="flex items-center gap-3">
+                            <i data-lucide="alert-circle" class="text-rose-500"></i>
+                            <p class="font-bold text-sm">Você possui ${vencidas.length} conta(s) atrasada(s)! Total: <span class="text-rose-500">${fmt(totalVencido)}</span></p>
+                        </div>
+                        <button onclick="showTab('despesas')" class="bg-rose-600 text-white text-[10px] px-3 py-1 rounded-lg font-black uppercase">Resolver</button>
+                    </div>
+                `;
+            } else { alertZone.classList.add('hidden'); }
+
+            // Widget Próximos 7 dias
+            const proximos = state.despesas.filter(d => d.venc >= hoje && d.venc <= dataLimite).sort((a,b) => a.venc > b.venc ? 1 : -1);
+            document.getElementById('lista-proximos').innerHTML = proximos.map(d => `
+                <div class="p-3 bg-slate-900 border-l-4 border-amber-500 rounded-xl flex justify-between items-center">
+                    <div><p class="text-xs font-bold text-white">${d.descricao}</p><p class="text-[10px] text-amber-500 font-bold uppercase">Vence ${d.venc.split('-').reverse().join('/')}</p></div>
+                    <p class="text-sm font-black">${fmt(d.valor)}</p>
+                </div>
+            `).join('') || '<p class="text-xs text-slate-600 text-center py-10 italic">Nenhuma conta para os próximos 7 dias</p>';
+
+            // Listas
+            renderListReceitas();
+            renderListDespesas(hoje);
+            renderListRV();
+            renderCharts(totalRec, totalVencido + totalPrevisao);
             lucide.createIcons();
         }
 
-        function updateDashboard() {
-            const totalRec = state.receitas.reduce((acc, c) => acc + c.valor, 0);
-            const totalDes = state.despesas.reduce((acc, c) => acc + c.valor, 0);
-            const totalRV = state.investRV.reduce((acc, c) => acc + (c.qtd * (c.cotacao || 0)), 0);
-            
-            const saldo = totalRec - totalDes;
-            const patrimonio = saldo + totalRV;
-
-            document.getElementById('dash-receitas').innerText = fmt(totalRec);
-            document.getElementById('dash-despesas').innerText = fmt(totalDes);
-            document.getElementById('dash-saldo').innerText = fmt(saldo);
-            document.getElementById('side-patrimonio').innerText = fmt(patrimonio);
-            document.getElementById('total-inv-global').innerText = fmt(totalRV);
-
-            renderCharts(totalRec, totalDes);
-        }
-
-        function renderReceitas() {
-            const container = document.getElementById('lista-receitas');
-            container.innerHTML = state.receitas.length ? state.receitas.map((r, i) => `
-                <div class="card p-5 flex justify-between items-center group hover:border-emerald-500/50 transition">
+        function renderListReceitas() {
+            document.getElementById('lista-receitas').innerHTML = state.receitas.map((r, i) => `
+                <div class="card p-4 flex justify-between items-center group">
                     <div class="flex items-center gap-4">
                         <div class="bg-emerald-500/10 p-3 rounded-2xl text-emerald-500"><i data-lucide="trending-up"></i></div>
-                        <div>
-                            <p class="font-bold text-white">${r.descricao}</p>
-                            <p class="text-xs text-slate-500">${r.data.split('-').reverse().join('/')} • ${r.categoria}</p>
-                        </div>
+                        <div><p class="font-bold text-white">${r.descricao}</p><p class="text-xs text-slate-500">${r.data.split('-').reverse().join('/')}</p></div>
                     </div>
                     <div class="flex items-center gap-4">
-                        <p class="text-lg font-black text-emerald-500">${fmt(r.valor)}</p>
-                        <button onclick="deleteItem('receitas', ${i})" class="text-slate-600 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
+                        <p class="font-black text-emerald-500 text-lg">${fmt(r.valor)}</p>
+                        <button onclick="deleteItem('receitas', ${i})" class="text-slate-600 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                     </div>
                 </div>
-            `).join('') : '<p class="text-center text-slate-600 py-10">Nenhuma receita cadastrada.</p>';
+            `).join('');
         }
 
-        function renderDespesas() {
-            const container = document.getElementById('lista-despesas');
-            container.innerHTML = state.despesas.length ? state.despesas.map((d, i) => `
-                <div class="card p-5 flex justify-between items-center group hover:border-rose-500/50 transition">
+        function renderListDespesas(hoje) {
+            document.getElementById('lista-despesas').innerHTML = state.despesas.map((d, i) => {
+                const vencida = d.venc < hoje;
+                return `
+                <div class="card p-4 flex justify-between items-center group ${vencida ? 'border-rose-500/50 bg-rose-500/5' : ''}">
                     <div class="flex items-center gap-4">
-                        <div class="bg-rose-500/10 p-3 rounded-2xl text-rose-500"><i data-lucide="trending-down"></i></div>
+                        <div class="p-3 rounded-2xl ${vencida ? 'bg-rose-500/20 text-rose-500' : 'bg-slate-800 text-slate-500'}"><i data-lucide="${vencida ? 'alert-triangle' : 'trending-down'}"></i></div>
                         <div>
                             <p class="font-bold text-white">${d.descricao}</p>
-                            <p class="text-xs text-slate-500">${d.venc.split('-').reverse().join('/')} • ${d.categoria}</p>
+                            <p class="text-[10px] font-black uppercase ${vencida ? 'text-rose-500' : 'text-slate-500'}">${vencida ? 'Atrasada' : 'Vence'} em ${d.venc.split('-').reverse().join('/')}</p>
                         </div>
                     </div>
                     <div class="flex items-center gap-4">
-                        <p class="text-lg font-black text-rose-500">${fmt(d.valor)}</p>
-                        <button onclick="deleteItem('despesas', ${i})" class="text-slate-600 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
+                        <p class="font-black ${vencida ? 'text-rose-500' : 'text-white'} text-lg">${fmt(d.valor)}</p>
+                        <button onclick="deleteItem('despesas', ${i})" class="text-slate-600 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                     </div>
                 </div>
-            `).join('') : '<p class="text-center text-slate-600 py-10">Nenhuma despesa cadastrada.</p>';
+            `}).join('');
         }
 
-        function renderRV() {
-            const container = document.getElementById('lista-rv');
-            container.innerHTML = state.investRV.map((a, i) => {
-                const total = a.qtd * (a.cotacao || 0);
-                const custo = a.qtd * a.pm;
-                const lucro = total - custo;
+        function renderListRV() {
+            const corpo = document.getElementById('corpo-rv');
+            let rows = state.investRV.map((a, i) => {
+                const atual = a.cotacao || 0;
+                const totalInvestido = a.qtd * a.pm;
+                const totalAtual = a.qtd * atual;
+                const lucro = totalAtual - totalInvestido;
                 return `
-                <tr class="border-b border-slate-800/50 hover:bg-slate-900 transition">
-                    <td class="p-4 font-black text-white">${a.ticker}</td>
-                    <td class="p-4">${a.qtd}</td>
-                    <td class="p-4 text-slate-400">${fmt(a.pm)}</td>
-                    <td class="p-4 font-bold text-indigo-400">${fmt(a.cotacao || 0)}</td>
-                    <td class="p-4 font-bold text-white">${fmt(total)}</td>
-                    <td class="p-4 font-black ${lucro >= 0 ? 'text-emerald-500' : 'text-rose-500'}">${fmt(lucro)}</td>
-                    <td class="p-4 text-right">
-                        <button onclick="deleteItem('investRV', ${i})" class="text-slate-600 hover:text-rose-500"><i data-lucide="x-circle" class="w-4 h-4"></i></button>
-                    </td>
-                </tr>`;
-            }).join('');
+                    <tr class="border-b border-slate-800 hover:bg-white/5 transition">
+                        <td class="p-4 font-black text-white">${a.ticker}</td>
+                        <td class="p-4">${a.qtd}</td>
+                        <td class="p-4 font-bold text-indigo-400">${fmt(atual)}</td>
+                        <td class="p-4 text-slate-500 text-xs">${fmt(totalInvestido)}</td>
+                        <td class="p-4 font-black">${fmt(totalAtual)}</td>
+                        <td class="p-4 font-black ${lucro >= 0 ? 'text-emerald-500' : 'text-rose-500'}">${fmt(lucro)}</td>
+                        <td class="p-4 text-right"><button onclick="deleteItem('investRV', ${i})" class="text-slate-700 hover:text-rose-500"><i data-lucide="x-circle" class="w-4 h-4"></i></button></td>
+                    </tr>
+                `;
+            });
+
+            const rowsRF = state.investRF.map((f, i) => `
+                <tr class="border-b border-slate-800 bg-emerald-500/5 transition">
+                    <td class="p-4 font-black text-emerald-500">[RF] ${f.nome}</td>
+                    <td class="p-4">-</td>
+                    <td class="p-4">-</td>
+                    <td class="p-4 text-slate-500 text-xs">${fmt(f.valor)}</td>
+                    <td class="p-4 font-black">${fmt(f.valor)}</td>
+                    <td class="p-4 text-slate-500 italic text-[10px]">Venc. ${f.venc.split('-').reverse().join('/')}</td>
+                    <td class="p-4 text-right"><button onclick="deleteItem('investRF', ${i})" class="text-slate-700 hover:text-rose-500"><i data-lucide="x-circle" class="w-4 h-4"></i></button></td>
+                </tr>
+            `);
+
+            corpo.innerHTML = rows.join('') + rowsRF.join('');
         }
 
         // --- GRÁFICOS ---
-        let fChart, cChart;
+        let fChart;
         function renderCharts(r, d) {
-            const ctxF = document.getElementById('chartFluxo').getContext('2d');
-            const ctxC = document.getElementById('chartCategorias').getContext('2d');
-            if(fChart) fChart.destroy();
-            if(cChart) cChart.destroy();
-
+            const ctx = document.getElementById('chartFluxo').getContext('2d');
+            if (fChart) fChart.destroy();
             Chart.defaults.color = '#64748b';
-            fChart = new Chart(ctxF, {
+            fChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: ['Este Mês'],
+                    labels: ['Mês Atual'],
                     datasets: [
-                        { label: 'Receitas', data: [r], backgroundColor: '#10b981', borderRadius: 10 },
-                        { label: 'Despesas', data: [d], backgroundColor: '#f43f5e', borderRadius: 10 }
+                        { label: 'Ganhos', data: [r], backgroundColor: '#10b981', borderRadius: 10 },
+                        { label: 'Gastos', data: [d], backgroundColor: '#f43f5e', borderRadius: 10 }
                     ]
                 },
-                options: { plugins: { legend: { display: false } }, scales: { y: { grid: { color: '#1e293b' } } } }
-            });
-
-            const cats = {};
-            state.despesas.forEach(x => cats[x.categoria] = (cats[x.categoria] || 0) + x.valor);
-            cChart = new Chart(ctxC, {
-                type: 'doughnut',
-                data: {
-                    labels: Object.keys(cats),
-                    datasets: [{ data: Object.values(cats), backgroundColor: ['#6366f1','#f59e0b','#ec4899','#10b981','#06b6d4'], borderWidth: 0 }]
-                },
-                options: { cutout: '80%', plugins: { legend: { position: 'bottom' } } }
+                options: { plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { grid: { display: false } } } }
             });
         }
 
-        // --- AÇÕES ---
+        // --- HANDLERS ---
         document.getElementById('form-receita').onsubmit = (e) => {
             e.preventDefault();
-            state.receitas.push({
-                descricao: document.getElementById('rec-desc').value,
-                valor: parseFloat(document.getElementById('rec-valor').value),
-                data: document.getElementById('rec-data').value,
-                categoria: document.getElementById('rec-cat').value
-            });
+            state.receitas.push({ descricao: document.getElementById('rec-desc').value, valor: parseFloat(document.getElementById('rec-valor').value), data: document.getElementById('rec-data').value });
             save(); closeModal('modal-receita'); render(); e.target.reset();
-        };
+        }
 
         document.getElementById('form-despesa').onsubmit = (e) => {
             e.preventDefault();
-            state.despesas.push({
-                descricao: document.getElementById('des-desc').value,
-                valor: parseFloat(document.getElementById('des-valor').value),
-                venc: document.getElementById('des-venc').value,
-                categoria: document.getElementById('des-cat-select').value
-            });
+            state.despesas.push({ descricao: document.getElementById('des-desc').value, valor: parseFloat(document.getElementById('des-valor').value), venc: document.getElementById('des-venc').value, anexo: document.getElementById('des-anexo').value });
             save(); closeModal('modal-despesa'); render(); e.target.reset();
-        };
+        }
 
         document.getElementById('form-rv').onsubmit = (e) => {
             e.preventDefault();
-            state.investRV.push({
-                ticker: document.getElementById('rv-ticker').value.toUpperCase().trim(),
-                qtd: parseFloat(document.getElementById('rv-qtd').value),
-                pm: parseFloat(document.getElementById('rv-pm').value),
-                cotacao: 0
-            });
+            state.investRV.push({ ticker: document.getElementById('rv-ticker').value.toUpperCase().trim(), qtd: parseFloat(document.getElementById('rv-qtd').value), pm: parseFloat(document.getElementById('rv-pm').value), cotacao: 0 });
             save(); closeModal('modal-rv'); syncQuotes(); e.target.reset();
-        };
-
-        function deleteItem(type, index) {
-            if(confirm('Excluir este item?')) {
-                state[type].splice(index, 1);
-                save();
-                render();
-            }
         }
 
-        function clearData() {
-            if(confirm('Deseja apagar TODOS os dados?')) {
-                localStorage.clear();
-                location.reload();
-            }
+        document.getElementById('form-rf').onsubmit = (e) => {
+            e.preventDefault();
+            state.investRF.push({ nome: document.getElementById('rf-nome').value, valor: parseFloat(document.getElementById('rf-valor').value), venc: document.getElementById('rf-venc').value });
+            save(); closeModal('modal-rf'); render(); e.target.reset();
         }
 
-        // --- INIT ---
+        function deleteItem(type, i) { if(confirm('Excluir este item?')) { state[type].splice(i, 1); save(); render(); } }
+        function clearData() { if(confirm('ATENÇÃO: Apagar todos os seus dados permanentemente?')) { localStorage.clear(); location.reload(); } }
+
         window.onload = () => {
             document.getElementById('current-date').innerText = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'full' }).format(new Date());
-            const select = document.getElementById('des-cat-select');
-            state.categorias.forEach(c => {
-                const opt = document.createElement('option');
-                opt.value = opt.text = c;
-                select.appendChild(opt);
-            });
             render();
             syncQuotes();
         }
