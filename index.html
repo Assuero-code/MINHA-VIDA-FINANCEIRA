@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minha Vida Financeira | Edição Alpha</title>
+    <title>Minha Vida Financeira | Alpha Master</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -19,19 +19,17 @@
         .negative { color: #f43f5e; }
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
-        .strikethrough { text-decoration: line-through; opacity: 0.5; }
-        @keyframes pulse-indigo { 0% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(99, 102, 241, 0); } 100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); } }
-        .syncing { animation: pulse-indigo 2s infinite; }
+        .strikethrough { text-decoration: line-through; opacity: 0.4; }
     </style>
 </head>
 <body class="antialiased">
 
-    <!-- MOBILE NAV -->
+    <!-- NAV MOBILE -->
     <nav class="fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 flex justify-around p-4 z-50 md:hidden">
-        <button onclick="showTab('dashboard')" class="nav-icon text-indigo-500"><i data-lucide="layout-dashboard"></i></button>
-        <button onclick="showTab('investimentos')" class="nav-icon text-slate-400"><i data-lucide="line-chart"></i></button>
-        <button onclick="showTab('receitas')" class="nav-icon text-slate-400"><i data-lucide="trending-up"></i></button>
-        <button onclick="showTab('configuracoes')" class="nav-icon text-slate-400"><i data-lucide="settings"></i></button>
+        <button onclick="showTab('dashboard')" class="text-indigo-500"><i data-lucide="layout-dashboard"></i></button>
+        <button onclick="showTab('receitas')" class="text-slate-400"><i data-lucide="trending-up"></i></button>
+        <button onclick="showTab('despesas')" class="text-slate-400"><i data-lucide="trending-down"></i></button>
+        <button onclick="showTab('investimentos')" class="text-slate-400"><i data-lucide="line-chart"></i></button>
     </nav>
 
     <div class="flex h-screen overflow-hidden">
@@ -42,11 +40,11 @@
                 <h1 class="text-lg font-black tracking-tighter uppercase">Minha Vida <span class="text-indigo-500">FINANC.</span></h1>
             </div>
             <nav class="space-y-2 flex-1">
-                <button onclick="showTab('dashboard')" class="flex items-center gap-3 w-full p-3 rounded-xl hover:bg-slate-900 transition font-semibold" id="link-dashboard"><i data-lucide="layout-dashboard" class="w-5 h-5"></i> Dashboard</button>
-                <button onclick="showTab('investimentos')" class="flex items-center gap-3 w-full p-3 rounded-xl hover:bg-slate-900 transition font-semibold text-slate-400"><i data-lucide="line-chart" class="text-amber-500"></i> Investimentos</button>
+                <button onclick="showTab('dashboard')" class="flex items-center gap-3 w-full p-3 rounded-xl hover:bg-slate-900 transition font-semibold"><i data-lucide="layout-dashboard"></i> Dashboard</button>
                 <button onclick="showTab('receitas')" class="flex items-center gap-3 w-full p-3 rounded-xl hover:bg-slate-900 transition font-semibold text-slate-400"><i data-lucide="trending-up" class="text-emerald-500"></i> Receitas</button>
                 <button onclick="showTab('despesas')" class="flex items-center gap-3 w-full p-3 rounded-xl hover:bg-slate-900 transition font-semibold text-slate-400"><i data-lucide="trending-down" class="text-rose-500"></i> Despesas</button>
-                <button onclick="showTab('configuracoes')" class="flex items-center gap-3 w-full p-3 rounded-xl hover:bg-slate-900 transition font-semibold text-slate-400"><i data-lucide="settings" class="text-slate-500"></i> Configurações</button>
+                <button onclick="showTab('investimentos')" class="flex items-center gap-3 w-full p-3 rounded-xl hover:bg-slate-900 transition font-semibold text-slate-400"><i data-lucide="line-chart" class="text-amber-500"></i> Investimentos</button>
+                <button onclick="showTab('configuracoes')" class="flex items-center gap-3 w-full p-3 rounded-xl hover:bg-slate-900 transition font-semibold text-slate-400"><i data-lucide="settings"></i> Configurações</button>
             </nav>
             <div class="mt-auto p-4 bg-indigo-950/20 border border-indigo-500/20 rounded-2xl text-center">
                 <p class="text-[10px] text-indigo-300 font-bold uppercase mb-1 tracking-widest">Patrimônio Consolidado</p>
@@ -62,7 +60,7 @@
                     <p id="current-date" class="text-slate-500 text-sm font-medium capitalize"></p>
                 </div>
                 <div class="flex gap-2">
-                    <button onclick="syncAlphaVantage()" class="bg-slate-900 border border-slate-800 p-3 rounded-xl text-indigo-400 hover:text-white transition" id="btn-sync-main" title="Sincronizar com Alpha Vantage">
+                    <button onclick="syncAlphaVantage()" class="bg-slate-900 border border-slate-800 p-3 rounded-xl text-indigo-400 hover:text-white transition" id="btn-sync">
                         <i data-lucide="refresh-cw" id="sync-icon"></i>
                     </button>
                 </div>
@@ -72,150 +70,157 @@
             <section id="dashboard" class="tab-content active space-y-6">
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div class="card p-5 border-emerald-500/20 bg-emerald-500/5">
-                        <p class="text-emerald-500 text-[10px] font-bold uppercase tracking-widest">Saldo Disponível</p>
-                        <h3 id="dash-saldo-real" class="text-2xl font-black">R$ 0,00</h3>
+                        <p class="text-emerald-500 text-[10px] font-bold uppercase">Saldo Líquido</p>
+                        <h3 id="dash-saldo" class="text-2xl font-black">R$ 0,00</h3>
+                    </div>
+                    <div class="card p-5 border-rose-500/20 bg-rose-500/5">
+                        <p class="text-rose-500 text-[10px] font-bold uppercase">Contas Vencidas</p>
+                        <h3 id="dash-vencido" class="text-2xl font-black">R$ 0,00</h3>
                     </div>
                     <div class="card p-5 border-amber-500/20 bg-amber-500/5">
-                        <p class="text-amber-500 text-[10px] font-bold uppercase tracking-widest">Investido (Custo)</p>
-                        <h3 id="dash-investido-custo" class="text-2xl font-black">R$ 0,00</h3>
+                        <p class="text-amber-500 text-[10px] font-bold uppercase">Valor Investido</p>
+                        <h3 id="dash-investido" class="text-2xl font-black">R$ 0,00</h3>
                     </div>
-                    <div class="card p-5 border-indigo-500/20 bg-indigo-500/5">
-                        <p class="text-indigo-400 text-[10px] font-bold uppercase tracking-widest">Valor de Mercado</p>
-                        <h3 id="dash-investido-mercado" class="text-2xl font-black">R$ 0,00</h3>
-                    </div>
-                    <div class="card p-5 bg-gradient-to-br from-indigo-600 to-indigo-800 border-none">
-                        <p class="text-white/70 text-[10px] font-bold uppercase tracking-widest">Patrimônio Total</p>
-                        <h3 id="dash-patrimonio-total" class="text-2xl font-black text-white">R$ 0,00</h3>
+                    <div class="card p-5 bg-indigo-600 border-none shadow-xl shadow-indigo-500/20">
+                        <p class="text-white/70 text-[10px] font-bold uppercase">Patrimônio Total</p>
+                        <h3 id="dash-patrimonio" class="text-2xl font-black text-white">R$ 0,00</h3>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     <div class="card p-6">
-                        <h4 class="font-bold mb-4 flex items-center gap-2"><i data-lucide="bar-chart-3" class="text-indigo-500"></i> Fluxo de Caixa</h4>
+                        <h4 class="font-bold mb-4 flex items-center gap-2"><i data-lucide="bar-chart-3" class="text-indigo-500"></i> Fluxo Mensal (Realizado)</h4>
                         <canvas id="chartFluxo"></canvas>
                     </div>
                     <div class="card p-6">
-                        <h4 class="font-bold mb-4 flex items-center gap-2"><i data-lucide="pie-chart" class="text-amber-500"></i> Alocação de Ativos</h4>
-                        <canvas id="chartAlocacao"></canvas>
+                        <h4 class="font-bold mb-4 flex items-center gap-2"><i data-lucide="alert-circle" class="text-rose-500"></i> Contas a Vencer</h4>
+                        <div id="lista-agenda" class="space-y-3"></div>
                     </div>
                 </div>
+            </section>
+
+            <!-- RECEITAS -->
+            <section id="receitas" class="tab-content space-y-4">
+                <div class="flex justify-between items-center bg-slate-900/50 p-6 rounded-3xl border border-slate-800">
+                    <h3 class="text-xl font-bold text-emerald-500">Receitas</h3>
+                    <button onclick="openForm('receita')" class="bg-emerald-600 px-6 py-3 rounded-2xl font-bold">+ Nova Receita</button>
+                </div>
+                <div id="lista-receitas" class="grid gap-3"></div>
+            </section>
+
+            <!-- DESPESAS -->
+            <section id="despesas" class="tab-content space-y-4">
+                <div class="flex justify-between items-center bg-slate-900/50 p-6 rounded-3xl border border-slate-800">
+                    <h3 class="text-xl font-bold text-rose-500">Despesas</h3>
+                    <button onclick="openForm('despesa')" class="bg-rose-600 px-6 py-3 rounded-2xl font-bold">+ Nova Despesa</button>
+                </div>
+                <div id="lista-despesas" class="grid gap-3"></div>
             </section>
 
             <!-- INVESTIMENTOS -->
             <section id="investimentos" class="tab-content space-y-6">
-                <div class="flex justify-between items-center bg-slate-900/50 p-6 rounded-3xl border border-slate-800">
-                    <h3 class="text-xl font-bold">Minha Carteira</h3>
-                    <div class="flex gap-2">
-                        <button onclick="openForm('rv')" class="bg-indigo-600 text-white px-4 py-2 rounded-xl font-bold text-sm hover:bg-indigo-500 transition">Add Ação/FII</button>
-                        <button onclick="openForm('rf')" class="bg-emerald-600 text-white px-4 py-2 rounded-xl font-bold text-sm hover:bg-emerald-500 transition">Add Renda Fixa</button>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div class="card p-6 border-indigo-500/20">
+                        <div class="flex justify-between items-start">
+                            <p class="text-xs font-bold uppercase text-slate-500 tracking-widest">Custo de Aquisição</p>
+                            <button onclick="openForm('rv')" class="bg-indigo-600 text-[10px] px-3 py-1 rounded-lg font-bold">Add Ação</button>
+                        </div>
+                        <h3 id="inv-custo" class="text-3xl font-black mt-2 text-white">R$ 0,00</h3>
+                    </div>
+                    <div class="card p-6 border-amber-500/20">
+                        <div class="flex justify-between items-start">
+                            <p class="text-xs font-bold uppercase text-slate-500 tracking-widest">Valor de Mercado (Alpha)</p>
+                            <button onclick="openForm('rf')" class="bg-emerald-600 text-[10px] px-3 py-1 rounded-lg font-bold">Add RF</button>
+                        </div>
+                        <h3 id="inv-mercado" class="text-3xl font-black mt-2 text-white">R$ 0,00</h3>
                     </div>
                 </div>
-
-                <div id="api-error-msg" class="hidden card p-4 border-rose-500/50 bg-rose-500/5 text-rose-500 text-xs font-bold"></div>
 
                 <div class="card overflow-hidden">
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-sm">
-                            <thead class="bg-slate-900 text-slate-500 uppercase font-black text-[10px]">
-                                <tr>
-                                    <th class="p-4">Ativo / Ticker</th>
-                                    <th class="p-4">Qtd / P. Médio</th>
-                                    <th class="p-4">V. Investido</th>
-                                    <th class="p-4">Cotação Alpha Vantage</th>
-                                    <th class="p-4">Valor Atual</th>
-                                    <th class="p-4">Lucro / Rent. %</th>
-                                    <th class="p-4">Sync</th>
-                                    <th class="p-4">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody id="corpo-investimentos" class="font-medium"></tbody>
-                        </table>
-                    </div>
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-900 text-[10px] font-black uppercase text-slate-500">
+                            <tr>
+                                <th class="p-4">Ticker</th>
+                                <th class="p-4">Investido (Custo)</th>
+                                <th class="p-4">Alpha Quote</th>
+                                <th class="p-4">Valor Atual</th>
+                                <th class="p-4">Rent. %</th>
+                                <th class="p-4 text-right">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="corpo-investimentos"></tbody>
+                    </table>
                 </div>
             </section>
 
-            <!-- RECEITAS/DESPESAS (SIMPLIFICADO PARA O CONTEXTO) -->
-            <section id="receitas" class="tab-content space-y-4">
-                <button onclick="openForm('receita')" class="bg-emerald-600 w-full p-4 rounded-2xl font-bold">+ Nova Receita</button>
-                <div id="lista-receitas" class="grid gap-3"></div>
-            </section>
-            
-            <section id="despesas" class="tab-content space-y-4">
-                <button onclick="openForm('despesa')" class="bg-rose-600 w-full p-4 rounded-2xl font-bold">+ Nova Despesa</button>
-                <div id="lista-despesas" class="grid gap-3"></div>
-            </section>
-
-            <!-- CONFIGURACOES -->
+            <!-- CONFIGURAÇÕES -->
             <section id="configuracoes" class="tab-content space-y-6">
-                <div class="card p-8 max-w-2xl mx-auto">
-                    <h3 class="text-xl font-bold mb-4 flex items-center gap-2"><i data-lucide="shield-check" class="text-indigo-400"></i> Segurança e API</h3>
-                    <p class="text-sm text-slate-400 mb-6">Para obter cotações em tempo real, insira sua chave da Alpha Vantage. Sua chave é salva apenas no seu navegador.</p>
-                    
-                    <div class="space-y-4">
-                        <div>
-                            <label class="text-[10px] font-black uppercase text-slate-500 ml-1">Alpha Vantage API Key</label>
-                            <input type="password" id="cfg-api-key" placeholder="Insira sua chave aqui...">
-                        </div>
-                        <button onclick="saveConfig()" class="bg-indigo-600 w-full p-4 rounded-2xl font-black">Salvar Configurações</button>
-                    </div>
-                    
-                    <div class="mt-10 p-4 bg-slate-900 rounded-xl border border-slate-800">
-                        <h4 class="text-xs font-bold uppercase text-slate-500 mb-2">Instruções:</h4>
-                        <ul class="text-xs text-slate-400 space-y-2 list-disc ml-4">
-                            <li>Obtenha uma chave gratuita em <a href="https://www.alphavantage.co/support/#api-key" target="_blank" class="text-indigo-400 underline">alphavantage.co</a></li>
-                            <li>O plano gratuito permite 25 requisições por dia.</li>
-                            <li>Ativos brasileiros devem ser cadastrados com o Ticker da B3 (ex: PETR4, MXRF11).</li>
-                        </ul>
-                    </div>
+                <div class="card p-8 max-w-xl mx-auto text-center">
+                    <h3 class="text-2xl font-bold mb-4">Configuração de API</h3>
+                    <p class="text-sm text-slate-400 mb-6">Insira sua chave Alpha Vantage para habilitar cotações automáticas de ativos brasileiros (.SA).</p>
+                    <input type="password" id="cfg-api-key" placeholder="Alpha Vantage Key" class="mb-4">
+                    <button onclick="saveConfig()" class="bg-indigo-600 w-full p-4 rounded-2xl font-bold">Salvar Configuração</button>
                 </div>
             </section>
         </main>
     </div>
 
     <!-- MODAL FORM -->
-    <div id="modal-form" class="fixed inset-0 bg-black/90 backdrop-blur-sm hidden z-[100] flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-[2.5rem] max-w-md w-full p-8 shadow-2xl">
+    <div id="modal-form" class="fixed inset-0 bg-black/95 backdrop-blur-md hidden z-[100] flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-[2.5rem] max-w-md w-full p-8 shadow-2xl overflow-y-auto max-h-[90vh]">
             <h3 id="form-title" class="text-2xl font-black mb-6">Lançamento</h3>
             <form id="main-form" class="space-y-4">
                 <input type="hidden" id="form-type">
                 <input type="hidden" id="form-index">
 
-                <div id="field-desc">
-                    <label class="text-[10px] font-black uppercase text-slate-500 ml-1">Nome / Ticker</label>
-                    <input type="text" id="inp-desc" placeholder="Ex: PETR4, Salário..." required>
+                <div>
+                    <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Descrição / Ticker</label>
+                    <input type="text" id="inp-desc" required>
                 </div>
 
                 <div id="box-comum" class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="text-[10px] font-black uppercase text-slate-500 ml-1">Valor R$</label>
+                        <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Valor R$</label>
                         <input type="number" step="0.01" id="inp-valor">
                     </div>
                     <div>
-                        <label class="text-[10px] font-black uppercase text-slate-500 ml-1">Data</label>
-                        <input type="date" id="inp-data">
+                        <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Data Vencimento</label>
+                        <input type="date" id="inp-venc">
                     </div>
                 </div>
 
-                <div id="field-extra" class="grid grid-cols-2 gap-4 hidden">
+                <div id="box-efetivada" class="hidden">
+                    <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Data de Recebimento/Pagamento</label>
+                    <input type="date" id="inp-pago">
+                </div>
+
+                <div id="box-invest" class="grid grid-cols-2 gap-4 hidden">
                     <div>
-                        <label class="text-[10px] font-black uppercase text-slate-500 ml-1">Quantidade</label>
+                        <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Qtd</label>
                         <input type="number" step="0.0001" id="inp-qtd">
                     </div>
                     <div>
-                        <label class="text-[10px] font-black uppercase text-slate-500 ml-1">Preço Médio (R$)</label>
+                        <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Preço Médio R$</label>
                         <input type="number" step="0.01" id="inp-pm">
                     </div>
                 </div>
 
-                <button type="submit" class="w-full bg-indigo-600 p-4 rounded-2xl font-black text-white">Confirmar</button>
-                <button type="button" onclick="closeModal()" class="w-full text-slate-500 font-bold text-sm mt-2">Cancelar</button>
+                <div id="box-cat">
+                    <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Categoria</label>
+                    <select id="inp-cat">
+                        <option>Salário</option><option>Aluguel</option><option>Alimentação</option><option>Transporte</option><option>Saúde</option><option>Lazer</option><option>Investimento</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="w-full bg-indigo-600 p-4 rounded-2xl font-black text-white text-lg mt-4 shadow-xl shadow-indigo-500/20">Salvar Alterações</button>
+                <button type="button" onclick="closeModal()" class="w-full text-slate-500 font-bold text-sm">Cancelar</button>
             </form>
         </div>
     </div>
 
     <script>
         // --- DATA & STATE ---
-        let state = JSON.parse(localStorage.getItem('minhavidafinanceira_vAlpha')) || {
+        let state = JSON.parse(localStorage.getItem('mvf_vAlpha_Master')) || {
             receitas: [],
             despesas: [],
             investRV: [],
@@ -223,7 +228,7 @@
             config: { apiKey: '' }
         };
 
-        const save = () => localStorage.setItem('minhavidafinanceira_vAlpha', JSON.stringify(state));
+        const save = () => localStorage.setItem('mvf_vAlpha_Master', JSON.stringify(state));
         const fmt = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
 
         // --- NAVIGATION ---
@@ -238,8 +243,7 @@
 
         function saveConfig() {
             state.config.apiKey = document.getElementById('cfg-api-key').value;
-            save();
-            alert("Configurações salvas com sucesso!");
+            save(); alert("API Key salva!");
         }
 
         // --- FORM LOGIC ---
@@ -248,17 +252,13 @@
             form.reset();
             document.getElementById('form-type').value = type;
             document.getElementById('form-index').value = index;
+            document.getElementById('form-title').innerText = index === -1 ? `Novo ${type}` : `Editar ${type}`;
             
-            const fieldExtra = document.getElementById('field-extra');
-            const boxComum = document.getElementById('box-comum');
-
-            if (type === 'rv') {
-                fieldExtra.classList.remove('hidden');
-                boxComum.classList.add('hidden');
-            } else {
-                fieldExtra.classList.add('hidden');
-                boxComum.classList.remove('hidden');
-            }
+            const isInvest = (type === 'rv' || type === 'rf');
+            document.getElementById('box-comum').classList.toggle('hidden', type === 'rv');
+            document.getElementById('box-invest').classList.toggle('hidden', type !== 'rv');
+            document.getElementById('box-cat').classList.toggle('hidden', isInvest);
+            document.getElementById('box-efetivada').classList.toggle('hidden', isInvest);
 
             if (index !== -1) {
                 const item = state[type === 'receita' ? 'receitas' : type === 'despesa' ? 'despesas' : type === 'rv' ? 'investRV' : 'investRF'][index];
@@ -268,7 +268,9 @@
                     document.getElementById('inp-pm').value = item.pm;
                 } else {
                     document.getElementById('inp-valor').value = item.valor;
-                    document.getElementById('inp-data').value = item.data || item.venc;
+                    document.getElementById('inp-venc').value = item.venc || item.data;
+                    document.getElementById('inp-pago').value = item.pagoData || '';
+                    document.getElementById('inp-cat').value = item.categoria || 'Salário';
                 }
             }
             document.getElementById('modal-form').classList.remove('hidden');
@@ -285,197 +287,178 @@
 
             if (type === 'rv') {
                 newItem = {
-                    ...newItem,
                     ticker: document.getElementById('inp-desc').value.toUpperCase().trim(),
                     qtd: parseFloat(document.getElementById('inp-qtd').value),
                     pm: parseFloat(document.getElementById('inp-pm').value),
                     cotacao: index !== -1 ? state.investRV[index].cotacao : 0,
-                    lastSync: index !== -1 ? state.investRV[index].lastSync : 'Nunca'
+                    lastSync: index !== -1 ? state.investRV[index].lastSync : 'N/A'
+                };
+            } else if (type === 'rf') {
+                newItem = {
+                    nome: document.getElementById('inp-desc').value,
+                    valor: parseFloat(document.getElementById('inp-valor').value),
+                    venc: document.getElementById('inp-venc').value
                 };
             } else {
                 newItem = {
-                    ...newItem,
                     descricao: document.getElementById('inp-desc').value,
-                    nome: document.getElementById('inp-desc').value,
                     valor: parseFloat(document.getElementById('inp-valor').value),
-                    data: document.getElementById('inp-data').value,
-                    venc: document.getElementById('inp-data').value,
-                    status: index === -1 ? 'pendente' : (state[type === 'receita' ? 'receitas' : 'despesas'][index].status)
+                    venc: document.getElementById('inp-venc').value,
+                    pagoData: document.getElementById('inp-pago').value,
+                    categoria: document.getElementById('inp-cat').value,
+                    status: index !== -1 ? state[type === 'receita' ? 'receitas' : 'despesas'][index].status : 'pendente'
                 };
             }
 
-            if (index === -1) state[type === 'receita' ? 'receitas' : type === 'despesa' ? 'despesas' : type === 'rv' ? 'investRV' : 'investRF'].push(newItem);
-            else state[type === 'receita' ? 'receitas' : type === 'despesa' ? 'despesas' : type === 'rv' ? 'investRV' : 'investRF'][index] = newItem;
+            const target = type === 'receita' ? 'receitas' : type === 'despesa' ? 'despesas' : type === 'rv' ? 'investRV' : 'investRF';
+            if (index === -1) state[target].push(newItem);
+            else state[target][index] = { ...state[target][index], ...newItem };
 
             save(); closeModal(); render();
         };
 
-        // --- ALPHA VANTAGE API INTEGRATION ---
+        // --- ALPHA VANTAGE ---
         async function syncAlphaVantage() {
-            const key = state.config.apiKey;
-            if (!key) return alert("Por favor, configure sua API Key nas Configurações.");
-            if (state.investRV.length === 0) return;
-
+            if (!state.config.apiKey) return alert("Configure a API Key!");
             const icon = document.getElementById('sync-icon');
-            const btn = document.getElementById('btn-sync-main');
-            const errorArea = document.getElementById('api-error-msg');
-            
             icon.classList.add('animate-spin');
-            btn.classList.add('syncing');
-            errorArea.classList.add('hidden');
 
-            for (let ativo of state.investRV) {
-                // Alpha Vantage necessita do sufixo .SA para B3
-                const symbol = ativo.ticker.includes('.') ? ativo.ticker : `${ativo.ticker}.SA`;
-                const url = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=${key}`;
-
+            for (let a of state.investRV) {
+                const ticker = a.ticker.includes('.') ? a.ticker : `${a.ticker}.SA`;
                 try {
-                    const response = await fetch(url);
-                    const data = await response.json();
-
-                    if (data["Note"]) {
-                        errorArea.innerText = "Limite de requisições da Alpha Vantage atingido (5/min). Tente novamente em instantes.";
-                        errorArea.classList.remove('hidden');
-                        break;
+                    const res = await fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${ticker}&apikey=${state.config.apiKey}`);
+                    const data = await res.json();
+                    if (data["Global Quote"]) {
+                        a.cotacao = parseFloat(data["Global Quote"]["05. price"]);
+                        a.lastSync = new Date().toLocaleTimeString();
                     }
-
-                    if (data["Global Quote"] && data["Global Quote"]["05. price"]) {
-                        ativo.cotacao = parseFloat(data["Global Quote"]["05. price"]);
-                        ativo.lastSync = new Date().toLocaleString();
-                    } else {
-                        ativo.lastSync = "Erro: Ativo não encontrado";
-                    }
-                } catch (e) {
-                    ativo.lastSync = "Erro de Conexão";
-                }
-                // Sleep para evitar rate limit (Alpha Vantage free é bem sensível)
+                } catch(e) {}
                 await new Promise(r => setTimeout(r, 1000));
             }
-
-            save();
-            render();
-            icon.classList.remove('animate-spin');
-            btn.classList.remove('syncing');
+            save(); render(); icon.classList.remove('animate-spin');
         }
 
+        // --- STATUS BAIXA ---
         function toggleStatus(type, index) {
             const list = type === 'receita' ? state.receitas : state.despesas;
-            list[index].status = list[index].status === 'pendente' ? 'pago' : 'pendente';
+            list[index].status = list[index].status === 'pago' ? 'pendente' : 'pago';
+            if (list[index].status === 'pago') list[index].pagoData = new Date().toISOString().split('T')[0];
             save(); render();
         }
 
         // --- RENDER ---
         function render() {
+            const hoje = new Date().toISOString().split('T')[0];
+            
             const recPagas = state.receitas.filter(r => r.status === 'pago').reduce((a,c) => a + c.valor, 0);
             const desPagas = state.despesas.filter(d => d.status === 'pago').reduce((a,c) => a + c.valor, 0);
-            
             const totalCustoRV = state.investRV.reduce((a,c) => a + (c.qtd * c.pm), 0);
             const totalMercadoRV = state.investRV.reduce((a,c) => a + (c.qtd * (c.cotacao || 0)), 0);
             const totalRF = state.investRF.reduce((a,c) => a + c.valor, 0);
 
-            const saldoLíquido = recPagas - desPagas;
-            const investidoTotalMercado = totalMercadoRV + totalRF;
-            const investidoTotalCusto = totalCustoRV + totalRF;
+            const saldo = recPagas - desPagas;
+            const investido = totalMercadoRV + totalRF;
+            const vencidos = state.despesas.filter(d => d.venc < hoje && d.status === 'pendente').reduce((a,c) => a + c.valor, 0);
 
-            document.getElementById('dash-saldo-real').innerText = fmt(saldoLíquido);
-            document.getElementById('dash-investido-custo').innerText = fmt(investidoTotalCusto);
-            document.getElementById('dash-investido-mercado').innerText = fmt(investidoTotalMercado);
-            document.getElementById('dash-patrimonio-total').innerText = fmt(saldoLíquido + investidoTotalMercado);
-            document.getElementById('side-patrimonio').innerText = fmt(saldoLíquido + investidoTotalMercado);
+            document.getElementById('dash-saldo').innerText = fmt(saldo);
+            document.getElementById('dash-vencido').innerText = fmt(vencidos);
+            document.getElementById('dash-investido').innerText = fmt(investido);
+            document.getElementById('dash-patrimonio').innerText = fmt(saldo + investido);
+            document.getElementById('side-patrimonio').innerText = fmt(saldo + investido);
+            document.getElementById('inv-custo').innerText = fmt(totalCustoRV + totalRF);
+            document.getElementById('inv-mercado').innerText = fmt(investido);
 
-            // Render Investimentos Table
-            const corpo = document.getElementById('corpo-investimentos');
-            let html = state.investRV.map((a, i) => {
-                const custo = a.qtd * a.pm;
-                const atual = a.qtd * (a.cotacao || 0);
-                const lucro = atual - custo;
-                const rent = custo > 0 ? (lucro / custo) * 100 : 0;
-                return `
-                <tr class="border-b border-slate-800 hover:bg-white/5 transition">
-                    <td class="p-4 font-black text-white cursor-pointer" onclick="openForm('rv', ${i})">${a.ticker}</td>
-                    <td class="p-4 text-xs">${a.qtd} x ${fmt(a.pm)}</td>
-                    <td class="p-4 font-bold">${fmt(custo)}</td>
-                    <td class="p-4 font-bold text-indigo-400">
-                        ${fmt(a.cotacao || 0)}
-                        <p class="text-[9px] text-slate-500 font-normal">Sinc: ${a.lastSync}</p>
-                    </td>
-                    <td class="p-4 font-black">${fmt(atual)}</td>
-                    <td class="p-4 font-black ${lucro >= 0 ? 'text-emerald-500' : 'text-rose-500'}">
-                        ${fmt(lucro)} <span class="text-[10px] ml-1">(${rent.toFixed(2)}%)</span>
-                    </td>
-                    <td class="p-4 text-center">
-                        <button onclick="syncAlphaVantage()" class="text-slate-500 hover:text-indigo-400"><i data-lucide="refresh-ccw" class="w-3 h-3"></i></button>
-                    </td>
-                    <td class="p-4 text-right"><button onclick="deleteItem('investRV', ${i})" class="text-slate-700 hover:text-rose-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td>
-                </tr>`;
-            }).join('');
-
-            html += state.investRF.map((f, i) => `
-                <tr class="border-b border-slate-800 bg-emerald-500/5 transition">
-                    <td class="p-4 font-black text-emerald-500 cursor-pointer" onclick="openForm('rf', ${i})">${f.nome}</td>
-                    <td class="p-4">-</td>
-                    <td class="p-4 font-bold">${fmt(f.valor)}</td>
-                    <td class="p-4 text-center">-</td>
-                    <td class="p-4 font-black">${fmt(f.valor)}</td>
-                    <td class="p-4 text-[10px] italic opacity-50">Renda Fixa</td>
-                    <td class="p-4"></td>
-                    <td class="p-4 text-right"><button onclick="deleteItem('investRF', ${i})" class="text-slate-700 hover:text-rose-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td>
-                </tr>`).join('');
-            
-            corpo.innerHTML = html || '<tr><td colspan="8" class="p-10 text-center opacity-30 italic">Nenhum investimento cadastrado.</td></tr>';
-
-            renderReceitas();
-            renderDespesas();
-            renderCharts(recPagas, desPagas);
-        }
-
-        // --- CHARTS ---
-        let fChart;
-        function renderCharts(r, d) {
-            const ctx = document.getElementById('chartFluxo').getContext('2d');
-            if (fChart) fChart.destroy();
-            Chart.defaults.color = '#64748b';
-            fChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ['Este Mês'],
-                    datasets: [
-                        { label: 'Entradas', data: [r], backgroundColor: '#10b981', borderRadius: 8 },
-                        { label: 'Saídas', data: [d], backgroundColor: '#6366f1', borderRadius: 8 }
-                    ]
-                },
-                options: { plugins: { legend: { display: false } }, scales: { y: { display: false } } }
-            });
-        }
-
-        function renderReceitas() {
+            // Lista Receitas
             document.getElementById('lista-receitas').innerHTML = state.receitas.map((r, i) => `
                 <div class="card p-4 flex justify-between items-center group">
                     <div class="flex items-center gap-4">
                         <button onclick="toggleStatus('receita', ${i})" class="w-8 h-8 rounded-full border-2 ${r.status === 'pago' ? 'bg-emerald-500 border-emerald-500' : 'border-slate-700'} flex items-center justify-center">
                             ${r.status === 'pago' ? '<i data-lucide="check" class="text-white w-4 h-4"></i>' : ''}
                         </button>
-                        <p class="font-bold ${r.status === 'pago' ? 'strikethrough' : ''}">${r.descricao}</p>
+                        <div onclick="openForm('receita', ${i})" class="cursor-pointer">
+                            <p class="font-bold ${r.status === 'pago' ? 'strikethrough' : ''}">${r.descricao}</p>
+                            <p class="text-[10px] text-slate-500 uppercase">${r.venc || r.pagoData || 'Sem data'}</p>
+                        </div>
                     </div>
-                    <p class="font-black text-emerald-500">${fmt(r.valor)}</p>
+                    <div class="flex items-center gap-4">
+                        <p class="font-black text-emerald-500">${fmt(r.valor)}</p>
+                        <button onclick="deleteItem('receitas', ${i})" class="text-slate-700 hover:text-rose-500 opacity-0 group-hover:opacity-100"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    </div>
                 </div>`).join('');
-        }
 
-        function renderDespesas() {
-            document.getElementById('lista-despesas').innerHTML = state.despesas.map((d, i) => `
-                <div class="card p-4 flex justify-between items-center group">
+            // Lista Despesas
+            document.getElementById('lista-despesas').innerHTML = state.despesas.map((d, i) => {
+                const isVencida = d.venc < hoje && d.status === 'pendente';
+                return `<div class="card p-4 flex justify-between items-center group ${isVencida ? 'border-rose-500/50 bg-rose-500/5' : ''}">
                     <div class="flex items-center gap-4">
                         <button onclick="toggleStatus('despesa', ${i})" class="w-8 h-8 rounded-full border-2 ${d.status === 'pago' ? 'bg-rose-500 border-rose-500' : 'border-slate-700'} flex items-center justify-center">
                             ${d.status === 'pago' ? '<i data-lucide="check" class="text-white w-4 h-4"></i>' : ''}
                         </button>
-                        <p class="font-bold ${d.status === 'pago' ? 'strikethrough' : ''}">${d.descricao}</p>
+                        <div onclick="openForm('despesa', ${i})" class="cursor-pointer">
+                            <p class="font-bold ${d.status === 'pago' ? 'strikethrough' : ''}">${d.descricao}</p>
+                            <p class="text-[10px] ${isVencida ? 'text-rose-500 font-bold' : 'text-slate-500'} uppercase">${d.venc}</p>
+                        </div>
                     </div>
-                    <p class="font-black text-rose-500">${fmt(d.valor)}</p>
+                    <div class="flex items-center gap-4">
+                        <p class="font-black text-rose-500">${fmt(d.valor)}</p>
+                        <button onclick="deleteItem('despesas', ${i})" class="text-slate-700 hover:text-rose-500 opacity-0 group-hover:opacity-100"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    </div>
+                </div>`}).join('');
+
+            // Agenda Dashboard
+            document.getElementById('lista-agenda').innerHTML = state.despesas.filter(d => d.status === 'pendente').slice(0,3).map(d => `
+                <div class="p-3 bg-slate-900 border-l-4 ${d.venc < hoje ? 'border-rose-500' : 'border-amber-500'} rounded-xl flex justify-between text-xs">
+                    <span>${d.descricao}</span><span class="font-bold">${fmt(d.valor)}</span>
                 </div>`).join('');
+
+            // Tabela Investimentos
+            document.getElementById('corpo-investimentos').innerHTML = state.investRV.map((a, i) => {
+                const totalCusto = a.qtd * a.pm;
+                const totalAtual = a.qtd * (a.cotacao || 0);
+                const lucro = totalAtual - totalCusto;
+                const rent = totalCusto > 0 ? (lucro/totalCusto)*100 : 0;
+                return `
+                <tr class="border-b border-slate-800 hover:bg-white/5 transition">
+                    <td class="p-4 font-black cursor-pointer" onclick="openForm('rv', ${i})">${a.ticker}<br><span class="text-[9px] opacity-40 font-normal">Sinc: ${a.lastSync}</span></td>
+                    <td class="p-4">${a.qtd} x ${fmt(a.pm)}<br><span class="text-xs opacity-50">${fmt(totalCusto)}</span></td>
+                    <td class="p-4 font-bold text-indigo-400">${fmt(a.cotacao || 0)}</td>
+                    <td class="p-4 font-black">${fmt(totalAtual)}</td>
+                    <td class="p-4 font-black ${lucro >= 0 ? 'text-emerald-500' : 'text-rose-500'}">${fmt(lucro)}<br><span class="text-[10px]">${rent.toFixed(2)}%</span></td>
+                    <td class="p-4 text-right"><button onclick="deleteItem('investRV', ${i})" class="text-slate-700"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td>
+                </tr>`;
+            }).join('') + state.investRF.map((f, i) => `
+                <tr class="border-b border-slate-800 bg-emerald-500/5">
+                    <td class="p-4 font-black cursor-pointer" onclick="openForm('rf', ${i})">${f.nome}</td>
+                    <td class="p-4">${fmt(f.valor)}</td>
+                    <td class="p-4">-</td>
+                    <td class="p-4 font-black">${fmt(f.valor)}</td>
+                    <td class="p-4 text-xs italic opacity-40">Renda Fixa</td>
+                    <td class="p-4 text-right"><button onclick="deleteItem('investRF', ${i})" class="text-slate-700"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td>
+                </tr>`).join('');
+
+            renderCharts(recPagas, desPagas);
+            lucide.createIcons();
+        }
+
+        // --- CHART ---
+        let fChart;
+        function renderCharts(r, d) {
+            const ctx = document.getElementById('chartFluxo').getContext('2d');
+            if (fChart) fChart.destroy();
+            fChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Realizado'],
+                    datasets: [
+                        { label: 'Recebido', data: [r], backgroundColor: '#10b981', borderRadius: 8 },
+                        { label: 'Pago', data: [d], backgroundColor: '#f43f5e', borderRadius: 8 }
+                    ]
+                },
+                options: { plugins: { legend: { display: false } }, scales: { y: { display: false } } }
+            });
         }
 
         function deleteItem(type, i) { if(confirm('Excluir?')) { state[type].splice(i, 1); save(); render(); } }
-        function clearData() { if(confirm('Resetar tudo?')) { localStorage.clear(); location.reload(); } }
 
         window.onload = () => {
             document.getElementById('current-date').innerText = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'full' }).format(new Date());
