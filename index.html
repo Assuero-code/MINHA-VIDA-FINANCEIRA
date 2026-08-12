@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minha Vida Financeira | Edição Master</title>
+    <title>Minha Vida Financeira | Edição Alpha</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -20,18 +20,18 @@
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
         .strikethrough { text-decoration: line-through; opacity: 0.5; }
-        @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(244, 63, 94, 0); } 100% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0); } }
-        .alert-vencido { animation: pulse-red 2s infinite; border: 2px solid #f43f5e !important; }
+        @keyframes pulse-indigo { 0% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(99, 102, 241, 0); } 100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); } }
+        .syncing { animation: pulse-indigo 2s infinite; }
     </style>
 </head>
 <body class="antialiased">
 
-    <!-- NAV MOBILE -->
+    <!-- MOBILE NAV -->
     <nav class="fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 flex justify-around p-4 z-50 md:hidden">
         <button onclick="showTab('dashboard')" class="nav-icon text-indigo-500"><i data-lucide="layout-dashboard"></i></button>
-        <button onclick="showTab('receitas')" class="nav-icon text-slate-400"><i data-lucide="trending-up"></i></button>
-        <button onclick="showTab('despesas')" class="nav-icon text-slate-400"><i data-lucide="trending-down"></i></button>
         <button onclick="showTab('investimentos')" class="nav-icon text-slate-400"><i data-lucide="line-chart"></i></button>
+        <button onclick="showTab('receitas')" class="nav-icon text-slate-400"><i data-lucide="trending-up"></i></button>
+        <button onclick="showTab('configuracoes')" class="nav-icon text-slate-400"><i data-lucide="settings"></i></button>
     </nav>
 
     <div class="flex h-screen overflow-hidden">
@@ -43,9 +43,10 @@
             </div>
             <nav class="space-y-2 flex-1">
                 <button onclick="showTab('dashboard')" class="flex items-center gap-3 w-full p-3 rounded-xl hover:bg-slate-900 transition font-semibold" id="link-dashboard"><i data-lucide="layout-dashboard" class="w-5 h-5"></i> Dashboard</button>
+                <button onclick="showTab('investimentos')" class="flex items-center gap-3 w-full p-3 rounded-xl hover:bg-slate-900 transition font-semibold text-slate-400"><i data-lucide="line-chart" class="text-amber-500"></i> Investimentos</button>
                 <button onclick="showTab('receitas')" class="flex items-center gap-3 w-full p-3 rounded-xl hover:bg-slate-900 transition font-semibold text-slate-400"><i data-lucide="trending-up" class="text-emerald-500"></i> Receitas</button>
                 <button onclick="showTab('despesas')" class="flex items-center gap-3 w-full p-3 rounded-xl hover:bg-slate-900 transition font-semibold text-slate-400"><i data-lucide="trending-down" class="text-rose-500"></i> Despesas</button>
-                <button onclick="showTab('investimentos')" class="flex items-center gap-3 w-full p-3 rounded-xl hover:bg-slate-900 transition font-semibold text-slate-400"><i data-lucide="line-chart" class="text-amber-500"></i> Investimentos</button>
+                <button onclick="showTab('configuracoes')" class="flex items-center gap-3 w-full p-3 rounded-xl hover:bg-slate-900 transition font-semibold text-slate-400"><i data-lucide="settings" class="text-slate-500"></i> Configurações</button>
             </nav>
             <div class="mt-auto p-4 bg-indigo-950/20 border border-indigo-500/20 rounded-2xl text-center">
                 <p class="text-[10px] text-indigo-300 font-bold uppercase mb-1 tracking-widest">Patrimônio Consolidado</p>
@@ -61,88 +62,70 @@
                     <p id="current-date" class="text-slate-500 text-sm font-medium capitalize"></p>
                 </div>
                 <div class="flex gap-2">
-                    <button onclick="syncQuotes()" class="bg-slate-900 border border-slate-800 p-3 rounded-xl text-indigo-400 hover:text-white transition"><i data-lucide="refresh-cw" id="sync-icon"></i></button>
-                    <button onclick="clearData()" class="bg-slate-900 border border-slate-800 p-3 rounded-xl text-rose-500"><i data-lucide="trash-2"></i></button>
+                    <button onclick="syncAlphaVantage()" class="bg-slate-900 border border-slate-800 p-3 rounded-xl text-indigo-400 hover:text-white transition" id="btn-sync-main" title="Sincronizar com Alpha Vantage">
+                        <i data-lucide="refresh-cw" id="sync-icon"></i>
+                    </button>
                 </div>
             </header>
 
             <!-- DASHBOARD -->
             <section id="dashboard" class="tab-content active space-y-6">
-                <div id="alert-zone"></div>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div class="card p-5 border-emerald-500/20 bg-emerald-500/5">
-                        <p class="text-emerald-500 text-[10px] font-bold uppercase tracking-widest">Saldo Líquido (Conta)</p>
+                        <p class="text-emerald-500 text-[10px] font-bold uppercase tracking-widest">Saldo Disponível</p>
                         <h3 id="dash-saldo-real" class="text-2xl font-black">R$ 0,00</h3>
                     </div>
-                    <div class="card p-5 border-rose-500/20 bg-rose-500/5">
-                        <p class="text-rose-500 text-[10px] font-bold uppercase tracking-widest">Contas em Atraso</p>
-                        <h3 id="dash-atraso" class="text-2xl font-black">R$ 0,00</h3>
-                    </div>
                     <div class="card p-5 border-amber-500/20 bg-amber-500/5">
-                        <p class="text-amber-500 text-[10px] font-bold uppercase tracking-widest">Total Investido (Atual)</p>
-                        <h3 id="dash-investido" class="text-2xl font-black text-amber-500">R$ 0,00</h3>
+                        <p class="text-amber-500 text-[10px] font-bold uppercase tracking-widest">Investido (Custo)</p>
+                        <h3 id="dash-investido-custo" class="text-2xl font-black">R$ 0,00</h3>
                     </div>
                     <div class="card p-5 border-indigo-500/20 bg-indigo-500/5">
-                        <p class="text-indigo-400 text-[10px] font-bold uppercase tracking-widest">Patrimônio Total</p>
-                        <h3 id="dash-patrimonio-geral" class="text-2xl font-black">R$ 0,00</h3>
+                        <p class="text-indigo-400 text-[10px] font-bold uppercase tracking-widest">Valor de Mercado</p>
+                        <h3 id="dash-investido-mercado" class="text-2xl font-black">R$ 0,00</h3>
+                    </div>
+                    <div class="card p-5 bg-gradient-to-br from-indigo-600 to-indigo-800 border-none">
+                        <p class="text-white/70 text-[10px] font-bold uppercase tracking-widest">Patrimônio Total</p>
+                        <h3 id="dash-patrimonio-total" class="text-2xl font-black text-white">R$ 0,00</h3>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div class="card p-6">
-                        <h4 class="font-bold mb-4 flex items-center gap-2"><i data-lucide="bar-chart-3" class="text-indigo-500"></i> Fluxo Mensal</h4>
+                        <h4 class="font-bold mb-4 flex items-center gap-2"><i data-lucide="bar-chart-3" class="text-indigo-500"></i> Fluxo de Caixa</h4>
                         <canvas id="chartFluxo"></canvas>
                     </div>
                     <div class="card p-6">
-                        <h4 class="font-bold mb-4 flex items-center gap-2"><i data-lucide="calendar-clock" class="text-amber-500"></i> Agenda de Contas</h4>
-                        <div id="lista-agenda" class="space-y-3 max-h-[300px] overflow-y-auto"></div>
+                        <h4 class="font-bold mb-4 flex items-center gap-2"><i data-lucide="pie-chart" class="text-amber-500"></i> Alocação de Ativos</h4>
+                        <canvas id="chartAlocacao"></canvas>
                     </div>
                 </div>
-            </section>
-
-            <!-- RECEITAS -->
-            <section id="receitas" class="tab-content space-y-4">
-                <div class="flex justify-between items-center bg-slate-900/50 p-6 rounded-3xl border border-slate-800">
-                    <h3 class="text-xl font-bold text-emerald-500">Minhas Receitas</h3>
-                    <button onclick="openForm('receita')" class="bg-emerald-600 text-white px-6 py-3 rounded-2xl font-bold flex items-center gap-2 hover:bg-emerald-500 transition"><i data-lucide="plus"></i> Add Receita</button>
-                </div>
-                <div id="lista-receitas" class="grid gap-3"></div>
-            </section>
-
-            <!-- DESPESAS -->
-            <section id="despesas" class="tab-content space-y-4">
-                <div class="flex justify-between items-center bg-slate-900/50 p-6 rounded-3xl border border-slate-800">
-                    <h3 class="text-xl font-bold text-rose-500">Minhas Despesas</h3>
-                    <button onclick="openForm('despesa')" class="bg-rose-600 text-white px-6 py-3 rounded-2xl font-bold flex items-center gap-2 hover:bg-rose-500 transition"><i data-lucide="plus"></i> Add Despesa</button>
-                </div>
-                <div id="lista-despesas" class="grid gap-3"></div>
             </section>
 
             <!-- INVESTIMENTOS -->
             <section id="investimentos" class="tab-content space-y-6">
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                    <div class="card bg-indigo-600 p-8 rounded-[2.5rem] relative overflow-hidden">
-                        <p class="text-xs uppercase font-bold text-indigo-100 opacity-70">Ações e FIIs</p>
-                        <h2 id="total-rv" class="text-4xl font-black text-white mt-1">R$ 0,00</h2>
-                        <button onclick="openForm('rv')" class="mt-4 bg-white/20 px-4 py-2 rounded-xl text-xs font-bold border border-white/30 hover:bg-white/30 transition">Add Ativo (B3)</button>
-                    </div>
-                    <div class="card bg-emerald-600 p-8 rounded-[2.5rem] relative overflow-hidden">
-                        <p class="text-xs uppercase font-bold text-emerald-100 opacity-70">Renda Fixa</p>
-                        <h2 id="total-rf" class="text-4xl font-black text-white mt-1">R$ 0,00</h2>
-                        <button onclick="openForm('rf')" class="mt-4 bg-white/20 px-4 py-2 rounded-xl text-xs font-bold border border-white/30 hover:bg-white/30 transition">Add Título</button>
+                <div class="flex justify-between items-center bg-slate-900/50 p-6 rounded-3xl border border-slate-800">
+                    <h3 class="text-xl font-bold">Minha Carteira</h3>
+                    <div class="flex gap-2">
+                        <button onclick="openForm('rv')" class="bg-indigo-600 text-white px-4 py-2 rounded-xl font-bold text-sm hover:bg-indigo-500 transition">Add Ação/FII</button>
+                        <button onclick="openForm('rf')" class="bg-emerald-600 text-white px-4 py-2 rounded-xl font-bold text-sm hover:bg-emerald-500 transition">Add Renda Fixa</button>
                     </div>
                 </div>
+
+                <div id="api-error-msg" class="hidden card p-4 border-rose-500/50 bg-rose-500/5 text-rose-500 text-xs font-bold"></div>
+
                 <div class="card overflow-hidden">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-sm">
                             <thead class="bg-slate-900 text-slate-500 uppercase font-black text-[10px]">
                                 <tr>
-                                    <th class="p-4">Ativo / Título</th>
-                                    <th class="p-4">Qtd / Aplicado</th>
-                                    <th class="p-4">Cotação Atual</th>
-                                    <th class="p-4">Total Atual</th>
-                                    <th class="p-4">Lucro / Prej.</th>
-                                    <th class="p-4 text-right">Ações</th>
+                                    <th class="p-4">Ativo / Ticker</th>
+                                    <th class="p-4">Qtd / P. Médio</th>
+                                    <th class="p-4">V. Investido</th>
+                                    <th class="p-4">Cotação Alpha Vantage</th>
+                                    <th class="p-4">Valor Atual</th>
+                                    <th class="p-4">Lucro / Rent. %</th>
+                                    <th class="p-4">Sync</th>
+                                    <th class="p-4">Ações</th>
                                 </tr>
                             </thead>
                             <tbody id="corpo-investimentos" class="font-medium"></tbody>
@@ -150,26 +133,62 @@
                     </div>
                 </div>
             </section>
+
+            <!-- RECEITAS/DESPESAS (SIMPLIFICADO PARA O CONTEXTO) -->
+            <section id="receitas" class="tab-content space-y-4">
+                <button onclick="openForm('receita')" class="bg-emerald-600 w-full p-4 rounded-2xl font-bold">+ Nova Receita</button>
+                <div id="lista-receitas" class="grid gap-3"></div>
+            </section>
+            
+            <section id="despesas" class="tab-content space-y-4">
+                <button onclick="openForm('despesa')" class="bg-rose-600 w-full p-4 rounded-2xl font-bold">+ Nova Despesa</button>
+                <div id="lista-despesas" class="grid gap-3"></div>
+            </section>
+
+            <!-- CONFIGURACOES -->
+            <section id="configuracoes" class="tab-content space-y-6">
+                <div class="card p-8 max-w-2xl mx-auto">
+                    <h3 class="text-xl font-bold mb-4 flex items-center gap-2"><i data-lucide="shield-check" class="text-indigo-400"></i> Segurança e API</h3>
+                    <p class="text-sm text-slate-400 mb-6">Para obter cotações em tempo real, insira sua chave da Alpha Vantage. Sua chave é salva apenas no seu navegador.</p>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="text-[10px] font-black uppercase text-slate-500 ml-1">Alpha Vantage API Key</label>
+                            <input type="password" id="cfg-api-key" placeholder="Insira sua chave aqui...">
+                        </div>
+                        <button onclick="saveConfig()" class="bg-indigo-600 w-full p-4 rounded-2xl font-black">Salvar Configurações</button>
+                    </div>
+                    
+                    <div class="mt-10 p-4 bg-slate-900 rounded-xl border border-slate-800">
+                        <h4 class="text-xs font-bold uppercase text-slate-500 mb-2">Instruções:</h4>
+                        <ul class="text-xs text-slate-400 space-y-2 list-disc ml-4">
+                            <li>Obtenha uma chave gratuita em <a href="https://www.alphavantage.co/support/#api-key" target="_blank" class="text-indigo-400 underline">alphavantage.co</a></li>
+                            <li>O plano gratuito permite 25 requisições por dia.</li>
+                            <li>Ativos brasileiros devem ser cadastrados com o Ticker da B3 (ex: PETR4, MXRF11).</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
         </main>
     </div>
 
-    <!-- MODAL ÚNICO -->
+    <!-- MODAL FORM -->
     <div id="modal-form" class="fixed inset-0 bg-black/90 backdrop-blur-sm hidden z-[100] flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-[2.5rem] max-w-md w-full p-8 shadow-2xl overflow-y-auto max-h-[90vh]">
+        <div class="bg-slate-900 border border-slate-800 rounded-[2.5rem] max-w-md w-full p-8 shadow-2xl">
             <h3 id="form-title" class="text-2xl font-black mb-6">Lançamento</h3>
             <form id="main-form" class="space-y-4">
                 <input type="hidden" id="form-type">
                 <input type="hidden" id="form-index">
 
                 <div id="field-desc">
-                    <label class="text-[10px] font-black uppercase text-slate-500 ml-1">Descrição / Ticker</label>
-                    <input type="text" id="inp-desc" placeholder="Ex: Salário, Conta de Luz, PETR4..." required>
+                    <label class="text-[10px] font-black uppercase text-slate-500 ml-1">Nome / Ticker</label>
+                    <input type="text" id="inp-desc" placeholder="Ex: PETR4, Salário..." required>
                 </div>
 
                 <div id="box-comum" class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="text-[10px] font-black uppercase text-slate-500 ml-1">Valor R$</label>
-                        <input type="number" step="0.01" id="inp-valor" placeholder="0.00">
+                        <input type="number" step="0.01" id="inp-valor">
                     </div>
                     <div>
                         <label class="text-[10px] font-black uppercase text-slate-500 ml-1">Data</label>
@@ -180,46 +199,47 @@
                 <div id="field-extra" class="grid grid-cols-2 gap-4 hidden">
                     <div>
                         <label class="text-[10px] font-black uppercase text-slate-500 ml-1">Quantidade</label>
-                        <input type="number" step="0.0001" id="inp-qtd" placeholder="0">
+                        <input type="number" step="0.0001" id="inp-qtd">
                     </div>
                     <div>
-                        <label class="text-[10px] font-black uppercase text-slate-500 ml-1">P. Médio (Compra)</label>
-                        <input type="number" step="0.01" id="inp-pm" placeholder="0.00">
+                        <label class="text-[10px] font-black uppercase text-slate-500 ml-1">Preço Médio (R$)</label>
+                        <input type="number" step="0.01" id="inp-pm">
                     </div>
                 </div>
 
-                <div id="field-cat">
-                    <label class="text-[10px] font-black uppercase text-slate-500 ml-1">Categoria</label>
-                    <select id="inp-cat">
-                        <option>Geral</option><option>Moradia</option><option>Alimentação</option><option>Saúde</option><option>Lazer</option>
-                    </select>
-                </div>
-
-                <button type="submit" class="w-full bg-indigo-600 p-4 rounded-2xl font-black text-white text-lg hover:bg-indigo-500 transition shadow-xl">Confirmar</button>
+                <button type="submit" class="w-full bg-indigo-600 p-4 rounded-2xl font-black text-white">Confirmar</button>
                 <button type="button" onclick="closeModal()" class="w-full text-slate-500 font-bold text-sm mt-2">Cancelar</button>
             </form>
         </div>
     </div>
 
     <script>
-        // --- DATA ---
-        let state = JSON.parse(localStorage.getItem('minhavidafinanceira_v5')) || {
+        // --- DATA & STATE ---
+        let state = JSON.parse(localStorage.getItem('minhavidafinanceira_vAlpha')) || {
             receitas: [],
             despesas: [],
             investRV: [],
-            investRF: []
+            investRF: [],
+            config: { apiKey: '' }
         };
 
-        const save = () => localStorage.setItem('minhavidafinanceira_v5', JSON.stringify(state));
+        const save = () => localStorage.setItem('minhavidafinanceira_vAlpha', JSON.stringify(state));
         const fmt = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
 
-        // --- NAV ---
+        // --- NAVIGATION ---
         function showTab(id) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             document.getElementById('tab-title').innerText = id.charAt(0).toUpperCase() + id.slice(1);
+            if (id === 'configuracoes') document.getElementById('cfg-api-key').value = state.config.apiKey;
             render();
             lucide.createIcons();
+        }
+
+        function saveConfig() {
+            state.config.apiKey = document.getElementById('cfg-api-key').value;
+            save();
+            alert("Configurações salvas com sucesso!");
         }
 
         // --- FORM LOGIC ---
@@ -228,37 +248,29 @@
             form.reset();
             document.getElementById('form-type').value = type;
             document.getElementById('form-index').value = index;
-            document.getElementById('form-title').innerText = index === -1 ? `Novo(a) ${type}` : `Editar ${type}`;
             
-            // Toggle Campos
-            const boxComum = document.getElementById('box-comum');
             const fieldExtra = document.getElementById('field-extra');
-            const fieldCat = document.getElementById('field-cat');
+            const boxComum = document.getElementById('box-comum');
 
             if (type === 'rv') {
-                boxComum.classList.add('hidden');
                 fieldExtra.classList.remove('hidden');
-                fieldCat.classList.add('hidden');
+                boxComum.classList.add('hidden');
             } else {
-                boxComum.classList.remove('hidden');
                 fieldExtra.classList.add('hidden');
-                fieldCat.classList.remove('hidden');
+                boxComum.classList.remove('hidden');
             }
 
             if (index !== -1) {
-                const list = type === 'receita' ? state.receitas : type === 'despesa' ? state.despesas : type === 'rv' ? state.investRV : state.investRF;
-                const item = list[index];
-                document.getElementById('inp-desc').value = item.descricao || item.ticker || item.nome;
+                const item = state[type === 'receita' ? 'receitas' : type === 'despesa' ? 'despesas' : type === 'rv' ? 'investRV' : 'investRF'][index];
+                document.getElementById('inp-desc').value = item.ticker || item.descricao || item.nome;
                 if (type === 'rv') {
                     document.getElementById('inp-qtd').value = item.qtd;
                     document.getElementById('inp-pm').value = item.pm;
                 } else {
                     document.getElementById('inp-valor').value = item.valor;
                     document.getElementById('inp-data').value = item.data || item.venc;
-                    document.getElementById('inp-cat').value = item.categoria || 'Geral';
                 }
             }
-
             document.getElementById('modal-form').classList.remove('hidden');
         }
 
@@ -269,64 +281,83 @@
             const type = document.getElementById('form-type').value;
             const index = parseInt(document.getElementById('form-index').value);
 
-            let newItem = {};
+            let newItem = { id: index === -1 ? Date.now() : 0, status: 'pendente' };
+
             if (type === 'rv') {
                 newItem = {
-                    ticker: document.getElementById('inp-desc').value.toUpperCase(),
+                    ...newItem,
+                    ticker: document.getElementById('inp-desc').value.toUpperCase().trim(),
                     qtd: parseFloat(document.getElementById('inp-qtd').value),
                     pm: parseFloat(document.getElementById('inp-pm').value),
                     cotacao: index !== -1 ? state.investRV[index].cotacao : 0,
-                    status: 'investido',
-                    id: index === -1 ? Date.now() : state.investRV[index].id
+                    lastSync: index !== -1 ? state.investRV[index].lastSync : 'Nunca'
                 };
             } else {
                 newItem = {
+                    ...newItem,
                     descricao: document.getElementById('inp-desc').value,
                     nome: document.getElementById('inp-desc').value,
                     valor: parseFloat(document.getElementById('inp-valor').value),
                     data: document.getElementById('inp-data').value,
                     venc: document.getElementById('inp-data').value,
-                    categoria: document.getElementById('inp-cat').value,
-                    status: index === -1 ? 'pendente' : (type === 'receita' ? state.receitas[index].status : state.despesas[index].status),
-                    id: index === -1 ? Date.now() : (type === 'receita' ? state.receitas[index].id : type === 'despesa' ? state.despesas[index].id : state.investRF[index].id)
+                    status: index === -1 ? 'pendente' : (state[type === 'receita' ? 'receitas' : 'despesas'][index].status)
                 };
             }
 
-            // Salvar no array correto
-            if (index === -1) {
-                if (type === 'receita') state.receitas.push(newItem);
-                else if (type === 'despesa') state.despesas.push(newItem);
-                else if (type === 'rv') state.investRV.push(newItem);
-                else if (type === 'rf') state.investRF.push(newItem);
-            } else {
-                if (type === 'receita') state.receitas[index] = newItem;
-                else if (type === 'despesa') state.despesas[index] = newItem;
-                else if (type === 'rv') state.investRV[index] = newItem;
-                else if (type === 'rf') state.investRF[index] = newItem;
-            }
+            if (index === -1) state[type === 'receita' ? 'receitas' : type === 'despesa' ? 'despesas' : type === 'rv' ? 'investRV' : 'investRF'].push(newItem);
+            else state[type === 'receita' ? 'receitas' : type === 'despesa' ? 'despesas' : type === 'rv' ? 'investRV' : 'investRF'][index] = newItem;
 
             save(); closeModal(); render();
         };
 
-        // --- SYNC B3 ---
-        async function syncQuotes() {
+        // --- ALPHA VANTAGE API INTEGRATION ---
+        async function syncAlphaVantage() {
+            const key = state.config.apiKey;
+            if (!key) return alert("Por favor, configure sua API Key nas Configurações.");
             if (state.investRV.length === 0) return;
+
             const icon = document.getElementById('sync-icon');
+            const btn = document.getElementById('btn-sync-main');
+            const errorArea = document.getElementById('api-error-msg');
+            
             icon.classList.add('animate-spin');
-            try {
-                const tickers = state.investRV.map(a => a.ticker).join(',');
-                const res = await fetch(`https://brapi.dev/api/quote/${tickers}`);
-                const data = await res.json();
-                state.investRV.forEach(a => {
-                    const find = data.results.find(r => r.symbol === a.ticker);
-                    if (find) a.cotacao = find.regularMarketPrice;
-                });
-                save(); render();
-            } catch (e) { console.error(e); }
-            finally { icon.classList.remove('animate-spin'); }
+            btn.classList.add('syncing');
+            errorArea.classList.add('hidden');
+
+            for (let ativo of state.investRV) {
+                // Alpha Vantage necessita do sufixo .SA para B3
+                const symbol = ativo.ticker.includes('.') ? ativo.ticker : `${ativo.ticker}.SA`;
+                const url = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=${key}`;
+
+                try {
+                    const response = await fetch(url);
+                    const data = await response.json();
+
+                    if (data["Note"]) {
+                        errorArea.innerText = "Limite de requisições da Alpha Vantage atingido (5/min). Tente novamente em instantes.";
+                        errorArea.classList.remove('hidden');
+                        break;
+                    }
+
+                    if (data["Global Quote"] && data["Global Quote"]["05. price"]) {
+                        ativo.cotacao = parseFloat(data["Global Quote"]["05. price"]);
+                        ativo.lastSync = new Date().toLocaleString();
+                    } else {
+                        ativo.lastSync = "Erro: Ativo não encontrado";
+                    }
+                } catch (e) {
+                    ativo.lastSync = "Erro de Conexão";
+                }
+                // Sleep para evitar rate limit (Alpha Vantage free é bem sensível)
+                await new Promise(r => setTimeout(r, 1000));
+            }
+
+            save();
+            render();
+            icon.classList.remove('animate-spin');
+            btn.classList.remove('syncing');
         }
 
-        // --- STATUS TOGGLE ---
         function toggleStatus(type, index) {
             const list = type === 'receita' ? state.receitas : state.despesas;
             list[index].status = list[index].status === 'pendente' ? 'pago' : 'pendente';
@@ -335,51 +366,86 @@
 
         // --- RENDER ---
         function render() {
-            const hoje = new Date().toISOString().split('T')[0];
-            
-            // Cálculos
             const recPagas = state.receitas.filter(r => r.status === 'pago').reduce((a,c) => a + c.valor, 0);
             const desPagas = state.despesas.filter(d => d.status === 'pago').reduce((a,c) => a + c.valor, 0);
-            const totalRV = state.investRV.reduce((a,c) => a + (c.qtd * (c.cotacao || 0)), 0);
+            
+            const totalCustoRV = state.investRV.reduce((a,c) => a + (c.qtd * c.pm), 0);
+            const totalMercadoRV = state.investRV.reduce((a,c) => a + (c.qtd * (c.cotacao || 0)), 0);
             const totalRF = state.investRF.reduce((a,c) => a + c.valor, 0);
-            const totalInvestido = totalRV + totalRF;
 
             const saldoLíquido = recPagas - desPagas;
-            const patrimonioTotal = saldoLíquido + totalInvestido;
+            const investidoTotalMercado = totalMercadoRV + totalRF;
+            const investidoTotalCusto = totalCustoRV + totalRF;
 
-            const vencidas = state.despesas.filter(d => d.venc < hoje && d.status === 'pendente');
-            const totalAtraso = vencidas.reduce((a,c) => a + c.valor, 0);
-
-            // UI Dashboard
             document.getElementById('dash-saldo-real').innerText = fmt(saldoLíquido);
-            document.getElementById('dash-investido').innerText = fmt(totalInvestido);
-            document.getElementById('dash-atraso').innerText = fmt(totalAtraso);
-            document.getElementById('dash-patrimonio-geral').innerText = fmt(patrimonioTotal);
-            document.getElementById('side-patrimonio').innerText = fmt(patrimonioTotal);
+            document.getElementById('dash-investido-custo').innerText = fmt(investidoTotalCusto);
+            document.getElementById('dash-investido-mercado').innerText = fmt(investidoTotalMercado);
+            document.getElementById('dash-patrimonio-total').innerText = fmt(saldoLíquido + investidoTotalMercado);
+            document.getElementById('side-patrimonio').innerText = fmt(saldoLíquido + investidoTotalMercado);
 
-            // Alertas
-            const alertZone = document.getElementById('alert-zone');
-            if (vencidas.length > 0) {
-                alertZone.innerHTML = `<div class="card p-4 alert-vencido bg-rose-500/10 flex justify-between items-center mb-6">
-                    <p class="text-xs font-bold"><i data-lucide="alert-triangle" class="inline w-4 h-4 mr-1"></i> Você tem contas vencidas!</p>
-                    <button onclick="showTab('despesas')" class="bg-rose-600 px-3 py-1 rounded-lg text-[10px] font-black uppercase">Resolver</button>
-                </div>`;
-            } else { alertZone.innerHTML = ''; }
+            // Render Investimentos Table
+            const corpo = document.getElementById('corpo-investimentos');
+            let html = state.investRV.map((a, i) => {
+                const custo = a.qtd * a.pm;
+                const atual = a.qtd * (a.cotacao || 0);
+                const lucro = atual - custo;
+                const rent = custo > 0 ? (lucro / custo) * 100 : 0;
+                return `
+                <tr class="border-b border-slate-800 hover:bg-white/5 transition">
+                    <td class="p-4 font-black text-white cursor-pointer" onclick="openForm('rv', ${i})">${a.ticker}</td>
+                    <td class="p-4 text-xs">${a.qtd} x ${fmt(a.pm)}</td>
+                    <td class="p-4 font-bold">${fmt(custo)}</td>
+                    <td class="p-4 font-bold text-indigo-400">
+                        ${fmt(a.cotacao || 0)}
+                        <p class="text-[9px] text-slate-500 font-normal">Sinc: ${a.lastSync}</p>
+                    </td>
+                    <td class="p-4 font-black">${fmt(atual)}</td>
+                    <td class="p-4 font-black ${lucro >= 0 ? 'text-emerald-500' : 'text-rose-500'}">
+                        ${fmt(lucro)} <span class="text-[10px] ml-1">(${rent.toFixed(2)}%)</span>
+                    </td>
+                    <td class="p-4 text-center">
+                        <button onclick="syncAlphaVantage()" class="text-slate-500 hover:text-indigo-400"><i data-lucide="refresh-ccw" class="w-3 h-3"></i></button>
+                    </td>
+                    <td class="p-4 text-right"><button onclick="deleteItem('investRV', ${i})" class="text-slate-700 hover:text-rose-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td>
+                </tr>`;
+            }).join('');
 
-            // Agenda
-            const agenda = state.despesas.filter(d => d.status === 'pendente').sort((a,b) => a.venc > b.venc ? 1 : -1);
-            document.getElementById('lista-agenda').innerHTML = agenda.map(d => `
-                <div class="p-3 bg-slate-900 border-l-4 ${d.venc < hoje ? 'border-rose-500' : 'border-amber-500'} rounded-xl flex justify-between items-center text-xs">
-                    <div><p class="font-bold text-white">${d.descricao}</p><p class="opacity-50 font-black">${d.venc.split('-').reverse().join('/')}</p></div>
-                    <p class="font-black">${fmt(d.valor)}</p>
-                </div>`).join('') || '<p class="text-center opacity-30 text-xs py-10">Tudo em dia!</p>';
+            html += state.investRF.map((f, i) => `
+                <tr class="border-b border-slate-800 bg-emerald-500/5 transition">
+                    <td class="p-4 font-black text-emerald-500 cursor-pointer" onclick="openForm('rf', ${i})">${f.nome}</td>
+                    <td class="p-4">-</td>
+                    <td class="p-4 font-bold">${fmt(f.valor)}</td>
+                    <td class="p-4 text-center">-</td>
+                    <td class="p-4 font-black">${fmt(f.valor)}</td>
+                    <td class="p-4 text-[10px] italic opacity-50">Renda Fixa</td>
+                    <td class="p-4"></td>
+                    <td class="p-4 text-right"><button onclick="deleteItem('investRF', ${i})" class="text-slate-700 hover:text-rose-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td>
+                </tr>`).join('');
+            
+            corpo.innerHTML = html || '<tr><td colspan="8" class="p-10 text-center opacity-30 italic">Nenhum investimento cadastrado.</td></tr>';
 
-            // Listas
             renderReceitas();
-            renderDespesas(hoje);
-            renderInvestimentos();
+            renderDespesas();
             renderCharts(recPagas, desPagas);
-            lucide.createIcons();
+        }
+
+        // --- CHARTS ---
+        let fChart;
+        function renderCharts(r, d) {
+            const ctx = document.getElementById('chartFluxo').getContext('2d');
+            if (fChart) fChart.destroy();
+            Chart.defaults.color = '#64748b';
+            fChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Este Mês'],
+                    datasets: [
+                        { label: 'Entradas', data: [r], backgroundColor: '#10b981', borderRadius: 8 },
+                        { label: 'Saídas', data: [d], backgroundColor: '#6366f1', borderRadius: 8 }
+                    ]
+                },
+                options: { plugins: { legend: { display: false } }, scales: { y: { display: false } } }
+            });
         }
 
         function renderReceitas() {
@@ -389,93 +455,32 @@
                         <button onclick="toggleStatus('receita', ${i})" class="w-8 h-8 rounded-full border-2 ${r.status === 'pago' ? 'bg-emerald-500 border-emerald-500' : 'border-slate-700'} flex items-center justify-center">
                             ${r.status === 'pago' ? '<i data-lucide="check" class="text-white w-4 h-4"></i>' : ''}
                         </button>
-                        <div onclick="openForm('receita', ${i})" class="cursor-pointer">
-                            <p class="font-bold text-white ${r.status === 'pago' ? 'strikethrough' : ''}">${r.descricao}</p>
-                            <p class="text-xs text-slate-500 font-bold">${r.data.split('-').reverse().join('/')}</p>
-                        </div>
+                        <p class="font-bold ${r.status === 'pago' ? 'strikethrough' : ''}">${r.descricao}</p>
                     </div>
-                    <div class="flex items-center gap-4">
-                        <p class="font-black text-emerald-500 text-lg">${fmt(r.valor)}</p>
-                        <button onclick="deleteItem('receitas', ${i})" class="text-slate-700 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                    </div>
+                    <p class="font-black text-emerald-500">${fmt(r.valor)}</p>
                 </div>`).join('');
         }
 
-        function renderDespesas(hoje) {
-            document.getElementById('lista-despesas').innerHTML = state.despesas.map((d, i) => {
-                const isVencida = d.venc < hoje && d.status === 'pendente';
-                return `<div class="card p-4 flex justify-between items-center group ${isVencida ? 'border-rose-500/50 bg-rose-500/5' : ''}">
+        function renderDespesas() {
+            document.getElementById('lista-despesas').innerHTML = state.despesas.map((d, i) => `
+                <div class="card p-4 flex justify-between items-center group">
                     <div class="flex items-center gap-4">
-                        <button onclick="toggleStatus('despesa', ${i})" class="w-8 h-8 rounded-full border-2 ${d.status === 'pago' ? 'bg-indigo-500 border-indigo-500' : 'border-slate-700'} flex items-center justify-center">
+                        <button onclick="toggleStatus('despesa', ${i})" class="w-8 h-8 rounded-full border-2 ${d.status === 'pago' ? 'bg-rose-500 border-rose-500' : 'border-slate-700'} flex items-center justify-center">
                             ${d.status === 'pago' ? '<i data-lucide="check" class="text-white w-4 h-4"></i>' : ''}
                         </button>
-                        <div onclick="openForm('despesa', ${i})" class="cursor-pointer">
-                            <p class="font-bold text-white ${d.status === 'pago' ? 'strikethrough' : ''}">${d.descricao}</p>
-                            <p class="text-[10px] font-black uppercase ${isVencida ? 'text-rose-500' : 'text-slate-500'}">${d.venc.split('-').reverse().join('/')}</p>
-                        </div>
+                        <p class="font-bold ${d.status === 'pago' ? 'strikethrough' : ''}">${d.descricao}</p>
                     </div>
-                    <div class="flex items-center gap-4">
-                        <p class="font-black ${d.status === 'pago' ? 'text-slate-500' : isVencida ? 'text-rose-500' : 'text-white'} text-lg">${fmt(d.valor)}</p>
-                        <button onclick="deleteItem('despesas', ${i})" class="text-slate-700 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                    </div>
-                </div>`;
-            }).join('');
-        }
-
-        function renderInvestimentos() {
-            const corpo = document.getElementById('corpo-investimentos');
-            let html = state.investRV.map((a, i) => {
-                const totalInvestido = a.qtd * a.pm;
-                const totalAtual = a.qtd * (a.cotacao || 0);
-                const lucro = totalAtual - totalInvestido;
-                return `<tr class="border-b border-slate-800 hover:bg-white/5 transition">
-                    <td class="p-4 font-black text-white cursor-pointer" onclick="openForm('rv', ${i})">${a.ticker}</td>
-                    <td class="p-4">${a.qtd} x ${fmt(a.pm)}</td>
-                    <td class="p-4 font-bold text-indigo-400">${fmt(a.cotacao || 0)}</td>
-                    <td class="p-4 font-black">${fmt(totalAtual)}</td>
-                    <td class="p-4 font-black ${lucro >= 0 ? 'text-emerald-500' : 'text-rose-500'}">${fmt(lucro)}</td>
-                    <td class="p-4 text-right"><button onclick="deleteItem('investRV', ${i})" class="text-slate-700 hover:text-rose-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td>
-                </tr>`;
-            }).join('');
-
-            html += state.investRF.map((f, i) => `<tr class="border-b border-slate-800 bg-emerald-500/5 transition">
-                    <td class="p-4 font-black text-emerald-500 cursor-pointer" onclick="openForm('rf', ${i})">${f.nome}</td>
-                    <td class="p-4">${fmt(f.valor)}</td>
-                    <td class="p-4">-</td>
-                    <td class="p-4 font-black">${fmt(f.valor)}</td>
-                    <td class="p-4 text-slate-500 italic text-[10px]">Renda Fixa</td>
-                    <td class="p-4 text-right"><button onclick="deleteItem('investRF', ${i})" class="text-slate-700 hover:text-rose-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td>
-                </tr>`).join('');
-            
-            corpo.innerHTML = html;
-            document.getElementById('total-rv').innerText = fmt(state.investRV.reduce((a,c) => a + (c.qtd * (c.cotacao || 0)), 0));
-            document.getElementById('total-rf').innerText = fmt(state.investRF.reduce((a,c) => a + c.valor, 0));
-        }
-
-        // --- CHARTS ---
-        let fChart;
-        function renderCharts(r, d) {
-            const ctx = document.getElementById('chartFluxo').getContext('2d');
-            if (fChart) fChart.destroy();
-            fChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ['Realizado'],
-                    datasets: [
-                        { label: 'Entradas', data: [r], backgroundColor: '#10b981', borderRadius: 8 },
-                        { label: 'Saídas', data: [d], backgroundColor: '#6366f1', borderRadius: 8 }
-                    ]
-                },
-                options: { plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { grid: { display: false } } } }
-            });
+                    <p class="font-black text-rose-500">${fmt(d.valor)}</p>
+                </div>`).join('');
         }
 
         function deleteItem(type, i) { if(confirm('Excluir?')) { state[type].splice(i, 1); save(); render(); } }
-        function clearData() { if(confirm('Limpar tudo?')) { localStorage.clear(); location.reload(); } }
+        function clearData() { if(confirm('Resetar tudo?')) { localStorage.clear(); location.reload(); } }
 
         window.onload = () => {
             document.getElementById('current-date').innerText = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'full' }).format(new Date());
-            render(); syncQuotes();
+            render();
+            lucide.createIcons();
         }
     </script>
 </body>
