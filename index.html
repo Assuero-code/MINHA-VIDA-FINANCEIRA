@@ -1,13 +1,571 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>My Google AI Studio App</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
-</html>
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minha Vida Financeira | Gestão Completa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .negative { color: #ef4444; }
+        .positive { color: #10b981; }
+        .bg-positive { background-color: #10b981; }
+        .bg-negative { background-color: #ef4444; }
+    </style>
+</head>
+<body class="text-slate-800">
 
+    <!-- Mobile Navigation (Bottom) -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 flex justify-around p-3 z-50 md:hidden">
+        <button onclick="showTab('dashboard')" class="flex flex-col items-center text-indigo-600">
+            <i data-lucide="layout-dashboard" class="w-6 h-6"></i>
+            <span class="text-xs">Início</span>
+        </button>
+        <button onclick="showTab('receitas')" class="flex flex-col items-center text-slate-500">
+            <i data-lucide="trending-up" class="w-6 h-6"></i>
+            <span class="text-xs">Receitas</span>
+        </button>
+        <button onclick="showTab('despesas')" class="flex flex-col items-center text-slate-500">
+            <i data-lucide="trending-down" class="w-6 h-6"></i>
+            <span class="text-xs">Despesas</span>
+        </button>
+        <button onclick="showTab('investimentos')" class="flex flex-col items-center text-slate-500">
+            <i data-lucide="pie-chart" class="w-6 h-6"></i>
+            <span class="text-xs">Investir</span>
+        </button>
+    </nav>
+
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar (Desktop) -->
+        <aside class="hidden md:flex flex-col w-64 bg-slate-900 text-white p-6">
+            <h1 class="text-xl font-bold mb-10 flex items-center gap-2">
+                <i data-lucide="wallet" class="text-indigo-400"></i> Minha Vida Financeira
+            </h1>
+            <nav class="space-y-4">
+                <button onclick="showTab('dashboard')" class="flex items-center gap-3 w-full p-2 hover:bg-slate-800 rounded transition">
+                    <i data-lucide="layout-dashboard"></i> Dashboard
+                </button>
+                <button onclick="showTab('receitas')" class="flex items-center gap-3 w-full p-2 hover:bg-slate-800 rounded transition">
+                    <i data-lucide="trending-up" class="text-emerald-400"></i> Receitas
+                </button>
+                <button onclick="showTab('despesas')" class="flex items-center gap-3 w-full p-2 hover:bg-slate-800 rounded transition">
+                    <i data-lucide="trending-down" class="text-rose-400"></i> Despesas
+                </button>
+                <button onclick="showTab('investimentos')" class="flex items-center gap-3 w-full p-2 hover:bg-slate-800 rounded transition">
+                    <i data-lucide="pie-chart" class="text-amber-400"></i> Investimentos
+                </button>
+                <button onclick="showTab('agenda')" class="flex items-center gap-3 w-full p-2 hover:bg-slate-800 rounded transition">
+                    <i data-lucide="calendar"></i> Contas a Vencer
+                </button>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-y-auto p-4 md:p-8 pb-24 md:pb-8">
+            
+            <!-- HEADER -->
+            <header class="flex justify-between items-center mb-8">
+                <div>
+                    <h2 id="tab-title" class="text-2xl font-bold">Dashboard</h2>
+                    <p class="text-slate-500 text-sm" id="current-date"></p>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="exportData()" class="p-2 border rounded-lg hover:bg-slate-100"><i data-lucide="download" class="w-5 h-5"></i></button>
+                    <button onclick="resetData()" class="p-2 border border-rose-200 text-rose-500 rounded-lg hover:bg-rose-50"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
+                </div>
+            </header>
+
+            <!-- TABS -->
+
+            <!-- DASHBOARD SECTION -->
+            <section id="dashboard" class="tab-content active space-y-6">
+                <!-- Resumo Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                        <p class="text-slate-500 text-xs font-semibold uppercase">Total Receitas</p>
+                        <h3 id="dash-receitas" class="text-2xl font-bold text-emerald-600">R$ 0,00</h3>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                        <p class="text-slate-500 text-xs font-semibold uppercase">Total Despesas</p>
+                        <h3 id="dash-despesas" class="text-2xl font-bold text-rose-600">R$ 0,00</h3>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                        <p class="text-slate-500 text-xs font-semibold uppercase">Saldo Atual</p>
+                        <h3 id="dash-saldo" class="text-2xl font-bold text-slate-800">R$ 0,00</h3>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                        <p class="text-slate-500 text-xs font-semibold uppercase">Patrimônio Total</p>
+                        <h3 id="dash-patrimonio" class="text-2xl font-bold text-indigo-600">R$ 0,00</h3>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                        <h4 class="font-bold mb-4">Fluxo Mensal (Receitas x Despesas)</h4>
+                        <canvas id="chartFluxo"></canvas>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                        <h4 class="font-bold mb-4">Despesas por Categoria</h4>
+                        <canvas id="chartCategorias"></canvas>
+                    </div>
+                </div>
+
+                <div id="status-alerta" class="p-4 rounded-xl text-center font-bold">
+                    <!-- Dinâmico -->
+                </div>
+            </section>
+
+            <!-- RECEITAS SECTION -->
+            <section id="receitas" class="tab-content space-y-6">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-xl font-bold text-emerald-600">Minhas Receitas</h3>
+                    <button onclick="openModal('modal-receita')" class="bg-emerald-600 text-white px-4 py-2 rounded-lg flex items-center gap-2">
+                        <i data-lucide="plus-circle" class="w-5 h-5"></i> Adicionar Receita
+                    </button>
+                </div>
+                <div class="bg-white rounded-2xl shadow-sm overflow-hidden border border-slate-100">
+                    <table class="w-full text-left">
+                        <thead class="bg-slate-50 border-b">
+                            <tr>
+                                <th class="p-4">Descrição</th>
+                                <th class="p-4">Data</th>
+                                <th class="p-4">Status</th>
+                                <th class="p-4 text-right">Valor</th>
+                                <th class="p-4">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lista-receitas"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- DESPESAS SECTION -->
+            <section id="despesas" class="tab-content space-y-6">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-xl font-bold text-rose-600">Minhas Despesas</h3>
+                    <button onclick="openModal('modal-despesa')" class="bg-rose-600 text-white px-4 py-2 rounded-lg flex items-center gap-2">
+                        <i data-lucide="minus-circle" class="w-5 h-5"></i> Adicionar Despesa
+                    </button>
+                </div>
+                <div class="bg-white rounded-2xl shadow-sm overflow-hidden border border-slate-100">
+                    <table class="w-full text-left">
+                        <thead class="bg-slate-50 border-b">
+                            <tr>
+                                <th class="p-4">Descrição</th>
+                                <th class="p-4">Vencimento</th>
+                                <th class="p-4">Categoria</th>
+                                <th class="p-4">Status</th>
+                                <th class="p-4 text-right">Valor</th>
+                                <th class="p-4">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lista-despesas"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- INVESTIMENTOS SECTION -->
+            <section id="investimentos" class="tab-content space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-indigo-900 text-white p-6 rounded-2xl shadow-lg">
+                        <p class="opacity-80">Total em Investimentos</p>
+                        <h2 id="total-investido" class="text-3xl font-bold">R$ 0,00</h2>
+                        <div class="mt-4 flex gap-4 text-sm">
+                            <span>Renda Fixa: <strong id="total-rf">R$ 0,00</strong></span>
+                            <span>Renda Variável: <strong id="total-rv">R$ 0,00</strong></span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <button onclick="openModal('modal-rv')" class="flex-1 bg-white border border-slate-200 p-4 rounded-2xl hover:border-indigo-400 transition text-center">
+                            <i data-lucide="trending-up" class="mx-auto mb-2 text-indigo-500"></i>
+                            Renda Variável
+                        </button>
+                        <button onclick="openModal('modal-rf')" class="flex-1 bg-white border border-slate-200 p-4 rounded-2xl hover:border-indigo-400 transition text-center">
+                            <i data-lucide="lock" class="mx-auto mb-2 text-indigo-500"></i>
+                            Renda Fixa
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+                    <h4 class="font-bold mb-4">Minha Carteira (Ações/FIIs)</h4>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="border-b">
+                                <tr>
+                                    <th class="p-2">Ativo</th>
+                                    <th class="p-2">Qtd</th>
+                                    <th class="p-2">P. Médio</th>
+                                    <th class="p-2">Cotação</th>
+                                    <th class="p-2">Total</th>
+                                    <th class="p-2">Resultado</th>
+                                </tr>
+                            </thead>
+                            <tbody id="lista-ativos-rv"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- MODAIS -->
+    
+    <!-- Modal Receita -->
+    <div id="modal-receita" class="fixed inset-0 bg-black bg-opacity-50 hidden z-[100] flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6">
+            <h3 class="text-xl font-bold mb-4">Nova Receita</h3>
+            <form id="form-receita" class="space-y-4">
+                <input type="text" placeholder="Descrição" id="rec-desc" class="w-full border p-2 rounded-lg" required>
+                <div class="grid grid-cols-2 gap-4">
+                    <input type="number" step="0.01" placeholder="Valor R$" id="rec-valor" class="w-full border p-2 rounded-lg" required>
+                    <input type="date" id="rec-data" class="w-full border p-2 rounded-lg" required>
+                </div>
+                <select id="rec-cat" class="w-full border p-2 rounded-lg">
+                    <option>Salário</option>
+                    <option>Investimentos</option>
+                    <option>Extra</option>
+                </select>
+                <div class="flex justify-end gap-2">
+                    <button type="button" onclick="closeModal('modal-receita')" class="px-4 py-2 text-slate-500">Cancelar</button>
+                    <button type="submit" class="bg-emerald-600 text-white px-6 py-2 rounded-lg">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Despesa -->
+    <div id="modal-despesa" class="fixed inset-0 bg-black bg-opacity-50 hidden z-[100] flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6">
+            <h3 class="text-xl font-bold mb-4 text-rose-600">Nova Despesa</h3>
+            <form id="form-despesa" class="space-y-4">
+                <input type="text" placeholder="O que você pagou?" id="des-desc" class="w-full border p-2 rounded-lg" required>
+                <div class="grid grid-cols-2 gap-4">
+                    <input type="number" step="0.01" placeholder="Valor R$" id="des-valor" class="w-full border p-2 rounded-lg" required>
+                    <input type="date" id="des-venc" class="w-full border p-2 rounded-lg" required>
+                </div>
+                <select id="des-cat" class="w-full border p-2 rounded-lg">
+                    <option>Moradia</option>
+                    <option>Alimentação</option>
+                    <option>Transporte</option>
+                    <option>Lazer</option>
+                    <option>Saúde</option>
+                    <option>Assinaturas</option>
+                </select>
+                <div>
+                    <label class="text-xs text-slate-400">Anexo (Comprovante)</label>
+                    <input type="file" id="des-file" class="w-full text-xs">
+                </div>
+                <div class="flex justify-end gap-2">
+                    <button type="button" onclick="closeModal('modal-despesa')" class="px-4 py-2 text-slate-500">Cancelar</button>
+                    <button type="submit" class="bg-rose-600 text-white px-6 py-2 rounded-lg">Salvar Despesa</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Renda Variável -->
+    <div id="modal-rv" class="fixed inset-0 bg-black bg-opacity-50 hidden z-[100] flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6">
+            <h3 class="text-xl font-bold mb-4">Adicionar Ativo (B3)</h3>
+            <form id="form-rv" class="space-y-4">
+                <input type="text" placeholder="Ticker (Ex: PETR4, IVVB11)" id="rv-ticker" class="w-full border p-2 rounded-lg uppercase" required>
+                <div class="grid grid-cols-2 gap-4">
+                    <input type="number" placeholder="Quantidade" id="rv-qtd" class="w-full border p-2 rounded-lg" required>
+                    <input type="number" step="0.01" placeholder="Preço Médio" id="rv-pm" class="w-full border p-2 rounded-lg" required>
+                </div>
+                <div class="flex justify-end gap-2">
+                    <button type="button" onclick="closeModal('modal-rv')" class="px-4 py-2 text-slate-500">Cancelar</button>
+                    <button type="submit" class="bg-indigo-600 text-white px-6 py-2 rounded-lg">Adicionar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // ESTADO GLOBAL DO APLICATIVO
+        let state = JSON.parse(localStorage.getItem('minha_vida_financeira')) || {
+            receitas: [],
+            despesas: [],
+            investimentos: {
+                rendaFixa: [],
+                rendaVariavel: []
+            },
+            categorias: ['Moradia', 'Alimentação', 'Transporte', 'Lazer', 'Saúde', 'Educação', 'Assinaturas', 'Outros']
+        };
+
+        // INICIALIZAÇÃO
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            document.getElementById('current-date').innerText = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'full' }).format(new Date());
+            updateDashboard();
+            renderAll();
+            // Simular atualização de cotações ao abrir
+            updateQuotes();
+        });
+
+        // NAVEGAÇÃO
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            
+            // Estética dos menus
+            const title = tabId.charAt(0).toUpperCase() + tabId.slice(1);
+            document.getElementById('tab-title').innerText = title;
+
+            // Atualizar ícones do menu mobile
+            document.querySelectorAll('nav button').forEach(btn => btn.classList.replace('text-indigo-600', 'text-slate-500'));
+            
+            renderAll();
+        }
+
+        // MODAIS
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+        // CRUD RECEITAS
+        document.getElementById('form-receita').onsubmit = (e) => {
+            e.preventDefault();
+            const novaRec = {
+                id: Date.now(),
+                descricao: document.getElementById('rec-desc').value,
+                valor: parseFloat(document.getElementById('rec-valor').value),
+                data: document.getElementById('rec-data').value,
+                categoria: document.getElementById('rec-cat').value,
+                status: 'Recebido'
+            };
+            state.receitas.push(novaRec);
+            save();
+            closeModal('modal-receita');
+            renderAll();
+            e.target.reset();
+        };
+
+        // CRUD DESPESAS
+        document.getElementById('form-despesa').onsubmit = (e) => {
+            e.preventDefault();
+            const novaDes = {
+                id: Date.now(),
+                descricao: document.getElementById('des-desc').value,
+                valor: parseFloat(document.getElementById('des-valor').value),
+                data: document.getElementById('des-venc').value,
+                categoria: document.getElementById('des-cat').value,
+                status: new Date(document.getElementById('des-venc').value) < new Date() ? 'Atrasada' : 'Pendente'
+            };
+            state.despesas.push(novaDes);
+            save();
+            closeModal('modal-despesa');
+            renderAll();
+            e.target.reset();
+        };
+
+        // CRUD INVESTIMENTOS (RV)
+        document.getElementById('form-rv').onsubmit = (e) => {
+            e.preventDefault();
+            const ticker = document.getElementById('rv-ticker').value.toUpperCase();
+            const novoAtivo = {
+                ticker: ticker,
+                qtd: parseInt(document.getElementById('rv-qtd').value),
+                pm: parseFloat(document.getElementById('rv-pm').value),
+                cotacao: 0 // Será atualizado pela "API"
+            };
+            state.investimentos.rendaVariavel.push(novoAtivo);
+            save();
+            closeModal('modal-rv');
+            updateQuotes();
+            renderAll();
+            e.target.reset();
+        };
+
+        // LÓGICA DE CÁLCULOS E RENDERIZAÇÃO
+        function renderAll() {
+            renderReceitas();
+            renderDespesas();
+            renderInvestimentos();
+            updateDashboard();
+            lucide.createIcons();
+        }
+
+        function renderReceitas() {
+            const list = document.getElementById('lista-receitas');
+            list.innerHTML = state.receitas.map(r => `
+                <tr class="border-b hover:bg-slate-50 transition">
+                    <td class="p-4 font-medium">${r.descricao}</td>
+                    <td class="p-4 text-sm text-slate-500">${formatDate(r.data)}</td>
+                    <td class="p-4"><span class="bg-emerald-100 text-emerald-700 px-2 py-1 rounded text-xs font-bold">${r.status}</span></td>
+                    <td class="p-4 text-right font-bold text-emerald-600">${formatCurrency(r.valor)}</td>
+                    <td class="p-4"><button onclick="deleteItem('receitas', ${r.id})" class="text-rose-400 hover:text-rose-600"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td>
+                </tr>
+            `).join('');
+        }
+
+        function renderDespesas() {
+            const list = document.getElementById('lista-despesas');
+            list.innerHTML = state.despesas.map(d => `
+                <tr class="border-b hover:bg-slate-50 transition">
+                    <td class="p-4 font-medium">${d.descricao}</td>
+                    <td class="p-4 text-sm text-slate-500">${formatDate(d.data)}</td>
+                    <td class="p-4 text-sm">${d.categoria}</td>
+                    <td class="p-4">
+                        <span class="${d.status === 'Atrasada' ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-700'} px-2 py-1 rounded text-xs font-bold">
+                            ${d.status}
+                        </span>
+                    </td>
+                    <td class="p-4 text-right font-bold text-rose-600">${formatCurrency(d.valor)}</td>
+                    <td class="p-4"><button onclick="deleteItem('despesas', ${d.id})" class="text-rose-400 hover:text-rose-600"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td>
+                </tr>
+            `).join('');
+        }
+
+        function renderInvestimentos() {
+            const listRV = document.getElementById('lista-ativos-rv');
+            let totalInvestidoRV = 0;
+            
+            listRV.innerHTML = state.investimentos.rendaVariavel.map(a => {
+                const totalAtivo = a.qtd * a.cotacao;
+                const investimentoInicial = a.qtd * a.pm;
+                const resultado = totalAtivo - investimentoInicial;
+                totalInvestidoRV += totalAtivo;
+
+                return `
+                <tr class="border-b">
+                    <td class="p-2 font-bold">${a.ticker}</td>
+                    <td class="p-2">${a.qtd}</td>
+                    <td class="p-2">${formatCurrency(a.pm)}</td>
+                    <td class="p-2">${formatCurrency(a.cotacao)}</td>
+                    <td class="p-2 font-bold">${formatCurrency(totalAtivo)}</td>
+                    <td class="p-2 ${resultado >= 0 ? 'text-emerald-500' : 'text-rose-500'} font-bold">
+                        ${formatCurrency(resultado)}
+                    </td>
+                </tr>
+            `}).join('');
+
+            document.getElementById('total-investido').innerText = formatCurrency(totalInvestidoRV);
+            document.getElementById('total-rv').innerText = formatCurrency(totalInvestidoRV);
+        }
+
+        function updateDashboard() {
+            const totalRec = state.receitas.reduce((acc, curr) => acc + curr.valor, 0);
+            const totalDes = state.despesas.reduce((acc, curr) => acc + curr.valor, 0);
+            const totalInv = state.investimentos.rendaVariavel.reduce((acc, curr) => acc + (curr.qtd * curr.cotacao), 0);
+            
+            const saldo = totalRec - totalDes;
+            const patrimonio = saldo + totalInv;
+
+            document.getElementById('dash-receitas').innerText = formatCurrency(totalRec);
+            document.getElementById('dash-despesas').innerText = formatCurrency(totalDes);
+            document.getElementById('dash-saldo').innerText = formatCurrency(saldo);
+            document.getElementById('dash-patrimonio').innerText = formatCurrency(patrimonio);
+
+            const statusAlerta = document.getElementById('status-alerta');
+            if (patrimonio >= 0) {
+                statusAlerta.className = "p-4 rounded-xl text-center font-bold bg-emerald-100 text-emerald-800";
+                statusAlerta.innerHTML = "🟢 SITUAÇÃO FINANCEIRA ATUAL: SALDO POSITIVO";
+            } else {
+                statusAlerta.className = "p-4 rounded-xl text-center font-bold bg-rose-100 text-rose-800";
+                statusAlerta.innerHTML = "🔴 SITUAÇÃO FINANCEIRA ATUAL: SALDO NEGATIVO";
+            }
+
+            renderCharts(totalRec, totalDes);
+        }
+
+        // GRÁFICOS
+        let flowChart, categoryChart;
+        function renderCharts(rec, des) {
+            const ctx1 = document.getElementById('chartFluxo').getContext('2d');
+            const ctx2 = document.getElementById('chartCategorias').getContext('2d');
+
+            if (flowChart) flowChart.destroy();
+            if (categoryChart) categoryChart.destroy();
+
+            flowChart = new Chart(ctx1, {
+                type: 'bar',
+                data: {
+                    labels: ['Financeiro'],
+                    datasets: [
+                        { label: 'Receitas', data: [rec], backgroundColor: '#10b981' },
+                        { label: 'Despesas', data: [des], backgroundColor: '#ef4444' }
+                    ]
+                },
+                options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+            });
+
+            // Agrupar despesas por categoria
+            const catData = {};
+            state.despesas.forEach(d => {
+                catData[d.categoria] = (catData[d.categoria] || 0) + d.valor;
+            });
+
+            categoryChart = new Chart(ctx2, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(catData),
+                    datasets: [{
+                        data: Object.values(catData),
+                        backgroundColor: ['#6366f1', '#f59e0b', '#ec4899', '#8b5cf6', '#06b6d4', '#10b981']
+                    }]
+                },
+                options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+            });
+        }
+
+        // SIMULAÇÃO DE COTAÇÃO (Para fins de demonstração, já que APIs reais exigem chaves pagas ou proxy)
+        async function updateQuotes() {
+            // Em uma implementação real, usaríamos fetch('API_URL')
+            // Aqui simulamos uma variação de preço aleatória para os ativos cadastrados
+            state.investimentos.rendaVariavel.forEach(ativo => {
+                if(ativo.cotacao === 0) ativo.cotacao = ativo.pm; // Inicia com preço médio
+                const variacao = (Math.random() * 2 - 1); // Variação entre -1 e 1
+                ativo.cotacao = Math.max(1, ativo.cotacao + variacao);
+            });
+            save();
+            renderInvestimentos();
+        }
+
+        // UTILITÁRIOS
+        function formatCurrency(val) {
+            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
+        }
+
+        function formatDate(dateStr) {
+            const parts = dateStr.split('-');
+            return `${parts[2]}/${parts[1]}/${parts[0]}`;
+        }
+
+        function deleteItem(type, id) {
+            if (confirm('Deseja realmente excluir este lançamento?')) {
+                state[type] = state[type].filter(i => i.id !== id);
+                save();
+                renderAll();
+            }
+        }
+
+        function save() {
+            localStorage.setItem('minha_vida_financeira', JSON.stringify(state));
+        }
+
+        function resetData() {
+            if(confirm('ATENÇÃO: Isso apagará TODOS os seus dados permanentemente. Continuar?')) {
+                localStorage.removeItem('minha_vida_financeira');
+                location.reload();
+            }
+        }
+
+        function exportData() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href",     dataStr);
+            downloadAnchorNode.setAttribute("download", "financeiro_backup.json");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        }
+    </script>
+</body>
+</html>
