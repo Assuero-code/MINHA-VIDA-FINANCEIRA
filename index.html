@@ -3,211 +3,273 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minha Vida Financeira | Gestão Completa</title>
+    <title>Minha Vida Financeira | Gestão Profissional</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-        .negative { color: #ef4444; }
-        .positive { color: #10b981; }
-        .bg-positive { background-color: #10b981; }
-        .bg-negative { background-color: #ef4444; }
+        .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); }
+        input, select { outline: none !important; }
+        input:focus { border-color: #6366f1 !important; ring: 2px #6366f122; }
     </style>
 </head>
-<body class="text-slate-800">
+<body class="text-slate-800 antialiased">
 
-    <!-- Mobile Navigation (Bottom) -->
+    <!-- MOBILE NAV (BOTTOM) -->
     <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 flex justify-around p-3 z-50 md:hidden">
-        <button onclick="showTab('dashboard')" class="flex flex-col items-center text-indigo-600">
+        <button onclick="showTab('dashboard')" class="nav-btn flex flex-col items-center text-indigo-600" data-tab="dashboard">
             <i data-lucide="layout-dashboard" class="w-6 h-6"></i>
-            <span class="text-xs">Início</span>
+            <span class="text-[10px] font-bold">Início</span>
         </button>
-        <button onclick="showTab('receitas')" class="flex flex-col items-center text-slate-500">
+        <button onclick="showTab('receitas')" class="nav-btn flex flex-col items-center text-slate-400" data-tab="receitas">
             <i data-lucide="trending-up" class="w-6 h-6"></i>
-            <span class="text-xs">Receitas</span>
+            <span class="text-[10px] font-bold">Ganhos</span>
         </button>
-        <button onclick="showTab('despesas')" class="flex flex-col items-center text-slate-500">
+        <button onclick="showTab('despesas')" class="nav-btn flex flex-col items-center text-slate-400" data-tab="despesas">
             <i data-lucide="trending-down" class="w-6 h-6"></i>
-            <span class="text-xs">Despesas</span>
+            <span class="text-[10px] font-bold">Gastos</span>
         </button>
-        <button onclick="showTab('investimentos')" class="flex flex-col items-center text-slate-500">
+        <button onclick="showTab('investimentos')" class="nav-btn flex flex-col items-center text-slate-400" data-tab="investimentos">
             <i data-lucide="pie-chart" class="w-6 h-6"></i>
-            <span class="text-xs">Investir</span>
+            <span class="text-[10px] font-bold">Investir</span>
         </button>
     </nav>
 
     <div class="flex h-screen overflow-hidden">
-        <!-- Sidebar (Desktop) -->
-        <aside class="hidden md:flex flex-col w-64 bg-slate-900 text-white p-6">
-            <h1 class="text-xl font-bold mb-10 flex items-center gap-2">
-                <i data-lucide="wallet" class="text-indigo-400"></i> Minha Vida Financeira
-            </h1>
-            <nav class="space-y-4">
-                <button onclick="showTab('dashboard')" class="flex items-center gap-3 w-full p-2 hover:bg-slate-800 rounded transition">
+        <!-- SIDEBAR (DESKTOP) -->
+        <aside class="hidden md:flex flex-col w-72 bg-slate-900 text-white p-6">
+            <div class="flex items-center gap-3 mb-10 px-2">
+                <div class="bg-indigo-500 p-2 rounded-xl">
+                    <i data-lucide="wallet" class="text-white"></i>
+                </div>
+                <h1 class="text-lg font-bold tracking-tight text-white">Minha Vida <span class="text-indigo-400">Financeira</span></h1>
+            </div>
+            
+            <nav class="space-y-2 flex-1">
+                <button onclick="showTab('dashboard')" class="flex items-center gap-3 w-full p-3 rounded-xl hover:bg-slate-800 transition active-btn bg-slate-800">
                     <i data-lucide="layout-dashboard"></i> Dashboard
                 </button>
-                <button onclick="showTab('receitas')" class="flex items-center gap-3 w-full p-2 hover:bg-slate-800 rounded transition">
+                <button onclick="showTab('receitas')" class="flex items-center gap-3 w-full p-3 rounded-xl hover:bg-slate-800 transition">
                     <i data-lucide="trending-up" class="text-emerald-400"></i> Receitas
                 </button>
-                <button onclick="showTab('despesas')" class="flex items-center gap-3 w-full p-2 hover:bg-slate-800 rounded transition">
+                <button onclick="showTab('despesas')" class="flex items-center gap-3 w-full p-3 rounded-xl hover:bg-slate-800 transition">
                     <i data-lucide="trending-down" class="text-rose-400"></i> Despesas
                 </button>
-                <button onclick="showTab('investimentos')" class="flex items-center gap-3 w-full p-2 hover:bg-slate-800 rounded transition">
+                <button onclick="showTab('investimentos')" class="flex items-center gap-3 w-full p-3 rounded-xl hover:bg-slate-800 transition">
                     <i data-lucide="pie-chart" class="text-amber-400"></i> Investimentos
                 </button>
-                <button onclick="showTab('agenda')" class="flex items-center gap-3 w-full p-2 hover:bg-slate-800 rounded transition">
-                    <i data-lucide="calendar"></i> Contas a Vencer
+                <button onclick="showTab('vencimentos')" class="flex items-center gap-3 w-full p-3 rounded-xl hover:bg-slate-800 transition">
+                    <i data-lucide="calendar-clock" class="text-indigo-300"></i> Contas a Vencer
                 </button>
             </nav>
+
+            <div class="mt-auto p-4 bg-slate-800/50 rounded-2xl border border-slate-700">
+                <p class="text-xs text-slate-400 mb-1 uppercase tracking-wider font-bold">Patrimônio Consolidado</p>
+                <h3 id="sidebar-patrimonio" class="text-xl font-bold text-white">R$ 0,00</h3>
+            </div>
         </aside>
 
-        <!-- Main Content -->
-        <main class="flex-1 overflow-y-auto p-4 md:p-8 pb-24 md:pb-8">
+        <!-- MAIN CONTENT -->
+        <main class="flex-1 overflow-y-auto p-4 md:p-10 pb-24 md:pb-10">
             
             <!-- HEADER -->
-            <header class="flex justify-between items-center mb-8">
+            <header class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
                 <div>
-                    <h2 id="tab-title" class="text-2xl font-bold">Dashboard</h2>
-                    <p class="text-slate-500 text-sm" id="current-date"></p>
+                    <h2 id="tab-title" class="text-3xl font-extrabold text-slate-900 tracking-tight">Dashboard</h2>
+                    <p id="current-date" class="text-slate-500 font-medium capitalize"></p>
                 </div>
-                <div class="flex gap-2">
-                    <button onclick="exportData()" class="p-2 border rounded-lg hover:bg-slate-100"><i data-lucide="download" class="w-5 h-5"></i></button>
-                    <button onclick="resetData()" class="p-2 border border-rose-200 text-rose-500 rounded-lg hover:bg-rose-50"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
+                <div class="flex items-center gap-3">
+                    <button onclick="exportData()" class="bg-white border border-slate-200 px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-50 flex items-center gap-2 font-semibold shadow-sm transition">
+                        <i data-lucide="download" class="w-4 h-4"></i> Exportar
+                    </button>
+                    <button onclick="clearData()" class="bg-rose-50 text-rose-600 px-4 py-2 rounded-xl hover:bg-rose-100 flex items-center gap-2 font-semibold transition">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i> Resetar
+                    </button>
                 </div>
             </header>
 
-            <!-- TABS -->
-
-            <!-- DASHBOARD SECTION -->
-            <section id="dashboard" class="tab-content active space-y-6">
-                <!-- Resumo Cards -->
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                        <p class="text-slate-500 text-xs font-semibold uppercase">Total Receitas</p>
-                        <h3 id="dash-receitas" class="text-2xl font-bold text-emerald-600">R$ 0,00</h3>
-                    </div>
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                        <p class="text-slate-500 text-xs font-semibold uppercase">Total Despesas</p>
-                        <h3 id="dash-despesas" class="text-2xl font-bold text-rose-600">R$ 0,00</h3>
-                    </div>
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                        <p class="text-slate-500 text-xs font-semibold uppercase">Saldo Atual</p>
-                        <h3 id="dash-saldo" class="text-2xl font-bold text-slate-800">R$ 0,00</h3>
-                    </div>
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                        <p class="text-slate-500 text-xs font-semibold uppercase">Patrimônio Total</p>
-                        <h3 id="dash-patrimonio" class="text-2xl font-bold text-indigo-600">R$ 0,00</h3>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                        <h4 class="font-bold mb-4">Fluxo Mensal (Receitas x Despesas)</h4>
-                        <canvas id="chartFluxo"></canvas>
-                    </div>
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                        <h4 class="font-bold mb-4">Despesas por Categoria</h4>
-                        <canvas id="chartCategorias"></canvas>
-                    </div>
-                </div>
-
-                <div id="status-alerta" class="p-4 rounded-xl text-center font-bold">
-                    <!-- Dinâmico -->
-                </div>
-            </section>
-
-            <!-- RECEITAS SECTION -->
-            <section id="receitas" class="tab-content space-y-6">
-                <div class="flex justify-between items-center">
-                    <h3 class="text-xl font-bold text-emerald-600">Minhas Receitas</h3>
-                    <button onclick="openModal('modal-receita')" class="bg-emerald-600 text-white px-4 py-2 rounded-lg flex items-center gap-2">
-                        <i data-lucide="plus-circle" class="w-5 h-5"></i> Adicionar Receita
-                    </button>
-                </div>
-                <div class="bg-white rounded-2xl shadow-sm overflow-hidden border border-slate-100">
-                    <table class="w-full text-left">
-                        <thead class="bg-slate-50 border-b">
-                            <tr>
-                                <th class="p-4">Descrição</th>
-                                <th class="p-4">Data</th>
-                                <th class="p-4">Status</th>
-                                <th class="p-4 text-right">Valor</th>
-                                <th class="p-4">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="lista-receitas"></tbody>
-                    </table>
-                </div>
-            </section>
-
-            <!-- DESPESAS SECTION -->
-            <section id="despesas" class="tab-content space-y-6">
-                <div class="flex justify-between items-center">
-                    <h3 class="text-xl font-bold text-rose-600">Minhas Despesas</h3>
-                    <button onclick="openModal('modal-despesa')" class="bg-rose-600 text-white px-4 py-2 rounded-lg flex items-center gap-2">
-                        <i data-lucide="minus-circle" class="w-5 h-5"></i> Adicionar Despesa
-                    </button>
-                </div>
-                <div class="bg-white rounded-2xl shadow-sm overflow-hidden border border-slate-100">
-                    <table class="w-full text-left">
-                        <thead class="bg-slate-50 border-b">
-                            <tr>
-                                <th class="p-4">Descrição</th>
-                                <th class="p-4">Vencimento</th>
-                                <th class="p-4">Categoria</th>
-                                <th class="p-4">Status</th>
-                                <th class="p-4 text-right">Valor</th>
-                                <th class="p-4">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="lista-despesas"></tbody>
-                    </table>
-                </div>
-            </section>
-
-            <!-- INVESTIMENTOS SECTION -->
-            <section id="investimentos" class="tab-content space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-indigo-900 text-white p-6 rounded-2xl shadow-lg">
-                        <p class="opacity-80">Total em Investimentos</p>
-                        <h2 id="total-investido" class="text-3xl font-bold">R$ 0,00</h2>
-                        <div class="mt-4 flex gap-4 text-sm">
-                            <span>Renda Fixa: <strong id="total-rf">R$ 0,00</strong></span>
-                            <span>Renda Variável: <strong id="total-rv">R$ 0,00</strong></span>
+            <!-- DASHBOARD TAB -->
+            <section id="dashboard" class="tab-content active space-y-8">
+                <!-- Resumo -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="bg-emerald-50 p-2 rounded-lg"><i data-lucide="arrow-up-right" class="text-emerald-600"></i></div>
+                            <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">+ Receitas</span>
                         </div>
+                        <p class="text-slate-500 text-sm font-medium">Total Receitas</p>
+                        <h3 id="total-receitas" class="text-2xl font-bold text-slate-900">R$ 0,00</h3>
                     </div>
-                    <div class="flex items-center gap-4">
-                        <button onclick="openModal('modal-rv')" class="flex-1 bg-white border border-slate-200 p-4 rounded-2xl hover:border-indigo-400 transition text-center">
-                            <i data-lucide="trending-up" class="mx-auto mb-2 text-indigo-500"></i>
-                            Renda Variável
-                        </button>
-                        <button onclick="openModal('modal-rf')" class="flex-1 bg-white border border-slate-200 p-4 rounded-2xl hover:border-indigo-400 transition text-center">
-                            <i data-lucide="lock" class="mx-auto mb-2 text-indigo-500"></i>
-                            Renda Fixa
-                        </button>
+                    <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="bg-rose-50 p-2 rounded-lg"><i data-lucide="arrow-down-right" class="text-rose-600"></i></div>
+                            <span class="text-xs font-bold text-rose-600 bg-rose-50 px-2 py-1 rounded-full">- Despesas</span>
+                        </div>
+                        <p class="text-slate-500 text-sm font-medium">Total Despesas</p>
+                        <h3 id="total-despesas" class="text-2xl font-bold text-slate-900">R$ 0,00</h3>
+                    </div>
+                    <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="bg-indigo-50 p-2 rounded-lg"><i data-lucide="banknote" class="text-indigo-600"></i></div>
+                        </div>
+                        <p class="text-slate-500 text-sm font-medium">Saldo Atual</p>
+                        <h3 id="saldo-atual" class="text-2xl font-bold">R$ 0,00</h3>
+                    </div>
+                    <div id="card-situacao" class="p-6 rounded-3xl border transition-all duration-500 shadow-sm flex flex-col justify-center">
+                        <p class="text-sm font-bold uppercase tracking-widest opacity-70 mb-1">Situação Atual</p>
+                        <h3 id="texto-situacao" class="text-xl font-black">CARREGANDO...</h3>
                     </div>
                 </div>
 
-                <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
-                    <h4 class="font-bold mb-4">Minha Carteira (Ações/FIIs)</h4>
+                <!-- Gráficos -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
+                        <h4 class="font-bold text-lg mb-6 flex items-center gap-2"><i data-lucide="bar-chart-3" class="text-indigo-500"></i> Fluxo de Caixa</h4>
+                        <canvas id="fluxoChart" height="250"></canvas>
+                    </div>
+                    <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
+                        <h4 class="font-bold text-lg mb-6 flex items-center gap-2"><i data-lucide="pie-chart" class="text-indigo-500"></i> Gastos por Categoria</h4>
+                        <canvas id="categoriaChart" height="250"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- RECEITAS TAB -->
+            <section id="receitas" class="tab-content space-y-6">
+                <div class="flex justify-between items-center bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+                    <div>
+                        <h3 class="text-xl font-bold text-emerald-600">Gerenciar Receitas</h3>
+                        <p class="text-slate-500 text-sm font-medium">Controle de entradas e rendimentos.</p>
+                    </div>
+                    <button onclick="openModal('modal-receita')" class="bg-emerald-600 text-white px-6 py-3 rounded-2xl hover:bg-emerald-700 flex items-center gap-2 font-bold shadow-lg shadow-emerald-100 transition">
+                        <i data-lucide="plus"></i> Adicionar Receita
+                    </button>
+                </div>
+                <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left">
-                            <thead class="border-b">
+                            <thead class="bg-slate-50 border-b border-slate-100">
                                 <tr>
-                                    <th class="p-2">Ativo</th>
-                                    <th class="p-2">Qtd</th>
-                                    <th class="p-2">P. Médio</th>
-                                    <th class="p-2">Cotação</th>
-                                    <th class="p-2">Total</th>
-                                    <th class="p-2">Resultado</th>
+                                    <th class="p-5 text-sm font-bold text-slate-400 uppercase">Descrição</th>
+                                    <th class="p-5 text-sm font-bold text-slate-400 uppercase">Categoria</th>
+                                    <th class="p-5 text-sm font-bold text-slate-400 uppercase">Data</th>
+                                    <th class="p-5 text-sm font-bold text-slate-400 uppercase">Status</th>
+                                    <th class="p-5 text-sm font-bold text-slate-400 uppercase text-right">Valor</th>
+                                    <th class="p-5 text-sm font-bold text-slate-400 uppercase">Ações</th>
                                 </tr>
                             </thead>
-                            <tbody id="lista-ativos-rv"></tbody>
+                            <tbody id="lista-receitas"></tbody>
                         </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- DESPESAS TAB -->
+            <section id="despesas" class="tab-content space-y-6">
+                <div class="flex justify-between items-center bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+                    <div>
+                        <h3 class="text-xl font-bold text-rose-600">Gerenciar Despesas</h3>
+                        <p class="text-slate-500 text-sm font-medium">Controle seus gastos e evite dívidas.</p>
+                    </div>
+                    <button onclick="openModal('modal-despesa')" class="bg-rose-600 text-white px-6 py-3 rounded-2xl hover:bg-rose-700 flex items-center gap-2 font-bold shadow-lg shadow-rose-100 transition">
+                        <i data-lucide="plus"></i> Adicionar Despesa
+                    </button>
+                </div>
+                <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-slate-50 border-b border-slate-100">
+                                <tr>
+                                    <th class="p-5 text-sm font-bold text-slate-400 uppercase">Descrição</th>
+                                    <th class="p-5 text-sm font-bold text-slate-400 uppercase">Categoria</th>
+                                    <th class="p-5 text-sm font-bold text-slate-400 uppercase">Vencimento</th>
+                                    <th class="p-5 text-sm font-bold text-slate-400 uppercase">Status</th>
+                                    <th class="p-5 text-sm font-bold text-slate-400 uppercase text-right">Valor</th>
+                                    <th class="p-5 text-sm font-bold text-slate-400 uppercase">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="lista-despesas"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- INVESTIMENTOS TAB -->
+            <section id="investimentos" class="tab-content space-y-8">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 space-y-6">
+                        <div class="bg-slate-900 text-white p-8 rounded-[2rem] relative overflow-hidden">
+                            <i data-lucide="circle-dot" class="absolute -right-10 -top-10 w-40 h-40 text-slate-800"></i>
+                            <div class="relative z-10">
+                                <p class="text-slate-400 font-medium mb-1">Valor Total em Ativos</p>
+                                <h2 id="invest-total" class="text-4xl font-black mb-6">R$ 0,00</h2>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div class="bg-slate-800 p-4 rounded-2xl">
+                                        <p class="text-xs text-slate-400 font-bold uppercase mb-1">Renda Fixa</p>
+                                        <p id="invest-rf" class="text-lg font-bold">R$ 0,00</p>
+                                    </div>
+                                    <div class="bg-slate-800 p-4 rounded-2xl">
+                                        <p class="text-xs text-slate-400 font-bold uppercase mb-1">Renda Variável</p>
+                                        <p id="invest-rv" class="text-lg font-bold">R$ 0,00</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- RV Table -->
+                        <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+                            <div class="flex justify-between items-center mb-6">
+                                <h4 class="font-bold text-lg">Ações e FIIs</h4>
+                                <button onclick="openModal('modal-rv')" class="text-indigo-600 font-bold text-sm hover:underline">+ Adicionar Ativo</button>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left">
+                                    <thead class="border-b">
+                                        <tr class="text-slate-400 text-xs uppercase font-bold">
+                                            <th class="py-3">Ticker</th>
+                                            <th class="py-3">Qtd</th>
+                                            <th class="py-3">Preço Médio</th>
+                                            <th class="py-3">Cotação Atual</th>
+                                            <th class="py-3 text-right">Total</th>
+                                            <th class="py-3 text-right">Resultado</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="lista-rv" class="text-sm"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-6">
+                        <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+                            <h4 class="font-bold text-lg mb-4">Renda Fixa</h4>
+                            <button onclick="openModal('modal-rf')" class="w-full mb-4 bg-indigo-50 text-indigo-600 p-4 rounded-2xl font-bold hover:bg-indigo-100 transition flex items-center justify-center gap-2">
+                                <i data-lucide="plus" class="w-4 h-4"></i> Novo Investimento RF
+                            </button>
+                            <div id="lista-rf" class="space-y-3"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VENCIMENTOS TAB -->
+            <section id="vencimentos" class="tab-content space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-rose-50 border border-rose-100 p-6 rounded-3xl">
+                        <h4 class="text-rose-700 font-bold mb-4 flex items-center gap-2"><i data-lucide="alert-circle"></i> Atrasadas</h4>
+                        <div id="lista-atrasadas" class="space-y-3"></div>
+                    </div>
+                    <div class="bg-amber-50 border border-amber-100 p-6 rounded-3xl">
+                        <h4 class="text-amber-700 font-bold mb-4 flex items-center gap-2"><i data-lucide="clock"></i> Vencem em 7 dias</h4>
+                        <div id="lista-proximas" class="space-y-3"></div>
+                    </div>
+                    <div class="bg-emerald-50 border border-emerald-100 p-6 rounded-3xl">
+                        <h4 class="text-emerald-700 font-bold mb-4 flex items-center gap-2"><i data-lucide="check-circle"></i> Recebimentos Previstos</h4>
+                        <div id="lista-previstas-rec" class="space-y-3"></div>
                     </div>
                 </div>
             </section>
@@ -218,341 +280,396 @@
     <!-- MODAIS -->
     
     <!-- Modal Receita -->
-    <div id="modal-receita" class="fixed inset-0 bg-black bg-opacity-50 hidden z-[100] flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl max-w-md w-full p-6">
-            <h3 class="text-xl font-bold mb-4">Nova Receita</h3>
+    <div id="modal-receita" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden z-[100] flex items-center justify-center p-4">
+        <div class="bg-white rounded-[2.5rem] max-w-md w-full p-8 shadow-2xl">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-black text-slate-900">Nova Receita</h3>
+                <button onclick="closeModal('modal-receita')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x"></i></button>
+            </div>
             <form id="form-receita" class="space-y-4">
-                <input type="text" placeholder="Descrição" id="rec-desc" class="w-full border p-2 rounded-lg" required>
+                <div>
+                    <label class="text-xs font-bold text-slate-400 uppercase mb-1 block ml-1">Descrição</label>
+                    <input type="text" id="rec-desc" class="w-full bg-slate-50 border-slate-100 border-2 p-4 rounded-2xl font-medium" placeholder="Ex: Salário Mensal" required>
+                </div>
                 <div class="grid grid-cols-2 gap-4">
-                    <input type="number" step="0.01" placeholder="Valor R$" id="rec-valor" class="w-full border p-2 rounded-lg" required>
-                    <input type="date" id="rec-data" class="w-full border p-2 rounded-lg" required>
+                    <div>
+                        <label class="text-xs font-bold text-slate-400 uppercase mb-1 block ml-1">Valor (R$)</label>
+                        <input type="number" step="0.01" id="rec-valor" class="w-full bg-slate-50 border-slate-100 border-2 p-4 rounded-2xl font-medium" placeholder="0,00" required>
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-400 uppercase mb-1 block ml-1">Data</label>
+                        <input type="date" id="rec-data" class="w-full bg-slate-50 border-slate-100 border-2 p-4 rounded-2xl font-medium" required>
+                    </div>
                 </div>
-                <select id="rec-cat" class="w-full border p-2 rounded-lg">
-                    <option>Salário</option>
-                    <option>Investimentos</option>
-                    <option>Extra</option>
-                </select>
-                <div class="flex justify-end gap-2">
-                    <button type="button" onclick="closeModal('modal-receita')" class="px-4 py-2 text-slate-500">Cancelar</button>
-                    <button type="submit" class="bg-emerald-600 text-white px-6 py-2 rounded-lg">Salvar</button>
+                <div>
+                    <label class="text-xs font-bold text-slate-400 uppercase mb-1 block ml-1">Categoria</label>
+                    <select id="rec-cat" class="w-full bg-slate-50 border-slate-100 border-2 p-4 rounded-2xl font-medium appearance-none">
+                        <option>Salário</option>
+                        <option>Investimento</option>
+                        <option>Freelance</option>
+                        <option>Presente</option>
+                        <option>Outros</option>
+                    </select>
                 </div>
+                <button type="submit" class="w-full bg-emerald-600 text-white p-5 rounded-2xl font-black text-lg hover:bg-emerald-700 shadow-xl shadow-emerald-100 transition">Salvar Entrada</button>
             </form>
         </div>
     </div>
 
     <!-- Modal Despesa -->
-    <div id="modal-despesa" class="fixed inset-0 bg-black bg-opacity-50 hidden z-[100] flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl max-w-md w-full p-6">
-            <h3 class="text-xl font-bold mb-4 text-rose-600">Nova Despesa</h3>
+    <div id="modal-despesa" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden z-[100] flex items-center justify-center p-4">
+        <div class="bg-white rounded-[2.5rem] max-w-md w-full p-8 shadow-2xl">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-black text-slate-900">Nova Despesa</h3>
+                <button onclick="closeModal('modal-despesa')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x"></i></button>
+            </div>
             <form id="form-despesa" class="space-y-4">
-                <input type="text" placeholder="O que você pagou?" id="des-desc" class="w-full border p-2 rounded-lg" required>
+                <input type="text" id="des-desc" class="w-full bg-slate-50 border-slate-100 border-2 p-4 rounded-2xl font-medium" placeholder="Ex: Conta de Luz" required>
                 <div class="grid grid-cols-2 gap-4">
-                    <input type="number" step="0.01" placeholder="Valor R$" id="des-valor" class="w-full border p-2 rounded-lg" required>
-                    <input type="date" id="des-venc" class="w-full border p-2 rounded-lg" required>
+                    <input type="number" step="0.01" id="des-valor" class="w-full bg-slate-50 border-slate-100 border-2 p-4 rounded-2xl font-medium" placeholder="Valor R$" required>
+                    <input type="date" id="des-venc" class="w-full bg-slate-50 border-slate-100 border-2 p-4 rounded-2xl font-medium" required>
                 </div>
-                <select id="des-cat" class="w-full border p-2 rounded-lg">
-                    <option>Moradia</option>
-                    <option>Alimentação</option>
-                    <option>Transporte</option>
-                    <option>Lazer</option>
-                    <option>Saúde</option>
-                    <option>Assinaturas</option>
-                </select>
+                <select id="des-cat" class="w-full bg-slate-50 border-slate-100 border-2 p-4 rounded-2xl font-medium appearance-none"></select>
                 <div>
-                    <label class="text-xs text-slate-400">Anexo (Comprovante)</label>
-                    <input type="file" id="des-file" class="w-full text-xs">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase block ml-1 mb-1">Anexar Comprovante (Opcional)</label>
+                    <input type="file" id="des-file" class="text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
                 </div>
-                <div class="flex justify-end gap-2">
-                    <button type="button" onclick="closeModal('modal-despesa')" class="px-4 py-2 text-slate-500">Cancelar</button>
-                    <button type="submit" class="bg-rose-600 text-white px-6 py-2 rounded-lg">Salvar Despesa</button>
-                </div>
+                <button type="submit" class="w-full bg-rose-600 text-white p-5 rounded-2xl font-black text-lg hover:bg-rose-700 shadow-xl shadow-rose-100 transition">Confirmar Gasto</button>
             </form>
         </div>
     </div>
 
-    <!-- Modal Renda Variável -->
-    <div id="modal-rv" class="fixed inset-0 bg-black bg-opacity-50 hidden z-[100] flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl max-w-md w-full p-6">
-            <h3 class="text-xl font-bold mb-4">Adicionar Ativo (B3)</h3>
+    <!-- Modal RV -->
+    <div id="modal-rv" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden z-[100] flex items-center justify-center p-4">
+        <div class="bg-white rounded-[2.5rem] max-w-md w-full p-8 shadow-2xl">
+            <h3 class="text-2xl font-black text-slate-900 mb-6">Ativo Variável</h3>
             <form id="form-rv" class="space-y-4">
-                <input type="text" placeholder="Ticker (Ex: PETR4, IVVB11)" id="rv-ticker" class="w-full border p-2 rounded-lg uppercase" required>
+                <input type="text" id="rv-ticker" class="w-full bg-slate-50 border-slate-100 border-2 p-4 rounded-2xl font-medium uppercase" placeholder="Ticker (Ex: PETR4)" required>
                 <div class="grid grid-cols-2 gap-4">
-                    <input type="number" placeholder="Quantidade" id="rv-qtd" class="w-full border p-2 rounded-lg" required>
-                    <input type="number" step="0.01" placeholder="Preço Médio" id="rv-pm" class="w-full border p-2 rounded-lg" required>
+                    <input type="number" id="rv-qtd" class="w-full bg-slate-50 border-slate-100 border-2 p-4 rounded-2xl font-medium" placeholder="Qtd" required>
+                    <input type="number" step="0.01" id="rv-pm" class="w-full bg-slate-50 border-slate-100 border-2 p-4 rounded-2xl font-medium" placeholder="Preço Médio" required>
                 </div>
-                <div class="flex justify-end gap-2">
-                    <button type="button" onclick="closeModal('modal-rv')" class="px-4 py-2 text-slate-500">Cancelar</button>
-                    <button type="submit" class="bg-indigo-600 text-white px-6 py-2 rounded-lg">Adicionar</button>
+                <button type="submit" class="w-full bg-indigo-600 text-white p-5 rounded-2xl font-black text-lg hover:bg-indigo-700 transition">Adicionar à Carteira</button>
+                <button type="button" onclick="closeModal('modal-rv')" class="w-full text-slate-400 font-bold">Cancelar</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal RF -->
+    <div id="modal-rf" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden z-[100] flex items-center justify-center p-4">
+        <div class="bg-white rounded-[2.5rem] max-w-md w-full p-8 shadow-2xl">
+            <h3 class="text-2xl font-black text-slate-900 mb-6">Renda Fixa</h3>
+            <form id="form-rf" class="space-y-4">
+                <input type="text" id="rf-nome" class="w-full bg-slate-50 border-slate-100 border-2 p-4 rounded-2xl font-medium" placeholder="Ex: CDB Banco Inter 102%" required>
+                <input type="number" step="0.01" id="rf-valor" class="w-full bg-slate-50 border-slate-100 border-2 p-4 rounded-2xl font-medium" placeholder="Valor Aplicado" required>
+                <div class="grid grid-cols-2 gap-4">
+                    <input type="date" id="rf-data" class="w-full bg-slate-50 border-slate-100 border-2 p-4 rounded-2xl font-medium" required>
+                    <input type="text" id="rf-rent" class="w-full bg-slate-50 border-slate-100 border-2 p-4 rounded-2xl font-medium" placeholder="Rentabilidade %">
                 </div>
+                <button type="submit" class="w-full bg-amber-500 text-white p-5 rounded-2xl font-black text-lg hover:bg-amber-600 transition">Salvar Investimento</button>
+                <button type="button" onclick="closeModal('modal-rf')" class="w-full text-slate-400 font-bold">Cancelar</button>
             </form>
         </div>
     </div>
 
     <script>
-        // ESTADO GLOBAL DO APLICATIVO
-        let state = JSON.parse(localStorage.getItem('minha_vida_financeira')) || {
+        // --- DATA STATE ---
+        let state = JSON.parse(localStorage.getItem('minha_vida_financeira_v1')) || {
             receitas: [],
             despesas: [],
-            investimentos: {
-                rendaFixa: [],
-                rendaVariavel: []
-            },
+            investRF: [],
+            investRV: [],
             categorias: ['Moradia', 'Alimentação', 'Transporte', 'Lazer', 'Saúde', 'Educação', 'Assinaturas', 'Outros']
         };
 
-        // INICIALIZAÇÃO
-        document.addEventListener('DOMContentLoaded', () => {
-            lucide.createIcons();
-            document.getElementById('current-date').innerText = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'full' }).format(new Date());
-            updateDashboard();
-            renderAll();
-            // Simular atualização de cotações ao abrir
-            updateQuotes();
-        });
+        // --- CORE FUNCTIONS ---
+        function save() {
+            localStorage.setItem('minha_vida_financeira_v1', JSON.stringify(state));
+            render();
+        }
 
-        // NAVEGAÇÃO
+        function formatCurrency(v) {
+            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
+        }
+
+        function formatDate(d) {
+            return d.split('-').reverse().join('/');
+        }
+
         function showTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
             
-            // Estética dos menus
-            const title = tabId.charAt(0).toUpperCase() + tabId.slice(1);
-            document.getElementById('tab-title').innerText = title;
-
-            // Atualizar ícones do menu mobile
-            document.querySelectorAll('nav button').forEach(btn => btn.classList.replace('text-indigo-600', 'text-slate-500'));
+            document.getElementById('tab-title').innerText = tabId.charAt(0).toUpperCase() + tabId.slice(1);
             
-            renderAll();
+            // UI Updates (Active buttons)
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('text-indigo-600');
+                btn.classList.add('text-slate-400');
+                if(btn.dataset.tab === tabId) {
+                    btn.classList.remove('text-slate-400');
+                    btn.classList.add('text-indigo-600');
+                }
+            });
+            
+            render();
         }
 
-        // MODAIS
         function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
-        // CRUD RECEITAS
-        document.getElementById('form-receita').onsubmit = (e) => {
-            e.preventDefault();
-            const novaRec = {
-                id: Date.now(),
-                descricao: document.getElementById('rec-desc').value,
-                valor: parseFloat(document.getElementById('rec-valor').value),
-                data: document.getElementById('rec-data').value,
-                categoria: document.getElementById('rec-cat').value,
-                status: 'Recebido'
-            };
-            state.receitas.push(novaRec);
-            save();
-            closeModal('modal-receita');
-            renderAll();
-            e.target.reset();
-        };
-
-        // CRUD DESPESAS
-        document.getElementById('form-despesa').onsubmit = (e) => {
-            e.preventDefault();
-            const novaDes = {
-                id: Date.now(),
-                descricao: document.getElementById('des-desc').value,
-                valor: parseFloat(document.getElementById('des-valor').value),
-                data: document.getElementById('des-venc').value,
-                categoria: document.getElementById('des-cat').value,
-                status: new Date(document.getElementById('des-venc').value) < new Date() ? 'Atrasada' : 'Pendente'
-            };
-            state.despesas.push(novaDes);
-            save();
-            closeModal('modal-despesa');
-            renderAll();
-            e.target.reset();
-        };
-
-        // CRUD INVESTIMENTOS (RV)
-        document.getElementById('form-rv').onsubmit = (e) => {
-            e.preventDefault();
-            const ticker = document.getElementById('rv-ticker').value.toUpperCase();
-            const novoAtivo = {
-                ticker: ticker,
-                qtd: parseInt(document.getElementById('rv-qtd').value),
-                pm: parseFloat(document.getElementById('rv-pm').value),
-                cotacao: 0 // Será atualizado pela "API"
-            };
-            state.investimentos.rendaVariavel.push(novoAtivo);
-            save();
-            closeModal('modal-rv');
-            updateQuotes();
-            renderAll();
-            e.target.reset();
-        };
-
-        // LÓGICA DE CÁLCULOS E RENDERIZAÇÃO
-        function renderAll() {
+        // --- RENDER LOGIC ---
+        function render() {
+            renderDashboard();
             renderReceitas();
             renderDespesas();
             renderInvestimentos();
-            updateDashboard();
+            renderVencimentos();
             lucide.createIcons();
         }
 
-        function renderReceitas() {
-            const list = document.getElementById('lista-receitas');
-            list.innerHTML = state.receitas.map(r => `
-                <tr class="border-b hover:bg-slate-50 transition">
-                    <td class="p-4 font-medium">${r.descricao}</td>
-                    <td class="p-4 text-sm text-slate-500">${formatDate(r.data)}</td>
-                    <td class="p-4"><span class="bg-emerald-100 text-emerald-700 px-2 py-1 rounded text-xs font-bold">${r.status}</span></td>
-                    <td class="p-4 text-right font-bold text-emerald-600">${formatCurrency(r.valor)}</td>
-                    <td class="p-4"><button onclick="deleteItem('receitas', ${r.id})" class="text-rose-400 hover:text-rose-600"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td>
-                </tr>
-            `).join('');
-        }
-
-        function renderDespesas() {
-            const list = document.getElementById('lista-despesas');
-            list.innerHTML = state.despesas.map(d => `
-                <tr class="border-b hover:bg-slate-50 transition">
-                    <td class="p-4 font-medium">${d.descricao}</td>
-                    <td class="p-4 text-sm text-slate-500">${formatDate(d.data)}</td>
-                    <td class="p-4 text-sm">${d.categoria}</td>
-                    <td class="p-4">
-                        <span class="${d.status === 'Atrasada' ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-700'} px-2 py-1 rounded text-xs font-bold">
-                            ${d.status}
-                        </span>
-                    </td>
-                    <td class="p-4 text-right font-bold text-rose-600">${formatCurrency(d.valor)}</td>
-                    <td class="p-4"><button onclick="deleteItem('despesas', ${d.id})" class="text-rose-400 hover:text-rose-600"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td>
-                </tr>
-            `).join('');
-        }
-
-        function renderInvestimentos() {
-            const listRV = document.getElementById('lista-ativos-rv');
-            let totalInvestidoRV = 0;
+        function renderDashboard() {
+            const totalRec = state.receitas.reduce((acc, c) => acc + c.valor, 0);
+            const totalDes = state.despesas.reduce((acc, c) => acc + c.valor, 0);
             
-            listRV.innerHTML = state.investimentos.rendaVariavel.map(a => {
-                const totalAtivo = a.qtd * a.cotacao;
-                const investimentoInicial = a.qtd * a.pm;
-                const resultado = totalAtivo - investimentoInicial;
-                totalInvestidoRV += totalAtivo;
-
-                return `
-                <tr class="border-b">
-                    <td class="p-2 font-bold">${a.ticker}</td>
-                    <td class="p-2">${a.qtd}</td>
-                    <td class="p-2">${formatCurrency(a.pm)}</td>
-                    <td class="p-2">${formatCurrency(a.cotacao)}</td>
-                    <td class="p-2 font-bold">${formatCurrency(totalAtivo)}</td>
-                    <td class="p-2 ${resultado >= 0 ? 'text-emerald-500' : 'text-rose-500'} font-bold">
-                        ${formatCurrency(resultado)}
-                    </td>
-                </tr>
-            `}).join('');
-
-            document.getElementById('total-investido').innerText = formatCurrency(totalInvestidoRV);
-            document.getElementById('total-rv').innerText = formatCurrency(totalInvestidoRV);
-        }
-
-        function updateDashboard() {
-            const totalRec = state.receitas.reduce((acc, curr) => acc + curr.valor, 0);
-            const totalDes = state.despesas.reduce((acc, curr) => acc + curr.valor, 0);
-            const totalInv = state.investimentos.rendaVariavel.reduce((acc, curr) => acc + (curr.qtd * curr.cotacao), 0);
+            // Simulação de valorização RV (Apenas para demo, integrável com API futuramente)
+            const totalRV = state.investRV.reduce((acc, c) => acc + (c.qtd * (c.pm * 1.05)), 0); 
+            const totalRF = state.investRF.reduce((acc, c) => acc + c.valor, 0);
             
             const saldo = totalRec - totalDes;
-            const patrimonio = saldo + totalInv;
+            const patrimonio = saldo + totalRV + totalRF;
 
-            document.getElementById('dash-receitas').innerText = formatCurrency(totalRec);
-            document.getElementById('dash-despesas').innerText = formatCurrency(totalDes);
-            document.getElementById('dash-saldo').innerText = formatCurrency(saldo);
-            document.getElementById('dash-patrimonio').innerText = formatCurrency(patrimonio);
+            document.getElementById('total-receitas').innerText = formatCurrency(totalRec);
+            document.getElementById('total-despesas').innerText = formatCurrency(totalDes);
+            document.getElementById('saldo-atual').innerText = formatCurrency(saldo);
+            document.getElementById('sidebar-patrimonio').innerText = formatCurrency(patrimonio);
 
-            const statusAlerta = document.getElementById('status-alerta');
-            if (patrimonio >= 0) {
-                statusAlerta.className = "p-4 rounded-xl text-center font-bold bg-emerald-100 text-emerald-800";
-                statusAlerta.innerHTML = "🟢 SITUAÇÃO FINANCEIRA ATUAL: SALDO POSITIVO";
+            const card = document.getElementById('card-situacao');
+            const texto = document.getElementById('texto-situacao');
+            
+            if(saldo >= 0) {
+                card.className = "p-6 rounded-3xl border border-emerald-100 bg-emerald-50 text-emerald-700 shadow-sm flex flex-col justify-center";
+                texto.innerText = "SALDO POSITIVO";
             } else {
-                statusAlerta.className = "p-4 rounded-xl text-center font-bold bg-rose-100 text-rose-800";
-                statusAlerta.innerHTML = "🔴 SITUAÇÃO FINANCEIRA ATUAL: SALDO NEGATIVO";
+                card.className = "p-6 rounded-3xl border border-rose-100 bg-rose-50 text-rose-700 shadow-sm flex flex-col justify-center";
+                texto.innerText = "SALDO NEGATIVO";
             }
 
             renderCharts(totalRec, totalDes);
         }
 
-        // GRÁFICOS
-        let flowChart, categoryChart;
-        function renderCharts(rec, des) {
-            const ctx1 = document.getElementById('chartFluxo').getContext('2d');
-            const ctx2 = document.getElementById('chartCategorias').getContext('2d');
+        function renderReceitas() {
+            const tbody = document.getElementById('lista-receitas');
+            tbody.innerHTML = state.receitas.sort((a,b) => new Date(b.data) - new Date(a.data)).map(r => `
+                <tr class="border-b border-slate-50 hover:bg-slate-50/50 transition">
+                    <td class="p-5 font-semibold text-slate-700">${r.descricao}</td>
+                    <td class="p-5 text-sm text-slate-500 font-medium">${r.categoria}</td>
+                    <td class="p-5 text-sm text-slate-500">${formatDate(r.data)}</td>
+                    <td class="p-5"><span class="bg-emerald-100 text-emerald-700 text-[10px] font-black uppercase px-2 py-1 rounded-md">Recebido</span></td>
+                    <td class="p-5 text-right font-bold text-emerald-600">${formatCurrency(r.valor)}</td>
+                    <td class="p-5">
+                        <button onclick="deleteItem('receitas', ${r.id})" class="text-slate-300 hover:text-rose-500 transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+        }
 
-            if (flowChart) flowChart.destroy();
-            if (categoryChart) categoryChart.destroy();
+        function renderDespesas() {
+            const tbody = document.getElementById('lista-despesas');
+            tbody.innerHTML = state.despesas.sort((a,b) => new Date(b.data) - new Date(a.data)).map(d => {
+                const isAtrasada = new Date(d.data) < new Date() && d.status !== 'Paga';
+                return `
+                <tr class="border-b border-slate-50 hover:bg-slate-50/50 transition">
+                    <td class="p-5 font-semibold text-slate-700">${d.descricao} ${d.file ? '📎' : ''}</td>
+                    <td class="p-5 text-sm text-slate-500 font-medium">${d.categoria}</td>
+                    <td class="p-5 text-sm text-slate-500">${formatDate(d.data)}</td>
+                    <td class="p-5">
+                        <span class="${isAtrasada ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-700'} text-[10px] font-black uppercase px-2 py-1 rounded-md">
+                            ${isAtrasada ? 'Atrasada' : 'Pendente'}
+                        </span>
+                    </td>
+                    <td class="p-5 text-right font-bold text-rose-600">${formatCurrency(d.valor)}</td>
+                    <td class="p-5">
+                        <button onclick="deleteItem('despesas', ${d.id})" class="text-slate-300 hover:text-rose-500 transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    </td>
+                </tr>
+            `}).join('');
+        }
 
-            flowChart = new Chart(ctx1, {
+        function renderInvestimentos() {
+            const listRV = document.getElementById('lista-rv');
+            const listRF = document.getElementById('lista-rf');
+            
+            let totalRV = 0;
+            let totalRF = 0;
+
+            listRV.innerHTML = state.investRV.map(a => {
+                const cotacaoFake = a.pm * 1.08; // Simulando alta de 8%
+                const totalAtivo = a.qtd * cotacaoFake;
+                const lucro = totalAtivo - (a.qtd * a.pm);
+                totalRV += totalAtivo;
+                return `
+                    <tr class="border-b border-slate-50">
+                        <td class="py-4 font-bold text-slate-700">${a.ticker}</td>
+                        <td class="py-4">${a.qtd}</td>
+                        <td class="py-4 text-slate-500">${formatCurrency(a.pm)}</td>
+                        <td class="py-4 font-medium text-indigo-600">${formatCurrency(cotacaoFake)}</td>
+                        <td class="py-4 text-right font-bold">${formatCurrency(totalAtivo)}</td>
+                        <td class="py-4 text-right font-bold ${lucro >= 0 ? 'text-emerald-500' : 'text-rose-500'}">${formatCurrency(lucro)}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            listRF.innerHTML = state.investRF.map(i => {
+                totalRF += i.valor;
+                return `
+                    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                        <div class="flex justify-between items-start mb-1">
+                            <p class="font-bold text-slate-800 text-sm">${i.nome}</p>
+                            <span class="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded font-bold">${i.rent || 'Pós'}</span>
+                        </div>
+                        <div class="flex justify-between items-end">
+                            <p class="text-xs text-slate-400 font-medium italic">${formatDate(i.data)}</p>
+                            <p class="font-black text-slate-900">${formatCurrency(i.valor)}</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('invest-total').innerText = formatCurrency(totalRV + totalRF);
+            document.getElementById('invest-rv').innerText = formatCurrency(totalRV);
+            document.getElementById('invest-rf').innerText = formatCurrency(totalRF);
+        }
+
+        function renderVencimentos() {
+            const hoje = new Date();
+            const em7dias = new Date(); em7dias.setDate(hoje.getDate() + 7);
+
+            const atrasadas = state.despesas.filter(d => new Date(d.data) < hoje);
+            const proximas = state.despesas.filter(d => {
+                const dv = new Date(d.data);
+                return dv >= hoje && dv <= em7dias;
+            });
+
+            document.getElementById('lista-atrasadas').innerHTML = atrasadas.map(d => `
+                <div class="bg-white p-3 rounded-xl border-l-4 border-rose-500 shadow-sm flex justify-between items-center">
+                    <div><p class="text-sm font-bold">${d.descricao}</p><p class="text-[10px] text-rose-500 font-black">VENCEU EM ${formatDate(d.data)}</p></div>
+                    <p class="font-bold text-rose-600 text-sm">${formatCurrency(d.valor)}</p>
+                </div>
+            `).join('') || '<p class="text-xs text-rose-300 italic text-center">Nenhuma conta atrasada</p>';
+
+            document.getElementById('lista-proximas').innerHTML = proximas.map(d => `
+                <div class="bg-white p-3 rounded-xl border-l-4 border-amber-500 shadow-sm flex justify-between items-center">
+                    <div><p class="text-sm font-bold">${d.descricao}</p><p class="text-[10px] text-amber-500 font-black">VENCE EM ${formatDate(d.data)}</p></div>
+                    <p class="font-bold text-amber-600 text-sm">${formatCurrency(d.valor)}</p>
+                </div>
+            `).join('') || '<p class="text-xs text-amber-300 italic text-center">Tudo em dia para os próximos dias</p>';
+        }
+
+        // --- CHARTS LOGIC ---
+        let fChart, cChart;
+        function renderCharts(r, d) {
+            const ctxF = document.getElementById('fluxoChart').getContext('2d');
+            const ctxC = document.getElementById('categoriaChart').getContext('2d');
+
+            if(fChart) fChart.destroy();
+            if(cChart) cChart.destroy();
+
+            fChart = new Chart(ctxF, {
                 type: 'bar',
                 data: {
                     labels: ['Financeiro'],
                     datasets: [
-                        { label: 'Receitas', data: [rec], backgroundColor: '#10b981' },
-                        { label: 'Despesas', data: [des], backgroundColor: '#ef4444' }
+                        { label: 'Entradas', data: [r], backgroundColor: '#10b981', borderRadius: 12 },
+                        { label: 'Saídas', data: [d], backgroundColor: '#f43f5e', borderRadius: 12 }
                     ]
                 },
-                options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+                options: { responsive: true, plugins: { legend: { display: false } } }
             });
 
-            // Agrupar despesas por categoria
-            const catData = {};
-            state.despesas.forEach(d => {
-                catData[d.categoria] = (catData[d.categoria] || 0) + d.valor;
-            });
+            const cats = {};
+            state.despesas.forEach(x => cats[x.categoria] = (cats[x.categoria] || 0) + x.valor);
 
-            categoryChart = new Chart(ctx2, {
+            cChart = new Chart(ctxC, {
                 type: 'doughnut',
                 data: {
-                    labels: Object.keys(catData),
+                    labels: Object.keys(cats),
                     datasets: [{
-                        data: Object.values(catData),
-                        backgroundColor: ['#6366f1', '#f59e0b', '#ec4899', '#8b5cf6', '#06b6d4', '#10b981']
+                        data: Object.values(cats),
+                        backgroundColor: ['#6366f1', '#f59e0b', '#ec4899', '#10b981', '#06b6d4', '#8b5cf6'],
+                        borderWidth: 0,
+                        hoverOffset: 20
                     }]
                 },
-                options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+                options: { cutout: '70%', plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20 } } } }
             });
         }
 
-        // SIMULAÇÃO DE COTAÇÃO (Para fins de demonstração, já que APIs reais exigem chaves pagas ou proxy)
-        async function updateQuotes() {
-            // Em uma implementação real, usaríamos fetch('API_URL')
-            // Aqui simulamos uma variação de preço aleatória para os ativos cadastrados
-            state.investimentos.rendaVariavel.forEach(ativo => {
-                if(ativo.cotacao === 0) ativo.cotacao = ativo.pm; // Inicia com preço médio
-                const variacao = (Math.random() * 2 - 1); // Variação entre -1 e 1
-                ativo.cotacao = Math.max(1, ativo.cotacao + variacao);
+        // --- ACTIONS ---
+        document.getElementById('form-receita').onsubmit = (e) => {
+            e.preventDefault();
+            state.receitas.push({
+                id: Date.now(),
+                descricao: document.getElementById('rec-desc').value,
+                valor: parseFloat(document.getElementById('rec-valor').value),
+                data: document.getElementById('rec-data').value,
+                categoria: document.getElementById('rec-cat').value
             });
             save();
-            renderInvestimentos();
+            closeModal('modal-receita');
+            e.target.reset();
         }
 
-        // UTILITÁRIOS
-        function formatCurrency(val) {
-            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
+        document.getElementById('form-despesa').onsubmit = (e) => {
+            e.preventDefault();
+            state.despesas.push({
+                id: Date.now(),
+                descricao: document.getElementById('des-desc').value,
+                valor: parseFloat(document.getElementById('des-valor').value),
+                data: document.getElementById('des-venc').value,
+                categoria: document.getElementById('des-cat').value,
+                file: document.getElementById('des-file').files[0] ? true : false
+            });
+            save();
+            closeModal('modal-despesa');
+            e.target.reset();
         }
 
-        function formatDate(dateStr) {
-            const parts = dateStr.split('-');
-            return `${parts[2]}/${parts[1]}/${parts[0]}`;
+        document.getElementById('form-rv').onsubmit = (e) => {
+            e.preventDefault();
+            state.investRV.push({
+                ticker: document.getElementById('rv-ticker').value.toUpperCase(),
+                qtd: parseInt(document.getElementById('rv-qtd').value),
+                pm: parseFloat(document.getElementById('rv-pm').value)
+            });
+            save();
+            closeModal('modal-rv');
+            e.target.reset();
+        }
+
+        document.getElementById('form-rf').onsubmit = (e) => {
+            e.preventDefault();
+            state.investRF.push({
+                nome: document.getElementById('rf-nome').value,
+                valor: parseFloat(document.getElementById('rf-valor').value),
+                data: document.getElementById('rf-data').value,
+                rent: document.getElementById('rf-rent').value
+            });
+            save();
+            closeModal('modal-rf');
+            e.target.reset();
         }
 
         function deleteItem(type, id) {
-            if (confirm('Deseja realmente excluir este lançamento?')) {
-                state[type] = state[type].filter(i => i.id !== id);
+            if(confirm('Tem certeza?')) {
+                state[type] = state[type].filter(x => x.id !== id);
                 save();
-                renderAll();
             }
         }
 
-        function save() {
-            localStorage.setItem('minha_vida_financeira', JSON.stringify(state));
-        }
-
-        function resetData() {
-            if(confirm('ATENÇÃO: Isso apagará TODOS os seus dados permanentemente. Continuar?')) {
-                localStorage.removeItem('minha_vida_financeira');
+        function clearData() {
+            if(confirm('Isso apagará tudo! Deseja continuar?')) {
+                localStorage.removeItem('minha_vida_financeira_v1');
                 location.reload();
             }
         }
@@ -560,12 +677,27 @@
         function exportData() {
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state));
             const downloadAnchorNode = document.createElement('a');
-            downloadAnchorNode.setAttribute("href",     dataStr);
-            downloadAnchorNode.setAttribute("download", "financeiro_backup.json");
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "minha_vida_financeira.json");
             document.body.appendChild(downloadAnchorNode);
             downloadAnchorNode.click();
             downloadAnchorNode.remove();
         }
+
+        // --- INIT ---
+        window.onload = () => {
+            document.getElementById('current-date').innerText = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'full' }).format(new Date());
+            
+            // Fill categories
+            const catSelect = document.getElementById('des-cat');
+            state.categorias.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = opt.text = c;
+                catSelect.appendChild(opt);
+            });
+
+            render();
+        };
     </script>
 </body>
 </html>
