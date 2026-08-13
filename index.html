@@ -49,7 +49,7 @@
                 <button onclick="showTab('configuracoes')" id="nav-configuracoes" class="flex items-center gap-3 w-full p-3 rounded-xl transition font-semibold text-slate-400 hover:bg-slate-900"><i data-lucide="settings"></i> Configurações</button>
             </nav>
             <div class="mt-auto p-4 bg-indigo-950/20 border border-indigo-500/20 rounded-2xl text-center">
-                <p class="text-[10px] text-indigo-300 font-bold uppercase mb-1 tracking-widest">Patrimônio Consolidado</p>
+                <p class="text-[10px] text-indigo-300 font-bold uppercase mb-1 tracking-widest">Patrimônio Investido</p>
                 <h3 id="side-patrimonio" class="text-xl font-black text-white">R$ 0,00</h3>
             </div>
         </aside>
@@ -70,6 +70,21 @@
 
             <!-- ABA DASHBOARD -->
             <section id="dashboard" class="tab-content active space-y-6">
+                <!-- ALERTA DE CONTAS VENCIDAS (SOLICITAÇÃO 4) -->
+                <div id="alerta-vencidos-container" class="hidden">
+                    <div class="card p-6 border-rose-500 bg-rose-500/10">
+                        <div class="flex items-center gap-3 mb-4 text-rose-500">
+                            <i data-lucide="alert-circle"></i>
+                            <h4 class="font-black uppercase tracking-widest text-sm">Contas Vencidas</h4>
+                        </div>
+                        <div id="lista-vencidos-detalhe" class="space-y-2 mb-4"></div>
+                        <div class="pt-4 border-t border-rose-500/20 flex justify-between items-center">
+                            <span class="text-xs font-bold text-rose-300 uppercase">Total Vencido:</span>
+                            <span id="alerta-vencido-total" class="text-xl font-black text-rose-500">R$ 0,00</span>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div class="card p-5 border-emerald-500/20 bg-emerald-500/5">
                         <p class="text-emerald-500 text-[10px] font-bold uppercase tracking-widest">Saldo Disponível</p>
@@ -84,7 +99,7 @@
                         <h3 id="dash-investido-custo" class="text-2xl font-black">R$ 0,00</h3>
                     </div>
                     <div class="card p-5 bg-indigo-600 border-none shadow-xl shadow-indigo-500/20">
-                        <p class="text-white/70 text-[10px] font-bold uppercase tracking-widest">Patrimônio Total</p>
+                        <p class="text-white/70 text-[10px] font-bold uppercase tracking-widest">Patrimônio Total (Investimentos)</p>
                         <h3 id="dash-patrimonio" class="text-2xl font-black text-white">R$ 0,00</h3>
                     </div>
                 </div>
@@ -104,10 +119,13 @@
             <!-- ABA RECEITAS -->
             <section id="receitas" class="tab-content space-y-4">
                 <div class="flex justify-between items-center bg-slate-900/50 p-6 rounded-3xl border border-slate-800">
-                    <h3 class="text-xl font-bold text-emerald-500">Minhas Receitas</h3>
+                    <div>
+                        <h3 class="text-xl font-bold text-emerald-500">Minhas Receitas</h3>
+                        <p id="total-geral-receitas" class="text-xs text-slate-400 font-bold uppercase mt-1"></p>
+                    </div>
                     <button onclick="openForm('receita')" class="bg-emerald-600 px-6 py-3 rounded-2xl font-bold hover:bg-emerald-500 transition shadow-lg">+ Add Receita</button>
                 </div>
-                <div id="lista-receitas" class="grid gap-3"></div>
+                <div id="lista-receitas-agrupadas" class="space-y-8"></div>
             </section>
 
             <!-- ABA DESPESAS -->
@@ -161,8 +179,8 @@
             <!-- ABA CONFIGURAÇÕES -->
             <section id="configuracoes" class="tab-content space-y-6">
                 <div class="card p-8 max-w-xl mx-auto">
-                    <h3 class="text-2xl font-black mb-4">Configurações de API</h3>
-                    <p class="text-sm text-slate-400 mb-6 font-medium">Obtenha sua chave gratuita no site da Alpha Vantage para habilitar cotações automáticas da B3.</p>
+                    <h3 class="text-2xl font-black mb-4">Configurações</h3>
+                    <p class="text-sm text-slate-400 mb-6 font-medium">Gerencie sua chave de API e seus dados.</p>
                     <div class="space-y-4">
                         <div>
                             <label class="text-[10px] font-black text-slate-500 uppercase ml-1">Alpha Vantage API Key</label>
@@ -216,10 +234,11 @@
                     </div>
                 </div>
 
+                <!-- SELECT CATEGORIA ATUALIZADO (SOLICITAÇÃO 3) -->
                 <div id="box-cat">
                     <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Categoria</label>
-                    <select id="inp-cat">
-                        <option>Aluguel</option><option>Salário</option><option>Alimentação</option><option>Transporte</option><option>Saúde</option><option>Lazer</option><option>Investimento</option>
+                    <select id="inp-cat" onchange="checkNewCategory(this)">
+                        <!-- Opções via JS -->
                     </select>
                 </div>
 
@@ -236,8 +255,14 @@
             despesas: [],
             investRV: [],
             investRF: [],
-            config: { apiKey: '' }
+            config: { apiKey: '' },
+            categoriasReceitas: ['Salário', 'Investimento', 'Venda', 'Extra'],
+            categoriasDespesas: ['Aluguel', 'Alimentação', 'Transporte', 'Saúde', 'Lazer', 'Educação']
         };
+
+        // Migração para versões antigas que não tinham categorias
+        if(!state.categoriasReceitas) state.categoriasReceitas = ['Salário', 'Investimento', 'Venda', 'Extra'];
+        if(!state.categoriasDespesas) state.categoriasDespesas = ['Aluguel', 'Alimentação', 'Transporte', 'Saúde', 'Lazer', 'Educação'];
 
         const save = () => localStorage.setItem('mvf_alpha_final_v1', JSON.stringify(state));
         const fmt = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
@@ -261,6 +286,33 @@
             save(); alert("API Key salva com sucesso!");
         }
 
+        // --- GESTÃO DE CATEGORIAS (SOLICITAÇÃO 3) ---
+        function updateCategorySelect(type, selectedValue = "") {
+            const select = document.getElementById('inp-cat');
+            const cats = type === 'receita' ? state.categoriasReceitas : state.categoriasDespesas;
+            
+            let html = cats.map(c => `<option value="${c}" ${c === selectedValue ? 'selected' : ''}>${c}</option>`).join('');
+            html += `<option value="NEW" class="text-indigo-400 font-bold">+ Adicionar nova categoria</option>`;
+            select.innerHTML = html;
+        }
+
+        function checkNewCategory(select) {
+            if (select.value === "NEW") {
+                const type = document.getElementById('form-type').value;
+                const name = prompt("Digite o nome da nova categoria:");
+                if (name && name.trim() !== "") {
+                    const listKey = type === 'receita' ? 'categoriasReceitas' : 'categoriasDespesas';
+                    if (!state[listKey].includes(name.trim())) {
+                        state[listKey].push(name.trim());
+                        save();
+                        updateCategorySelect(type, name.trim());
+                    }
+                } else {
+                    select.selectedIndex = 0;
+                }
+            }
+        }
+
         // --- FORMULÁRIO ---
         function openForm(type, index = -1) {
             const form = document.getElementById('main-form');
@@ -277,6 +329,8 @@
             document.getElementById('box-cat').classList.toggle('hidden', isRV || isRF);
             document.getElementById('box-efetivada').classList.toggle('hidden', isRV || isRF);
 
+            if (!isRV && !isRF) updateCategorySelect(type);
+
             if (index !== -1) {
                 const list = type === 'receita' ? state.receitas : type === 'despesa' ? state.despesas : type === 'rv' ? state.investRV : state.investRF;
                 const item = list[index];
@@ -288,7 +342,7 @@
                     document.getElementById('inp-valor').value = item.valor;
                     document.getElementById('inp-venc').value = item.venc || item.data;
                     document.getElementById('inp-pago').value = item.pagoData || '';
-                    document.getElementById('inp-cat').value = item.categoria || 'Geral';
+                    if (!isRV && !isRF) updateCategorySelect(type, item.categoria);
                 }
             }
             document.getElementById('modal-form').classList.remove('hidden');
@@ -353,7 +407,7 @@
                         a.lastSync = new Date().toLocaleTimeString();
                     }
                 } catch(e) { console.error(e); }
-                await new Promise(r => setTimeout(r, 1200)); // Sleep prevent rate limit
+                await new Promise(r => setTimeout(r, 1200)); 
             }
             save(); render(); icon.classList.remove('animate-spin');
         }
@@ -376,8 +430,10 @@
             const custoRF = state.investRF.reduce((a,c) => a + c.valor, 0);
 
             const saldoLíquido = recPagas - desPagas;
+
+            // PATRIMÔNIO TOTAL: EXCLUSIVAMENTE INVESTIMENTOS (SOLICITAÇÃO 1)
             const totalInvestidoMercado = mercadoRV + custoRF;
-            const patrimônioTotal = saldoLíquido + totalInvestidoMercado;
+            const patrimônioTotal = totalInvestidoMercado;
 
             document.getElementById('dash-saldo').innerText = fmt(saldoLíquido);
             document.getElementById('dash-investido-custo').innerText = fmt(custoInvestRV + custoRF);
@@ -386,26 +442,73 @@
             document.getElementById('inv-rv-mercado').innerText = fmt(mercadoRV);
             document.getElementById('inv-rf-total').innerText = fmt(custoRF);
 
-            const vencidosVal = state.despesas.filter(d => d.venc < hoje && d.status === 'pendente').reduce((a,c) => a + c.valor, 0);
-            document.getElementById('dash-vencido').innerText = fmt(vencidosVal);
+            // ALERTA DE CONTAS VENCIDAS (SOLICITAÇÃO 4)
+            const despesasVencidas = state.despesas.filter(d => d.venc < hoje && d.status === 'pendente');
+            const totalVencido = despesasVencidas.reduce((a,c) => a + c.valor, 0);
+            const alertContainer = document.getElementById('alerta-vencidos-container');
+            
+            document.getElementById('dash-vencido').innerText = fmt(totalVencido);
 
-            // Lista Receitas
-            document.getElementById('lista-receitas').innerHTML = state.receitas.map((r, i) => `
-                <div class="card p-4 flex justify-between items-center group">
-                    <div class="flex items-center gap-4">
-                        <button onclick="toggleStatus('receita', ${i})" class="w-8 h-8 rounded-full border-2 ${r.status === 'pago' ? 'bg-emerald-500 border-emerald-500' : 'border-slate-700'} flex items-center justify-center transition">
-                            ${r.status === 'pago' ? '<i data-lucide="check" class="text-white w-4 h-4"></i>' : ''}
-                        </button>
-                        <div onclick="openForm('receita', ${i})" class="cursor-pointer">
-                            <p class="font-bold ${r.status === 'pago' ? 'strikethrough' : ''}">${r.descricao}</p>
-                            <p class="text-[10px] text-slate-500 uppercase font-bold">${r.venc || 'Sem data'}</p>
+            if (despesasVencidas.length > 0) {
+                alertContainer.classList.remove('hidden');
+                document.getElementById('alerta-vencido-total').innerText = fmt(totalVencido);
+                document.getElementById('lista-vencidos-detalhe').innerHTML = despesasVencidas.map(d => `
+                    <div class="flex justify-between items-center text-xs bg-rose-500/10 p-2 rounded-lg border border-rose-500/20">
+                        <div>
+                            <span class="font-black text-rose-500">${d.descricao}</span>
+                            <span class="text-[10px] text-rose-300/60 ml-2">Venc: ${d.venc.split('-').reverse().join('/')}</span>
                         </div>
+                        <span class="font-bold text-rose-500">${fmt(d.valor)}</span>
                     </div>
-                    <div class="flex items-center gap-4">
-                        <p class="font-black text-emerald-500">${fmt(r.valor)}</p>
-                        <button onclick="deleteItem('receitas', ${i})" class="text-slate-700 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                `).join('');
+            } else {
+                alertContainer.classList.add('hidden');
+            }
+
+            // ORGANIZAÇÃO DE RECEITAS POR MÊS (SOLICITAÇÃO 2)
+            const totalGeralRec = state.receitas.reduce((a,c) => a + c.valor, 0);
+            document.getElementById('total-geral-receitas').innerText = `Total Geral: ${fmt(totalGeralRec)}`;
+
+            const receitasAgrupadas = state.receitas.reduce((acc, rec) => {
+                if(!rec.venc) return acc;
+                const [ano, mes] = rec.venc.split('-');
+                const label = new Date(ano, mes - 1).toLocaleString('pt-br', { month: 'long', year: 'numeric' });
+                if (!acc[label]) acc[label] = { items: [], total: 0 };
+                acc[label].items.push(rec);
+                acc[label].total += rec.valor;
+                return acc;
+            }, {});
+
+            document.getElementById('lista-receitas-agrupadas').innerHTML = Object.keys(receitasAgrupadas).sort().reverse().map(mes => `
+                <div class="space-y-3">
+                    <div class="flex justify-between items-end border-b border-slate-800 pb-2">
+                        <h4 class="text-indigo-400 font-black uppercase text-xs tracking-widest">${mes}</h4>
+                        <span class="text-emerald-500 font-bold text-sm">Mensal: ${fmt(receitasAgrupadas[mes].total)}</span>
                     </div>
-                </div>`).join('');
+                    <div class="grid gap-3">
+                        ${receitasAgrupadas[mes].items.map((r) => {
+                            // Encontrar index original para os botões de ação
+                            const originalIndex = state.receitas.findIndex(item => item.id === r.id);
+                            return `
+                            <div class="card p-4 flex justify-between items-center group">
+                                <div class="flex items-center gap-4">
+                                    <button onclick="toggleStatus('receita', ${originalIndex})" class="w-8 h-8 rounded-full border-2 ${r.status === 'pago' ? 'bg-emerald-500 border-emerald-500' : 'border-slate-700'} flex items-center justify-center transition">
+                                        ${r.status === 'pago' ? '<i data-lucide="check" class="text-white w-4 h-4"></i>' : ''}
+                                    </button>
+                                    <div onclick="openForm('receita', ${originalIndex})" class="cursor-pointer">
+                                        <p class="font-bold ${r.status === 'pago' ? 'strikethrough' : ''}">${r.descricao}</p>
+                                        <p class="text-[10px] text-slate-500 uppercase font-bold">${r.categoria} • ${r.venc.split('-').reverse().join('/')}</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-4">
+                                    <p class="font-black text-emerald-500">${fmt(r.valor)}</p>
+                                    <button onclick="deleteItem('receitas', ${originalIndex})" class="text-slate-700 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                </div>
+                            </div>`
+                        }).join('')}
+                    </div>
+                </div>
+            `).join('');
 
             // Lista Despesas
             document.getElementById('lista-despesas').innerHTML = state.despesas.map((d, i) => {
@@ -417,7 +520,7 @@
                         </button>
                         <div onclick="openForm('despesa', ${i})" class="cursor-pointer">
                             <p class="font-bold ${d.status === 'pago' ? 'strikethrough' : ''}">${d.descricao}</p>
-                            <p class="text-[10px] ${isVencida ? 'text-rose-500 font-bold' : 'text-slate-500'} uppercase">${d.venc}</p>
+                            <p class="text-[10px] ${isVencida ? 'text-rose-500 font-bold' : 'text-slate-500'} uppercase font-bold">${d.categoria} • ${d.venc.split('-').reverse().join('/')}</p>
                         </div>
                     </div>
                     <div class="flex items-center gap-4">
@@ -453,11 +556,11 @@
                     <td class="p-4 text-right"><button onclick="deleteItem('investRF', ${i})" class="text-slate-700 hover:text-rose-500 transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td>
                 </tr>`).join('');
 
-            // Agenda e Fluxo
-            document.getElementById('lista-agenda').innerHTML = state.despesas.filter(d => d.status === 'pendente').slice(0,3).map(d => `
+            // Agenda
+            document.getElementById('lista-agenda').innerHTML = state.despesas.filter(d => d.status === 'pendente').sort((a,b) => a.venc > b.venc ? 1 : -1).slice(0,4).map(d => `
                 <div class="p-3 bg-slate-900 border-l-4 ${d.venc < hoje ? 'border-rose-500' : 'border-amber-500'} rounded-xl flex justify-between text-xs">
                     <span>${d.descricao}</span><span class="font-bold">${fmt(d.valor)}</span>
-                </div>`).join('');
+                </div>`).join('') || '<p class="text-xs text-slate-500 italic">✓ Nenhuma conta pendente.</p>';
 
             renderCharts(recPagas, desPagas);
             lucide.createIcons();
