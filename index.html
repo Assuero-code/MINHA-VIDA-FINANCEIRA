@@ -70,7 +70,7 @@
 
             <!-- ABA DASHBOARD -->
             <section id="dashboard" class="tab-content active space-y-6">
-                <!-- ALERTA DE CONTAS VENCIDAS (SOLICITAÇÃO 4) -->
+                <!-- ALERTA DE CONTAS VENCIDAS -->
                 <div id="alerta-vencidos-container" class="hidden">
                     <div class="card p-6 border-rose-500 bg-rose-500/10">
                         <div class="flex items-center gap-3 mb-4 text-rose-500">
@@ -234,7 +234,6 @@
                     </div>
                 </div>
 
-                <!-- SELECT CATEGORIA ATUALIZADO (SOLICITAÇÃO 3) -->
                 <div id="box-cat">
                     <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Categoria</label>
                     <select id="inp-cat" onchange="checkNewCategory(this)">
@@ -260,7 +259,6 @@
             categoriasDespesas: ['Aluguel', 'Alimentação', 'Transporte', 'Saúde', 'Lazer', 'Educação']
         };
 
-        // Migração para versões antigas que não tinham categorias
         if(!state.categoriasReceitas) state.categoriasReceitas = ['Salário', 'Investimento', 'Venda', 'Extra'];
         if(!state.categoriasDespesas) state.categoriasDespesas = ['Aluguel', 'Alimentação', 'Transporte', 'Saúde', 'Lazer', 'Educação'];
 
@@ -286,7 +284,6 @@
             save(); alert("API Key salva com sucesso!");
         }
 
-        // --- GESTÃO DE CATEGORIAS (SOLICITAÇÃO 3) ---
         function updateCategorySelect(type, selectedValue = "") {
             const select = document.getElementById('inp-cat');
             const cats = type === 'receita' ? state.categoriasReceitas : state.categoriasDespesas;
@@ -355,10 +352,13 @@
             const type = document.getElementById('form-type').value;
             const index = parseInt(document.getElementById('form-index').value);
 
-            let newItem = { id: index === -1 ? Date.now() : 0, status: 'pendente' };
+            let newItem = { status: 'pendente' };
+            // BUG FIX: Garante que ID seja gerado apenas para novos e preservado para edições
+            if (index === -1) newItem.id = Date.now() + Math.floor(Math.random() * 1000);
 
             if (type === 'rv') {
                 newItem = {
+                    ...newItem,
                     ticker: document.getElementById('inp-desc').value.toUpperCase().trim(),
                     qtd: parseFloat(document.getElementById('inp-qtd').value),
                     pm: parseFloat(document.getElementById('inp-pm').value),
@@ -368,6 +368,7 @@
                 newItem.custoTotal = newItem.qtd * newItem.pm;
             } else if (type === 'rf') {
                 newItem = {
+                    ...newItem,
                     nome: document.getElementById('inp-desc').value,
                     valor: parseFloat(document.getElementById('inp-valor').value),
                     venc: document.getElementById('inp-venc').value,
@@ -375,6 +376,7 @@
                 };
             } else {
                 newItem = {
+                    ...newItem,
                     descricao: document.getElementById('inp-desc').value,
                     valor: parseFloat(document.getElementById('inp-valor').value),
                     venc: document.getElementById('inp-venc').value,
@@ -412,11 +414,15 @@
             save(); render(); icon.classList.remove('animate-spin');
         }
 
-        // --- LOGICA DE BAIXA ---
-        function toggleStatus(type, index) {
-            const list = type === 'receita' ? state.receitas : state.despesas;
-            list[index].status = list[index].status === 'pago' ? 'pendente' : 'pago';
-            save(); render();
+        // BUG FIX: toggleStatus agora busca pelo ID único do item para evitar conflitos em listas agrupadas
+        function toggleStatus(type, id) {
+            const listName = type === 'receita' ? 'receitas' : 'despesas';
+            const index = state[listName].findIndex(item => item.id === id);
+            if (index !== -1) {
+                state[listName][index].status = state[listName][index].status === 'pago' ? 'pendente' : 'pago';
+                save(); 
+                render();
+            }
         }
 
         // --- RENDERIZAÇÃO ---
@@ -430,10 +436,7 @@
             const custoRF = state.investRF.reduce((a,c) => a + c.valor, 0);
 
             const saldoLíquido = recPagas - desPagas;
-
-            // PATRIMÔNIO TOTAL: EXCLUSIVAMENTE INVESTIMENTOS (SOLICITAÇÃO 1)
-            const totalInvestidoMercado = mercadoRV + custoRF;
-            const patrimônioTotal = totalInvestidoMercado;
+            const patrimônioTotal = mercadoRV + custoRF;
 
             document.getElementById('dash-saldo').innerText = fmt(saldoLíquido);
             document.getElementById('dash-investido-custo').innerText = fmt(custoInvestRV + custoRF);
@@ -442,7 +445,6 @@
             document.getElementById('inv-rv-mercado').innerText = fmt(mercadoRV);
             document.getElementById('inv-rf-total').innerText = fmt(custoRF);
 
-            // ALERTA DE CONTAS VENCIDAS (SOLICITAÇÃO 4)
             const despesasVencidas = state.despesas.filter(d => d.venc < hoje && d.status === 'pendente');
             const totalVencido = despesasVencidas.reduce((a,c) => a + c.valor, 0);
             const alertContainer = document.getElementById('alerta-vencidos-container');
@@ -465,7 +467,6 @@
                 alertContainer.classList.add('hidden');
             }
 
-            // ORGANIZAÇÃO DE RECEITAS POR MÊS (SOLICITAÇÃO 2)
             const totalGeralRec = state.receitas.reduce((a,c) => a + c.valor, 0);
             document.getElementById('total-geral-receitas').innerText = `Total Geral: ${fmt(totalGeralRec)}`;
 
@@ -487,12 +488,11 @@
                     </div>
                     <div class="grid gap-3">
                         ${receitasAgrupadas[mes].items.map((r) => {
-                            // Encontrar index original para os botões de ação
                             const originalIndex = state.receitas.findIndex(item => item.id === r.id);
                             return `
                             <div class="card p-4 flex justify-between items-center group">
                                 <div class="flex items-center gap-4">
-                                    <button onclick="toggleStatus('receita', ${originalIndex})" class="w-8 h-8 rounded-full border-2 ${r.status === 'pago' ? 'bg-emerald-500 border-emerald-500' : 'border-slate-700'} flex items-center justify-center transition">
+                                    <button onclick="toggleStatus('receita', ${r.id})" class="w-8 h-8 rounded-full border-2 ${r.status === 'pago' ? 'bg-emerald-500 border-emerald-500' : 'border-slate-700'} flex items-center justify-center transition hover:border-emerald-500">
                                         ${r.status === 'pago' ? '<i data-lucide="check" class="text-white w-4 h-4"></i>' : ''}
                                     </button>
                                     <div onclick="openForm('receita', ${originalIndex})" class="cursor-pointer">
@@ -502,7 +502,7 @@
                                 </div>
                                 <div class="flex items-center gap-4">
                                     <p class="font-black text-emerald-500">${fmt(r.valor)}</p>
-                                    <button onclick="deleteItem('receitas', ${originalIndex})" class="text-slate-700 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    <button onclick="deleteItemById('receitas', ${r.id})" class="text-slate-700 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                                 </div>
                             </div>`
                         }).join('')}
@@ -510,12 +510,11 @@
                 </div>
             `).join('');
 
-            // Lista Despesas
             document.getElementById('lista-despesas').innerHTML = state.despesas.map((d, i) => {
                 const isVencida = d.venc < hoje && d.status === 'pendente';
                 return `<div class="card p-4 flex justify-between items-center group ${isVencida ? 'border-rose-500/50 bg-rose-500/5' : ''}">
                     <div class="flex items-center gap-4">
-                        <button onclick="toggleStatus('despesa', ${i})" class="w-8 h-8 rounded-full border-2 ${d.status === 'pago' ? 'bg-rose-500 border-rose-500' : 'border-slate-700'} flex items-center justify-center">
+                        <button onclick="toggleStatus('despesa', ${d.id})" class="w-8 h-8 rounded-full border-2 ${d.status === 'pago' ? 'bg-rose-500 border-rose-500' : 'border-slate-700'} flex items-center justify-center transition hover:border-rose-500">
                             ${d.status === 'pago' ? '<i data-lucide="check" class="text-white w-4 h-4"></i>' : ''}
                         </button>
                         <div onclick="openForm('despesa', ${i})" class="cursor-pointer">
@@ -525,11 +524,10 @@
                     </div>
                     <div class="flex items-center gap-4">
                         <p class="font-black text-rose-500">${fmt(d.valor)}</p>
-                        <button onclick="deleteItem('despesas', ${i})" class="text-slate-700 hover:text-rose-500 opacity-0 group-hover:opacity-100"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        <button onclick="deleteItemById('despesas', ${d.id})" class="text-slate-700 hover:text-rose-500 opacity-0 group-hover:opacity-100"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                     </div>
                 </div>`}).join('');
 
-            // Tabela Investimentos
             document.getElementById('corpo-investimentos').innerHTML = state.investRV.map((a, i) => {
                 const custo = a.qtd * a.pm;
                 const atual = a.qtd * (a.cotacao || 0);
@@ -543,7 +541,7 @@
                     <td class="p-4 font-bold text-indigo-400">${fmt(a.cotacao || 0)}</td>
                     <td class="p-4 font-black">${fmt(atual)}</td>
                     <td class="p-4 font-black ${lucro >= 0 ? 'text-emerald-500' : 'text-rose-500'}">${fmt(lucro)}<br><span class="text-[9px] font-bold">${rent.toFixed(2)}%</span></td>
-                    <td class="p-4 text-right"><button onclick="deleteItem('investRV', ${i})" class="text-slate-700 hover:text-rose-500 transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td>
+                    <td class="p-4 text-right"><button onclick="deleteItemById('investRV', ${a.id})" class="text-slate-700 hover:text-rose-500 transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td>
                 </tr>`;
             }).join('') + state.investRF.map((f, i) => `
                 <tr class="bg-emerald-500/5 border-b border-slate-800/30">
@@ -553,10 +551,9 @@
                     <td class="p-4 text-center">-</td>
                     <td class="p-4 font-black">${fmt(f.valor)}</td>
                     <td class="p-4 text-xs italic opacity-40 text-emerald-400">Renda Fixa</td>
-                    <td class="p-4 text-right"><button onclick="deleteItem('investRF', ${i})" class="text-slate-700 hover:text-rose-500 transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td>
+                    <td class="p-4 text-right"><button onclick="deleteItemById('investRF', ${f.id})" class="text-slate-700 hover:text-rose-500 transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td>
                 </tr>`).join('');
 
-            // Agenda
             document.getElementById('lista-agenda').innerHTML = state.despesas.filter(d => d.status === 'pendente').sort((a,b) => a.venc > b.venc ? 1 : -1).slice(0,4).map(d => `
                 <div class="p-3 bg-slate-900 border-l-4 ${d.venc < hoje ? 'border-rose-500' : 'border-amber-500'} rounded-xl flex justify-between text-xs">
                     <span>${d.descricao}</span><span class="font-bold">${fmt(d.valor)}</span>
@@ -583,7 +580,15 @@
             });
         }
 
-        function deleteItem(type, i) { if(confirm('Excluir lançamento?')) { state[type].splice(i, 1); save(); render(); } }
+        // BUG FIX: Nova função de deletar por ID para garantir segurança
+        function deleteItemById(type, id) { 
+            if(confirm('Excluir lançamento?')) { 
+                state[type] = state[type].filter(item => item.id !== id);
+                save(); 
+                render(); 
+            } 
+        }
+        
         function clearData() { if(confirm('Isso apagará todos os dados salvos localmente!')) { localStorage.clear(); location.reload(); } }
 
         window.onload = () => {
