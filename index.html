@@ -110,8 +110,9 @@
                         <canvas id="chartFluxo"></canvas>
                     </div>
                     <div class="card p-6">
-                        <h4 class="font-bold mb-4 flex items-center gap-2"><i data-lucide="calendar" class="text-amber-500"></i> Agenda de Contas</h4>
-                        <div id="lista-agenda" class="space-y-3"></div>
+                        <h4 class="font-bold mb-4 flex items-center gap-2"><i data-lucide="calendar" class="text-amber-500"></i> Agenda e Previsões</h4>
+                        <div id="lista-previsao-futura" class="mb-4 grid grid-cols-1 gap-2"></div>
+                        <div id="lista-agenda" class="space-y-3 border-t border-slate-800 pt-4"></div>
                     </div>
                 </div>
             </section>
@@ -131,10 +132,13 @@
             <!-- ABA DESPESAS -->
             <section id="despesas" class="tab-content space-y-4">
                 <div class="flex justify-between items-center bg-slate-900/50 p-6 rounded-3xl border border-slate-800">
-                    <h3 class="text-xl font-bold text-rose-500">Minhas Despesas</h3>
+                    <div>
+                        <h3 class="text-xl font-bold text-rose-500">Minhas Despesas</h3>
+                        <p id="total-geral-despesas-previsto" class="text-xs text-slate-400 font-bold uppercase mt-1"></p>
+                    </div>
                     <button onclick="openForm('despesa')" class="bg-rose-600 px-6 py-3 rounded-2xl font-bold hover:bg-rose-500 transition shadow-lg">+ Add Despesa</button>
                 </div>
-                <div id="lista-despesas" class="grid gap-3"></div>
+                <div id="lista-despesas-agrupadas" class="space-y-8"></div>
             </section>
 
             <!-- ABA INVESTIMENTOS -->
@@ -200,7 +204,7 @@
             <h3 id="form-title" class="text-2xl font-black mb-6">Lançamento</h3>
             <form id="main-form" class="space-y-4">
                 <input type="hidden" id="form-type">
-                <input type="hidden" id="form-index">
+                <input type="hidden" id="form-id">
 
                 <div>
                     <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Descrição / Ticker</label>
@@ -311,12 +315,12 @@
         }
 
         // --- FORMULÁRIO ---
-        function openForm(type, index = -1) {
+        function openForm(type, id = null) {
             const form = document.getElementById('main-form');
             form.reset();
             document.getElementById('form-type').value = type;
-            document.getElementById('form-index').value = index;
-            document.getElementById('form-title').innerText = index === -1 ? `Novo ${type}` : `Editar ${type}`;
+            document.getElementById('form-id').value = id || '';
+            document.getElementById('form-title').innerText = id === null ? `Novo ${type}` : `Editar ${type}`;
             
             const isRV = (type === 'rv');
             const isRF = (type === 'rf');
@@ -328,18 +332,20 @@
 
             if (!isRV && !isRF) updateCategorySelect(type);
 
-            if (index !== -1) {
-                const list = type === 'receita' ? state.receitas : type === 'despesa' ? state.despesas : type === 'rv' ? state.investRV : state.investRF;
-                const item = list[index];
-                document.getElementById('inp-desc').value = item.ticker || item.descricao || item.nome;
-                if (isRV) {
-                    document.getElementById('inp-qtd').value = item.qtd;
-                    document.getElementById('inp-pm').value = item.pm;
-                } else {
-                    document.getElementById('inp-valor').value = item.valor;
-                    document.getElementById('inp-venc').value = item.venc || item.data;
-                    document.getElementById('inp-pago').value = item.pagoData || '';
-                    if (!isRV && !isRF) updateCategorySelect(type, item.categoria);
+            if (id !== null) {
+                const listName = type === 'receita' ? 'receitas' : type === 'despesa' ? 'despesas' : type === 'rv' ? 'investRV' : 'investRF';
+                const item = state[listName].find(i => i.id == id);
+                if (item) {
+                    document.getElementById('inp-desc').value = item.ticker || item.descricao || item.nome;
+                    if (isRV) {
+                        document.getElementById('inp-qtd').value = item.qtd;
+                        document.getElementById('inp-pm').value = item.pm;
+                    } else {
+                        document.getElementById('inp-valor').value = item.valor;
+                        document.getElementById('inp-venc').value = item.venc || item.data;
+                        document.getElementById('inp-pago').value = item.pagoData || '';
+                        if (!isRV && !isRF) updateCategorySelect(type, item.categoria);
+                    }
                 }
             }
             document.getElementById('modal-form').classList.remove('hidden');
@@ -350,11 +356,14 @@
         document.getElementById('main-form').onsubmit = (e) => {
             e.preventDefault();
             const type = document.getElementById('form-type').value;
-            const index = parseInt(document.getElementById('form-index').value);
+            const id = document.getElementById('form-id').value;
+
+            const listName = type === 'receita' ? 'receitas' : type === 'despesa' ? 'despesas' : type === 'rv' ? 'investRV' : 'investRF';
+            let itemIndex = id ? state[listName].findIndex(i => i.id == id) : -1;
 
             let newItem = { status: 'pendente' };
-            // BUG FIX: Garante que ID seja gerado apenas para novos e preservado para edições
-            if (index === -1) newItem.id = Date.now() + Math.floor(Math.random() * 1000);
+            if (itemIndex === -1) newItem.id = Date.now() + Math.floor(Math.random() * 1000);
+            else newItem = { ...state[listName][itemIndex] };
 
             if (type === 'rv') {
                 newItem = {
@@ -362,8 +371,8 @@
                     ticker: document.getElementById('inp-desc').value.toUpperCase().trim(),
                     qtd: parseFloat(document.getElementById('inp-qtd').value),
                     pm: parseFloat(document.getElementById('inp-pm').value),
-                    cotacao: index !== -1 ? state.investRV[index].cotacao : 0,
-                    lastSync: index !== -1 ? state.investRV[index].lastSync : 'N/A'
+                    cotacao: newItem.cotacao || 0,
+                    lastSync: newItem.lastSync || 'N/A'
                 };
                 newItem.custoTotal = newItem.qtd * newItem.pm;
             } else if (type === 'rf') {
@@ -381,19 +390,16 @@
                     valor: parseFloat(document.getElementById('inp-valor').value),
                     venc: document.getElementById('inp-venc').value,
                     pagoData: document.getElementById('inp-pago').value,
-                    categoria: document.getElementById('inp-cat').value,
-                    status: index !== -1 ? state[type === 'receita' ? 'receitas' : 'despesas'][index].status : 'pendente'
+                    categoria: document.getElementById('inp-cat').value
                 };
             }
 
-            const listName = type === 'receita' ? 'receitas' : type === 'despesa' ? 'despesas' : type === 'rv' ? 'investRV' : 'investRF';
-            if (index === -1) state[listName].push(newItem);
-            else state[listName][index] = { ...state[listName][index], ...newItem };
+            if (itemIndex === -1) state[listName].push(newItem);
+            else state[listName][itemIndex] = newItem;
 
             save(); closeModal(); render();
         };
 
-        // --- API ALPHA VANTAGE ---
         async function syncAlphaVantage() {
             if (!state.config.apiKey) return alert("Configure a API Key nas Configurações!");
             const icon = document.getElementById('sync-icon');
@@ -414,12 +420,11 @@
             save(); render(); icon.classList.remove('animate-spin');
         }
 
-        // BUG FIX: toggleStatus agora busca pelo ID único do item para evitar conflitos em listas agrupadas
         function toggleStatus(type, id) {
             const listName = type === 'receita' ? 'receitas' : 'despesas';
-            const index = state[listName].findIndex(item => item.id === id);
-            if (index !== -1) {
-                state[listName][index].status = state[listName][index].status === 'pago' ? 'pendente' : 'pago';
+            const item = state[listName].find(item => item.id == id);
+            if (item) {
+                item.status = item.status === 'pago' ? 'pendente' : 'pago';
                 save(); 
                 render();
             }
@@ -445,10 +450,10 @@
             document.getElementById('inv-rv-mercado').innerText = fmt(mercadoRV);
             document.getElementById('inv-rf-total').innerText = fmt(custoRF);
 
+            // Alerta Vencidos
             const despesasVencidas = state.despesas.filter(d => d.venc < hoje && d.status === 'pendente');
             const totalVencido = despesasVencidas.reduce((a,c) => a + c.valor, 0);
             const alertContainer = document.getElementById('alerta-vencidos-container');
-            
             document.getElementById('dash-vencido').innerText = fmt(totalVencido);
 
             if (despesasVencidas.length > 0) {
@@ -467,35 +472,93 @@
                 alertContainer.classList.add('hidden');
             }
 
-            const totalGeralRec = state.receitas.reduce((a,c) => a + c.valor, 0);
-            document.getElementById('total-geral-receitas').innerText = `Total Geral: ${fmt(totalGeralRec)}`;
+            // --- LÓGICA DE AGRUPAMENTO E PREVISÃO (DESPESAS) ---
+            const despesasAgrupadas = state.despesas.reduce((acc, des) => {
+                if(!des.venc) return acc;
+                const [ano, mes] = des.venc.split('-');
+                const label = new Date(ano, mes - 1).toLocaleString('pt-br', { month: 'long', year: 'numeric' });
+                if (!acc[label]) acc[label] = { items: [], previsto: 0, pago: 0, pendente: 0, sortKey: `${ano}-${mes}` };
+                acc[label].items.push(des);
+                acc[label].previsto += des.valor;
+                if(des.status === 'pago') acc[label].pago += des.valor;
+                else acc[label].pendente += des.valor;
+                return acc;
+            }, {});
 
+            const mesesSorted = Object.keys(despesasAgrupadas).sort((a,b) => despesasAgrupadas[a].sortKey.localeCompare(despesasAgrupadas[b].sortKey));
+
+            // Dashboard - Próximas Previsões
+            const mesAtualObj = new Date();
+            const mesAtualLabel = mesAtualObj.toLocaleString('pt-br', { month: 'long', year: 'numeric' });
+            
+            document.getElementById('lista-previsao-futura').innerHTML = mesesSorted.filter(m => despesasAgrupadas[m].sortKey >= `${mesAtualObj.getFullYear()}-${(mesAtualObj.getMonth()+1).toString().padStart(2,'0')}`).slice(0,3).map(m => `
+                <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl flex justify-between items-center">
+                    <div class="text-[10px] uppercase font-black text-indigo-400">${m}</div>
+                    <div class="text-xs font-bold">Previsto: <span class="text-white">${fmt(despesasAgrupadas[m].previsto)}</span></div>
+                </div>
+            `).join('');
+
+            // Aba Despesas - Render
+            document.getElementById('total-geral-despesas-previsto').innerText = `Total Geral Previsto: ${fmt(state.despesas.reduce((a,c) => a + c.valor, 0))}`;
+            document.getElementById('lista-despesas-agrupadas').innerHTML = mesesSorted.map(mes => `
+                <div class="space-y-3">
+                    <div class="flex flex-col border-b border-slate-800 pb-2">
+                        <h4 class="text-rose-500 font-black uppercase text-xs tracking-widest">${mes}</h4>
+                        <div class="flex justify-between mt-1">
+                             <span class="text-[10px] font-bold text-slate-500 uppercase">Previsto: ${fmt(despesasAgrupadas[mes].previsto)}</span>
+                             <span class="text-[10px] font-bold text-emerald-500 uppercase">Pago: ${fmt(despesasAgrupadas[mes].pago)}</span>
+                             <span class="text-[10px] font-bold text-amber-500 uppercase">Pendente: ${fmt(despesasAgrupadas[mes].pendente)}</span>
+                        </div>
+                    </div>
+                    <div class="grid gap-3">
+                        ${despesasAgrupadas[mes].items.map((d) => `
+                            <div class="card p-4 flex justify-between items-center group ${d.venc < hoje && d.status === 'pendente' ? 'border-rose-500/50 bg-rose-500/5' : ''}">
+                                <div class="flex items-center gap-4">
+                                    <button onclick="toggleStatus('despesa', ${d.id})" class="w-8 h-8 rounded-full border-2 ${d.status === 'pago' ? 'bg-rose-500 border-rose-500' : 'border-slate-700'} flex items-center justify-center transition hover:border-rose-500">
+                                        ${d.status === 'pago' ? '<i data-lucide="check" class="text-white w-4 h-4"></i>' : ''}
+                                    </button>
+                                    <div onclick="openForm('despesa', ${d.id})" class="cursor-pointer">
+                                        <p class="font-bold ${d.status === 'pago' ? 'strikethrough' : ''}">${d.descricao}</p>
+                                        <p class="text-[10px] text-slate-500 uppercase font-bold">${d.categoria} • ${d.venc.split('-').reverse().join('/')}</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-4">
+                                    <p class="font-black text-rose-500">${fmt(d.valor)}</p>
+                                    <button onclick="deleteItemById('despesas', ${d.id})" class="text-slate-700 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                </div>
+                            </div>`).join('')}
+                    </div>
+                </div>
+            `).join('');
+
+            // Receitas Render (Mantido por ID)
             const receitasAgrupadas = state.receitas.reduce((acc, rec) => {
                 if(!rec.venc) return acc;
                 const [ano, mes] = rec.venc.split('-');
                 const label = new Date(ano, mes - 1).toLocaleString('pt-br', { month: 'long', year: 'numeric' });
-                if (!acc[label]) acc[label] = { items: [], total: 0 };
+                if (!acc[label]) acc[label] = { items: [], total: 0, sortKey: `${ano}-${mes}` };
                 acc[label].items.push(rec);
                 acc[label].total += rec.valor;
                 return acc;
             }, {});
 
-            document.getElementById('lista-receitas-agrupadas').innerHTML = Object.keys(receitasAgrupadas).sort().reverse().map(mes => `
+            const mesesRecSorted = Object.keys(receitasAgrupadas).sort((a,b) => receitasAgrupadas[a].sortKey.localeCompare(receitasAgrupadas[b].sortKey));
+
+            document.getElementById('total-geral-receitas').innerText = `Total Geral: ${fmt(state.receitas.reduce((a,c) => a + c.valor, 0))}`;
+            document.getElementById('lista-receitas-agrupadas').innerHTML = mesesRecSorted.map(mes => `
                 <div class="space-y-3">
                     <div class="flex justify-between items-end border-b border-slate-800 pb-2">
                         <h4 class="text-indigo-400 font-black uppercase text-xs tracking-widest">${mes}</h4>
                         <span class="text-emerald-500 font-bold text-sm">Mensal: ${fmt(receitasAgrupadas[mes].total)}</span>
                     </div>
                     <div class="grid gap-3">
-                        ${receitasAgrupadas[mes].items.map((r) => {
-                            const originalIndex = state.receitas.findIndex(item => item.id === r.id);
-                            return `
+                        ${receitasAgrupadas[mes].items.map((r) => `
                             <div class="card p-4 flex justify-between items-center group">
                                 <div class="flex items-center gap-4">
                                     <button onclick="toggleStatus('receita', ${r.id})" class="w-8 h-8 rounded-full border-2 ${r.status === 'pago' ? 'bg-emerald-500 border-emerald-500' : 'border-slate-700'} flex items-center justify-center transition hover:border-emerald-500">
                                         ${r.status === 'pago' ? '<i data-lucide="check" class="text-white w-4 h-4"></i>' : ''}
                                     </button>
-                                    <div onclick="openForm('receita', ${originalIndex})" class="cursor-pointer">
+                                    <div onclick="openForm('receita', ${r.id})" class="cursor-pointer">
                                         <p class="font-bold ${r.status === 'pago' ? 'strikethrough' : ''}">${r.descricao}</p>
                                         <p class="text-[10px] text-slate-500 uppercase font-bold">${r.categoria} • ${r.venc.split('-').reverse().join('/')}</p>
                                     </div>
@@ -504,38 +567,20 @@
                                     <p class="font-black text-emerald-500">${fmt(r.valor)}</p>
                                     <button onclick="deleteItemById('receitas', ${r.id})" class="text-slate-700 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                                 </div>
-                            </div>`
-                        }).join('')}
+                            </div>`).join('')}
                     </div>
                 </div>
             `).join('');
 
-            document.getElementById('lista-despesas').innerHTML = state.despesas.map((d, i) => {
-                const isVencida = d.venc < hoje && d.status === 'pendente';
-                return `<div class="card p-4 flex justify-between items-center group ${isVencida ? 'border-rose-500/50 bg-rose-500/5' : ''}">
-                    <div class="flex items-center gap-4">
-                        <button onclick="toggleStatus('despesa', ${d.id})" class="w-8 h-8 rounded-full border-2 ${d.status === 'pago' ? 'bg-rose-500 border-rose-500' : 'border-slate-700'} flex items-center justify-center transition hover:border-rose-500">
-                            ${d.status === 'pago' ? '<i data-lucide="check" class="text-white w-4 h-4"></i>' : ''}
-                        </button>
-                        <div onclick="openForm('despesa', ${i})" class="cursor-pointer">
-                            <p class="font-bold ${d.status === 'pago' ? 'strikethrough' : ''}">${d.descricao}</p>
-                            <p class="text-[10px] ${isVencida ? 'text-rose-500 font-bold' : 'text-slate-500'} uppercase font-bold">${d.categoria} • ${d.venc.split('-').reverse().join('/')}</p>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-4">
-                        <p class="font-black text-rose-500">${fmt(d.valor)}</p>
-                        <button onclick="deleteItemById('despesas', ${d.id})" class="text-slate-700 hover:text-rose-500 opacity-0 group-hover:opacity-100"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                    </div>
-                </div>`}).join('');
-
-            document.getElementById('corpo-investimentos').innerHTML = state.investRV.map((a, i) => {
+            // Tabela Investimentos (Mantido por ID)
+            document.getElementById('corpo-investimentos').innerHTML = state.investRV.map((a) => {
                 const custo = a.qtd * a.pm;
                 const atual = a.qtd * (a.cotacao || 0);
                 const lucro = atual - custo;
                 const rent = custo > 0 ? (lucro/custo)*100 : 0;
                 return `
                 <tr class="hover:bg-white/5 transition border-b border-slate-800/30">
-                    <td class="p-4 font-black cursor-pointer" onclick="openForm('rv', ${i})">${a.ticker}<br><span class="text-[8px] opacity-40 font-normal">Sync: ${a.lastSync}</span></td>
+                    <td class="p-4 font-black cursor-pointer" onclick="openForm('rv', ${a.id})">${a.ticker}<br><span class="text-[8px] opacity-40 font-normal">Sync: ${a.lastSync}</span></td>
                     <td class="p-4 text-xs font-bold text-slate-400">${a.qtd} <br> <span class="opacity-40 font-normal">PM: ${fmt(a.pm)}</span></td>
                     <td class="p-4 font-bold text-slate-500">${fmt(custo)}</td>
                     <td class="p-4 font-bold text-indigo-400">${fmt(a.cotacao || 0)}</td>
@@ -543,9 +588,9 @@
                     <td class="p-4 font-black ${lucro >= 0 ? 'text-emerald-500' : 'text-rose-500'}">${fmt(lucro)}<br><span class="text-[9px] font-bold">${rent.toFixed(2)}%</span></td>
                     <td class="p-4 text-right"><button onclick="deleteItemById('investRV', ${a.id})" class="text-slate-700 hover:text-rose-500 transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td>
                 </tr>`;
-            }).join('') + state.investRF.map((f, i) => `
+            }).join('') + state.investRF.map((f) => `
                 <tr class="bg-emerald-500/5 border-b border-slate-800/30">
-                    <td class="p-4 font-black cursor-pointer" onclick="openForm('rf', ${i})">${f.nome}</td>
+                    <td class="p-4 font-black cursor-pointer" onclick="openForm('rf', ${f.id})">${f.nome}</td>
                     <td class="p-4">${fmt(f.valor)}</td>
                     <td class="p-4 font-bold text-slate-500">${fmt(f.valor)}</td>
                     <td class="p-4 text-center">-</td>
@@ -554,6 +599,7 @@
                     <td class="p-4 text-right"><button onclick="deleteItemById('investRF', ${f.id})" class="text-slate-700 hover:text-rose-500 transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td>
                 </tr>`).join('');
 
+            // Agenda Rápida
             document.getElementById('lista-agenda').innerHTML = state.despesas.filter(d => d.status === 'pendente').sort((a,b) => a.venc > b.venc ? 1 : -1).slice(0,4).map(d => `
                 <div class="p-3 bg-slate-900 border-l-4 ${d.venc < hoje ? 'border-rose-500' : 'border-amber-500'} rounded-xl flex justify-between text-xs">
                     <span>${d.descricao}</span><span class="font-bold">${fmt(d.valor)}</span>
@@ -580,10 +626,9 @@
             });
         }
 
-        // BUG FIX: Nova função de deletar por ID para garantir segurança
         function deleteItemById(type, id) { 
             if(confirm('Excluir lançamento?')) { 
-                state[type] = state[type].filter(item => item.id !== id);
+                state[type] = state[type].filter(item => item.id != id);
                 save(); 
                 render(); 
             } 
