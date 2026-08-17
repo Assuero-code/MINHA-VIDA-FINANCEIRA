@@ -1,3 +1,5 @@
+--- START OF FILE text/html ---
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -21,6 +23,8 @@
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
         .strikethrough { text-decoration: line-through; opacity: 0.4; }
         .nav-active { background-color: #1e293b; color: white !important; border-left: 4px solid #6366f1; }
+        /* Novos Estilos */
+        .parcela-tag { font-size: 9px; padding: 2px 6px; border-radius: 4px; background: #1e293b; color: #94a3b8; font-weight: 800; border: 1px solid #334155; margin-left: 8px; }
     </style>
 </head>
 <body class="antialiased">
@@ -56,12 +60,19 @@
 
         <!-- MAIN CONTENT -->
         <main class="flex-1 p-4 md:p-10 overflow-hidden">
-            <header class="flex justify-between items-center mb-8">
+            <header class="flex justify-between items-start mb-8">
                 <div>
                     <h2 id="tab-title" class="text-3xl font-black text-white tracking-tight">Dashboard</h2>
                     <p id="current-date" class="text-slate-500 text-sm font-medium capitalize"></p>
                 </div>
-                <div class="flex gap-2">
+                <div class="flex flex-col items-end gap-3">
+                    <!-- FILTRO DE MÊS -->
+                    <div class="flex items-center gap-2 bg-slate-900 border border-slate-800 p-2 rounded-xl">
+                        <i data-lucide="calendar" class="w-4 h-4 text-indigo-500 ml-2"></i>
+                        <select id="filtro-mes-global" onchange="changeFilterMonth(this.value)" class="!bg-transparent !border-none !p-1 text-xs font-bold w-40 cursor-pointer">
+                            <!-- Opções via JS -->
+                        </select>
+                    </div>
                     <button onclick="syncAlphaVantage()" class="bg-slate-900 border border-slate-800 p-3 rounded-xl text-indigo-400 hover:text-white transition" id="btn-sync">
                         <i data-lucide="refresh-cw" id="sync-icon"></i>
                     </button>
@@ -75,7 +86,7 @@
                     <div class="card p-6 border-rose-500 bg-rose-500/10">
                         <div class="flex items-center gap-3 mb-4 text-rose-500">
                             <i data-lucide="alert-circle"></i>
-                            <h4 class="font-black uppercase tracking-widest text-sm">Contas Vencidas</h4>
+                            <h4 class="font-black uppercase tracking-widest text-sm">Contas Vencidas (Geral)</h4>
                         </div>
                         <div id="lista-vencidos-detalhe" class="space-y-2 mb-4"></div>
                         <div class="pt-4 border-t border-rose-500/20 flex justify-between items-center">
@@ -85,34 +96,38 @@
                     </div>
                 </div>
 
+                <!-- CARDS DE FECHAMENTO MENSAL -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div class="card p-5 border-emerald-500/20 bg-emerald-500/5">
-                        <p class="text-emerald-500 text-[10px] font-bold uppercase tracking-widest">Saldo Disponível</p>
-                        <h3 id="dash-saldo" class="text-2xl font-black">R$ 0,00</h3>
+                        <p class="text-emerald-500 text-[10px] font-bold uppercase tracking-widest">Receitas do Mês (Real)</p>
+                        <h3 id="dash-receita-mes" class="text-2xl font-black">R$ 0,00</h3>
+                        <p id="dash-receita-previsto" class="text-[9px] text-slate-500 mt-1">Previsto: R$ 0,00</p>
                     </div>
                     <div class="card p-5 border-rose-500/20 bg-rose-500/5">
-                        <p class="text-rose-500 text-[10px] font-bold uppercase tracking-widest">Contas Vencidas</p>
-                        <h3 id="dash-vencido" class="text-2xl font-black text-rose-500">R$ 0,00</h3>
+                        <p class="text-rose-500 text-[10px] font-bold uppercase tracking-widest">Despesas Pagas (Mês)</p>
+                        <h3 id="dash-despesa-paga-mes" class="text-2xl font-black text-rose-500">R$ 0,00</h3>
+                        <p id="dash-despesa-previsto" class="text-[9px] text-slate-500 mt-1">Previsto: R$ 0,00</p>
                     </div>
-                    <div class="card p-5 border-amber-500/20 bg-amber-500/5">
-                        <p class="text-amber-500 text-[10px] font-bold uppercase tracking-widest">Investido (Custo)</p>
-                        <h3 id="dash-investido-custo" class="text-2xl font-black">R$ 0,00</h3>
+                    <div class="card p-5 border-indigo-500/20 bg-indigo-500/5">
+                        <p class="text-indigo-400 text-[10px] font-bold uppercase tracking-widest">Saldo Real do Mês</p>
+                        <h3 id="dash-saldo-real-mes" class="text-2xl font-black">R$ 0,00</h3>
+                        <p id="dash-saldo-anterior" class="text-[9px] text-slate-500 mt-1">Transportado: R$ 0,00</p>
                     </div>
                     <div class="card p-5 bg-indigo-600 border-none shadow-xl shadow-indigo-500/20">
-                        <p class="text-white/70 text-[10px] font-bold uppercase tracking-widest">Patrimônio Total (Investimentos)</p>
-                        <h3 id="dash-patrimonio" class="text-2xl font-black text-white">R$ 0,00</h3>
+                        <p class="text-white/70 text-[10px] font-bold uppercase tracking-widest">Saldo Previsto Final</p>
+                        <h3 id="dash-saldo-previsto-mes" class="text-2xl font-black text-white">R$ 0,00</h3>
+                        <p class="text-[9px] text-white/50 mt-1">Considerando pendências</p>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     <div class="card p-6">
-                        <h4 class="font-bold mb-4 flex items-center gap-2"><i data-lucide="bar-chart-3" class="text-indigo-500"></i> Fluxo Mensal (Realizado)</h4>
+                        <h4 class="font-bold mb-4 flex items-center gap-2"><i data-lucide="bar-chart-3" class="text-indigo-500"></i> Fluxo do Mês (Realizado)</h4>
                         <canvas id="chartFluxo"></canvas>
                     </div>
                     <div class="card p-6">
-                        <h4 class="font-bold mb-4 flex items-center gap-2"><i data-lucide="calendar" class="text-amber-500"></i> Agenda e Previsões</h4>
-                        <div id="lista-previsao-futura" class="mb-4 grid grid-cols-1 gap-2"></div>
-                        <div id="lista-agenda" class="space-y-3 border-t border-slate-800 pt-4"></div>
+                        <h4 class="font-bold mb-4 flex items-center gap-2"><i data-lucide="calendar" class="text-amber-500"></i> Agenda do Mês</h4>
+                        <div id="lista-agenda" class="space-y-3"></div>
                     </div>
                 </div>
             </section>
@@ -222,6 +237,18 @@
                     </div>
                 </div>
 
+                <!-- CAMPO PARCELAMENTO -->
+                <div id="box-parcelamento" class="bg-slate-950/50 p-4 rounded-xl border border-slate-800 space-y-3">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" id="inp-is-parcelado" class="!w-4 !h-4" onchange="toggleParcelasView(this.checked)">
+                        <span class="text-xs font-bold text-slate-400 uppercase">Parcelar lançamento</span>
+                    </label>
+                    <div id="box-qtd-parcelas" class="hidden">
+                        <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Número de Parcelas (1-12)</label>
+                        <input type="number" id="inp-qtd-parcelas" min="1" max="12" value="1">
+                    </div>
+                </div>
+
                 <div id="box-efetivada" class="hidden">
                     <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Data de Pagamento Real</label>
                     <input type="date" id="inp-pago">
@@ -260,11 +287,13 @@
             investRF: [],
             config: { apiKey: '' },
             categoriasReceitas: ['Salário', 'Investimento', 'Venda', 'Extra'],
-            categoriasDespesas: ['Aluguel', 'Alimentação', 'Transporte', 'Saúde', 'Lazer', 'Educação']
+            categoriasDespesas: ['Aluguel', 'Alimentação', 'Transporte', 'Saúde', 'Lazer', 'Educação'],
+            selectedMonth: new Date().toISOString().slice(0, 7) // Formato YYYY-MM
         };
 
         if(!state.categoriasReceitas) state.categoriasReceitas = ['Salário', 'Investimento', 'Venda', 'Extra'];
         if(!state.categoriasDespesas) state.categoriasDespesas = ['Aluguel', 'Alimentação', 'Transporte', 'Saúde', 'Lazer', 'Educação'];
+        if(!state.selectedMonth) state.selectedMonth = new Date().toISOString().slice(0, 7);
 
         const save = () => localStorage.setItem('mvf_alpha_final_v1', JSON.stringify(state));
         const fmt = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
@@ -314,6 +343,44 @@
             }
         }
 
+        // --- MÊS FILTRO ---
+        function populateMonthFilter() {
+            const select = document.getElementById('filtro-mes-global');
+            const months = new Set();
+            
+            // Adicionar meses baseados nos dados existentes
+            [...state.receitas, ...state.despesas].forEach(item => {
+                if(item.venc) months.add(item.venc.slice(0, 7));
+            });
+
+            // Garantir que o mês atual e próximos estejam lá
+            let now = new Date();
+            for(let i=-2; i<=6; i++) {
+                let d = new Date(now.getFullYear(), now.getMonth() + i, 1);
+                months.add(d.toISOString().slice(0, 7));
+            }
+
+            const sortedMonths = Array.from(months).sort();
+            let html = '<option value="all">MOSTRAR TODOS</option>';
+            sortedMonths.forEach(m => {
+                const [year, month] = m.split('-');
+                const label = new Date(year, month-1).toLocaleString('pt-br', { month: 'long', year: 'numeric' });
+                html += `<option value="${m}" ${state.selectedMonth === m ? 'selected' : ''}>${label.toUpperCase()}</option>`;
+            });
+            select.innerHTML = html;
+        }
+
+        function changeFilterMonth(val) {
+            state.selectedMonth = val;
+            save();
+            render();
+        }
+
+        // --- PARCELAMENTO UI ---
+        function toggleParcelasView(checked) {
+            document.getElementById('box-qtd-parcelas').classList.toggle('hidden', !checked);
+        }
+
         // --- FORMULÁRIO ---
         function openForm(type, id = null) {
             const form = document.getElementById('main-form');
@@ -329,6 +396,10 @@
             document.getElementById('box-invest').classList.toggle('hidden', !isRV);
             document.getElementById('box-cat').classList.toggle('hidden', isRV || isRF);
             document.getElementById('box-efetivada').classList.toggle('hidden', isRV || isRF);
+            
+            // Esconder parcelamento em edição ou investimentos
+            document.getElementById('box-parcelamento').classList.toggle('hidden', id !== null || isRV || isRF);
+            document.getElementById('box-qtd-parcelas').classList.add('hidden');
 
             if (!isRV && !isRF) updateCategorySelect(type);
 
@@ -357,48 +428,72 @@
             e.preventDefault();
             const type = document.getElementById('form-type').value;
             const id = document.getElementById('form-id').value;
+            const isParcelado = document.getElementById('inp-is-parcelado').checked && !id;
 
             const listName = type === 'receita' ? 'receitas' : type === 'despesa' ? 'despesas' : type === 'rv' ? 'investRV' : 'investRF';
-            let itemIndex = id ? state[listName].findIndex(i => i.id == id) : -1;
+            
+            if (isParcelado && (type === 'receita' || type === 'despesa')) {
+                generateParcelas(type);
+            } else {
+                saveSingleItem(type, id, listName);
+            }
 
+            save(); closeModal(); render();
+        };
+
+        function saveSingleItem(type, id, listName) {
+            let itemIndex = id ? state[listName].findIndex(i => i.id == id) : -1;
             let newItem = { status: 'pendente' };
             if (itemIndex === -1) newItem.id = Date.now() + Math.floor(Math.random() * 1000);
             else newItem = { ...state[listName][itemIndex] };
 
             if (type === 'rv') {
-                newItem = {
-                    ...newItem,
-                    ticker: document.getElementById('inp-desc').value.toUpperCase().trim(),
-                    qtd: parseFloat(document.getElementById('inp-qtd').value),
-                    pm: parseFloat(document.getElementById('inp-pm').value),
-                    cotacao: newItem.cotacao || 0,
-                    lastSync: newItem.lastSync || 'N/A'
-                };
+                newItem = { ...newItem, ticker: document.getElementById('inp-desc').value.toUpperCase().trim(), qtd: parseFloat(document.getElementById('inp-qtd').value), pm: parseFloat(document.getElementById('inp-pm').value), cotacao: newItem.cotacao || 0, lastSync: newItem.lastSync || 'N/A' };
                 newItem.custoTotal = newItem.qtd * newItem.pm;
             } else if (type === 'rf') {
-                newItem = {
-                    ...newItem,
-                    nome: document.getElementById('inp-desc').value,
-                    valor: parseFloat(document.getElementById('inp-valor').value),
-                    venc: document.getElementById('inp-venc').value,
-                    custoTotal: parseFloat(document.getElementById('inp-valor').value)
-                };
+                newItem = { ...newItem, nome: document.getElementById('inp-desc').value, valor: parseFloat(document.getElementById('inp-valor').value), venc: document.getElementById('inp-venc').value, custoTotal: parseFloat(document.getElementById('inp-valor').value) };
             } else {
-                newItem = {
-                    ...newItem,
-                    descricao: document.getElementById('inp-desc').value,
-                    valor: parseFloat(document.getElementById('inp-valor').value),
-                    venc: document.getElementById('inp-venc').value,
-                    pagoData: document.getElementById('inp-pago').value,
-                    categoria: document.getElementById('inp-cat').value
-                };
+                newItem = { ...newItem, descricao: document.getElementById('inp-desc').value, valor: parseFloat(document.getElementById('inp-valor').value), venc: document.getElementById('inp-venc').value, pagoData: document.getElementById('inp-pago').value, categoria: document.getElementById('inp-cat').value };
             }
 
             if (itemIndex === -1) state[listName].push(newItem);
             else state[listName][itemIndex] = newItem;
+        }
 
-            save(); closeModal(); render();
-        };
+        function generateParcelas(type) {
+            const total = parseFloat(document.getElementById('inp-valor').value);
+            const qtd = parseInt(document.getElementById('inp-qtd-parcelas').value);
+            const desc = document.getElementById('inp-desc').value;
+            const dataBase = document.getElementById('inp-venc').value;
+            const cat = document.getElementById('inp-cat').value;
+            const groupId = Date.now();
+
+            const valorParcela = Math.floor((total * 100) / qtd) / 100;
+            const sobra = parseFloat((total - (valorParcela * qtd)).toFixed(2));
+
+            const listName = type === 'receita' ? 'receitas' : 'despesas';
+
+            for (let i = 1; i <= qtd; i++) {
+                let currentVal = valorParcela;
+                if (i === qtd) currentVal = parseFloat((valorParcela + sobra).toFixed(2));
+
+                let d = new Date(dataBase + "T00:00:00");
+                d.setMonth(d.getMonth() + (i - 1));
+                
+                const item = {
+                    id: Date.now() + Math.random(),
+                    groupId: groupId,
+                    descricao: desc,
+                    valor: currentVal,
+                    venc: d.toISOString().split('T')[0],
+                    categoria: cat,
+                    status: 'pendente',
+                    parcelaNum: i,
+                    parcelaTotal: qtd
+                };
+                state[listName].push(item);
+            }
+        }
 
         async function syncAlphaVantage() {
             if (!state.config.apiKey) return alert("Configure a API Key nas Configurações!");
@@ -425,32 +520,89 @@
             const item = state[listName].find(item => item.id == id);
             if (item) {
                 item.status = item.status === 'pago' ? 'pendente' : 'pago';
-                save(); 
-                render();
+                save(); render();
             }
+        }
+
+        // --- CÁLCULOS TIPO CADEIA (FECHAMENTO) ---
+        function getChainCalculations(targetMonth) {
+            const allMonths = new Set();
+            [...state.receitas, ...state.despesas].forEach(i => monthsSetAdd(allMonths, i.venc));
+            
+            const sortedMonths = Array.from(allMonths).sort();
+            let runningPrevisto = 0;
+            let runningReal = 0;
+            
+            let result = { 
+                previstoMes: 0, realMes: 0, 
+                despesaPagaMes: 0, despesaPrevistaMes: 0,
+                receitaRecebidaMes: 0, receitaPrevistaMes: 0,
+                anteriorPrevisto: 0, anteriorReal: 0 
+            };
+
+            for (const m of sortedMonths) {
+                const mesRec = state.receitas.filter(r => r.venc && r.venc.startsWith(m));
+                const mesDes = state.despesas.filter(d => d.venc && d.venc.startsWith(m));
+
+                const recPrev = mesRec.reduce((a,c) => a + c.valor, 0);
+                const recReal = mesRec.filter(r => r.status === 'pago').reduce((a,c) => a + c.valor, 0);
+                
+                const desPrev = mesDes.reduce((a,c) => a + c.valor, 0);
+                const desReal = mesDes.filter(d => d.status === 'pago').reduce((a,c) => a + c.valor, 0);
+
+                if (m === targetMonth) {
+                    result.anteriorPrevisto = runningPrevisto;
+                    result.anteriorReal = runningReal;
+                    result.receitaPrevistaMes = recPrev;
+                    result.receitaRecebidaMes = recReal;
+                    result.despesaPrevistaMes = desPrev;
+                    result.despesaPagaMes = desReal;
+                }
+
+                runningPrevisto += (recPrev - desPrev);
+                runningReal += (recReal - desReal);
+
+                if (m === targetMonth) {
+                    result.previstoMes = runningPrevisto;
+                    result.realMes = runningReal;
+                }
+            }
+            return result;
+        }
+
+        function monthsSetAdd(set, dateStr) {
+            if(dateStr) set.add(dateStr.slice(0,7));
         }
 
         // --- RENDERIZAÇÃO ---
         function render() {
+            populateMonthFilter();
             const hoje = new Date().toISOString().split('T')[0];
-            const recPagas = state.receitas.filter(r => r.status === 'pago').reduce((a,c) => a + c.valor, 0);
-            const desPagas = state.despesas.filter(d => d.status === 'pago').reduce((a,c) => a + c.valor, 0);
-            
+            const isAll = state.selectedMonth === 'all';
+
+            // Dados Investimentos (Sempre Global)
             const custoInvestRV = state.investRV.reduce((a,c) => a + (c.qtd * c.pm), 0);
             const mercadoRV = state.investRV.reduce((a,c) => a + (c.qtd * (c.cotacao || 0)), 0);
             const custoRF = state.investRF.reduce((a,c) => a + c.valor, 0);
-
-            const saldoLíquido = recPagas - desPagas;
             const patrimônioTotal = mercadoRV + custoRF;
 
-            document.getElementById('dash-saldo').innerText = fmt(saldoLíquido);
             document.getElementById('dash-investido-custo').innerText = fmt(custoInvestRV + custoRF);
             document.getElementById('dash-patrimonio').innerText = fmt(patrimônioTotal);
             document.getElementById('side-patrimonio').innerText = fmt(patrimônioTotal);
             document.getElementById('inv-rv-mercado').innerText = fmt(mercadoRV);
             document.getElementById('inv-rf-total').innerText = fmt(custoRF);
 
-            // Alerta Vencidos
+            // Fechamento Mensal no Dashboard
+            const res = getChainCalculations(state.selectedMonth);
+            document.getElementById('dash-receita-mes').innerText = fmt(res.receitaRecebidaMes);
+            document.getElementById('dash-receita-previsto').innerText = `Previsto: ${fmt(res.receitaPrevistaMes)}`;
+            document.getElementById('dash-despesa-paga-mes').innerText = fmt(res.despesaPagaMes);
+            document.getElementById('dash-despesa-previsto').innerText = `Previsto: ${fmt(res.despesaPrevistaMes)}`;
+            document.getElementById('dash-saldo-real-mes').innerText = fmt(res.realMes);
+            document.getElementById('dash-saldo-anterior').innerText = `Transportado: ${fmt(res.anteriorReal)}`;
+            document.getElementById('dash-saldo-previsto-mes').innerText = fmt(res.previstoMes);
+
+            // Alerta Vencidos (Mantido Global)
             const despesasVencidas = state.despesas.filter(d => d.venc < hoje && d.status === 'pendente');
             const totalVencido = despesasVencidas.reduce((a,c) => a + c.valor, 0);
             const alertContainer = document.getElementById('alerta-vencidos-container');
@@ -461,152 +613,95 @@
                 document.getElementById('alerta-vencido-total').innerText = fmt(totalVencido);
                 document.getElementById('lista-vencidos-detalhe').innerHTML = despesasVencidas.map(d => `
                     <div class="flex justify-between items-center text-xs bg-rose-500/10 p-2 rounded-lg border border-rose-500/20">
-                        <div>
-                            <span class="font-black text-rose-500">${d.descricao}</span>
-                            <span class="text-[10px] text-rose-300/60 ml-2">Venc: ${d.venc.split('-').reverse().join('/')}</span>
-                        </div>
+                        <div><span class="font-black text-rose-500">${d.descricao}</span><span class="text-[10px] text-rose-300/60 ml-2">${d.venc.split('-').reverse().join('/')}</span></div>
                         <span class="font-bold text-rose-500">${fmt(d.valor)}</span>
-                    </div>
-                `).join('');
-            } else {
-                alertContainer.classList.add('hidden');
-            }
+                    </div>`).join('');
+            } else { alertContainer.classList.add('hidden'); }
 
-            // --- LÓGICA DE AGRUPAMENTO E PREVISÃO (DESPESAS) ---
-            const despesasAgrupadas = state.despesas.reduce((acc, des) => {
-                if(!des.venc) return acc;
-                const [ano, mes] = des.venc.split('-');
-                const label = new Date(ano, mes - 1).toLocaleString('pt-br', { month: 'long', year: 'numeric' });
-                if (!acc[label]) acc[label] = { items: [], previsto: 0, pago: 0, pendente: 0, sortKey: `${ano}-${mes}` };
-                acc[label].items.push(des);
-                acc[label].previsto += des.valor;
-                if(des.status === 'pago') acc[label].pago += des.valor;
-                else acc[label].pendente += des.valor;
-                return acc;
-            }, {});
+            // Agenda do Mês
+            document.getElementById('lista-agenda').innerHTML = state.despesas
+                .filter(d => d.venc && d.venc.startsWith(state.selectedMonth) && d.status === 'pendente')
+                .sort((a,b) => a.venc.localeCompare(b.venc))
+                .map(d => `
+                <div class="p-3 bg-slate-900 border-l-4 ${d.venc < hoje ? 'border-rose-500' : 'border-amber-500'} rounded-xl flex justify-between text-xs">
+                    <span>${d.descricao} ${d.parcelaNum ? `<span class="parcela-tag">${d.parcelaNum}/${d.parcelaTotal}</span>` : ''}</span>
+                    <span class="font-bold">${fmt(d.valor)}</span>
+                </div>`).join('') || '<p class="text-xs text-slate-500 italic">Nenhuma conta pendente para este mês.</p>';
 
-            const mesesSorted = Object.keys(despesasAgrupadas).sort((a,b) => despesasAgrupadas[a].sortKey.localeCompare(despesasAgrupadas[b].sortKey));
+            // Renderizar Listas (Receitas / Despesas)
+            renderList('receita', isAll);
+            renderList('despesa', isAll);
 
-            // Dashboard - Próximas Previsões
-            const mesAtualObj = new Date();
-            const mesAtualLabel = mesAtualObj.toLocaleString('pt-br', { month: 'long', year: 'numeric' });
-            
-            document.getElementById('lista-previsao-futura').innerHTML = mesesSorted.filter(m => despesasAgrupadas[m].sortKey >= `${mesAtualObj.getFullYear()}-${(mesAtualObj.getMonth()+1).toString().padStart(2,'0')}`).slice(0,3).map(m => `
-                <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl flex justify-between items-center">
-                    <div class="text-[10px] uppercase font-black text-indigo-400">${m}</div>
-                    <div class="text-xs font-bold">Previsto: <span class="text-white">${fmt(despesasAgrupadas[m].previsto)}</span></div>
-                </div>
-            `).join('');
-
-            // Aba Despesas - Render
-            document.getElementById('total-geral-despesas-previsto').innerText = `Total Geral Previsto: ${fmt(state.despesas.reduce((a,c) => a + c.valor, 0))}`;
-            document.getElementById('lista-despesas-agrupadas').innerHTML = mesesSorted.map(mes => `
-                <div class="space-y-3">
-                    <div class="flex flex-col border-b border-slate-800 pb-2">
-                        <h4 class="text-rose-500 font-black uppercase text-xs tracking-widest">${mes}</h4>
-                        <div class="flex justify-between mt-1">
-                             <span class="text-[10px] font-bold text-slate-500 uppercase">Previsto: ${fmt(despesasAgrupadas[mes].previsto)}</span>
-                             <span class="text-[10px] font-bold text-emerald-500 uppercase">Pago: ${fmt(despesasAgrupadas[mes].pago)}</span>
-                             <span class="text-[10px] font-bold text-amber-500 uppercase">Pendente: ${fmt(despesasAgrupadas[mes].pendente)}</span>
-                        </div>
-                    </div>
-                    <div class="grid gap-3">
-                        ${despesasAgrupadas[mes].items.map((d) => `
-                            <div class="card p-4 flex justify-between items-center group ${d.venc < hoje && d.status === 'pendente' ? 'border-rose-500/50 bg-rose-500/5' : ''}">
-                                <div class="flex items-center gap-4">
-                                    <button onclick="toggleStatus('despesa', ${d.id})" class="w-8 h-8 rounded-full border-2 ${d.status === 'pago' ? 'bg-rose-500 border-rose-500' : 'border-slate-700'} flex items-center justify-center transition hover:border-rose-500">
-                                        ${d.status === 'pago' ? '<i data-lucide="check" class="text-white w-4 h-4"></i>' : ''}
-                                    </button>
-                                    <div onclick="openForm('despesa', ${d.id})" class="cursor-pointer">
-                                        <p class="font-bold ${d.status === 'pago' ? 'strikethrough' : ''}">${d.descricao}</p>
-                                        <p class="text-[10px] text-slate-500 uppercase font-bold">${d.categoria} • ${d.venc.split('-').reverse().join('/')}</p>
-                                    </div>
-                                </div>
-                                <div class="flex items-center gap-4">
-                                    <p class="font-black text-rose-500">${fmt(d.valor)}</p>
-                                    <button onclick="deleteItemById('despesas', ${d.id})" class="text-slate-700 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                                </div>
-                            </div>`).join('')}
-                    </div>
-                </div>
-            `).join('');
-
-            // Receitas Render (Mantido por ID)
-            const receitasAgrupadas = state.receitas.reduce((acc, rec) => {
-                if(!rec.venc) return acc;
-                const [ano, mes] = rec.venc.split('-');
-                const label = new Date(ano, mes - 1).toLocaleString('pt-br', { month: 'long', year: 'numeric' });
-                if (!acc[label]) acc[label] = { items: [], total: 0, sortKey: `${ano}-${mes}` };
-                acc[label].items.push(rec);
-                acc[label].total += rec.valor;
-                return acc;
-            }, {});
-
-            const mesesRecSorted = Object.keys(receitasAgrupadas).sort((a,b) => receitasAgrupadas[a].sortKey.localeCompare(receitasAgrupadas[b].sortKey));
-
-            document.getElementById('total-geral-receitas').innerText = `Total Geral: ${fmt(state.receitas.reduce((a,c) => a + c.valor, 0))}`;
-            document.getElementById('lista-receitas-agrupadas').innerHTML = mesesRecSorted.map(mes => `
-                <div class="space-y-3">
-                    <div class="flex justify-between items-end border-b border-slate-800 pb-2">
-                        <h4 class="text-indigo-400 font-black uppercase text-xs tracking-widest">${mes}</h4>
-                        <span class="text-emerald-500 font-bold text-sm">Mensal: ${fmt(receitasAgrupadas[mes].total)}</span>
-                    </div>
-                    <div class="grid gap-3">
-                        ${receitasAgrupadas[mes].items.map((r) => `
-                            <div class="card p-4 flex justify-between items-center group">
-                                <div class="flex items-center gap-4">
-                                    <button onclick="toggleStatus('receita', ${r.id})" class="w-8 h-8 rounded-full border-2 ${r.status === 'pago' ? 'bg-emerald-500 border-emerald-500' : 'border-slate-700'} flex items-center justify-center transition hover:border-emerald-500">
-                                        ${r.status === 'pago' ? '<i data-lucide="check" class="text-white w-4 h-4"></i>' : ''}
-                                    </button>
-                                    <div onclick="openForm('receita', ${r.id})" class="cursor-pointer">
-                                        <p class="font-bold ${r.status === 'pago' ? 'strikethrough' : ''}">${r.descricao}</p>
-                                        <p class="text-[10px] text-slate-500 uppercase font-bold">${r.categoria} • ${r.venc.split('-').reverse().join('/')}</p>
-                                    </div>
-                                </div>
-                                <div class="flex items-center gap-4">
-                                    <p class="font-black text-emerald-500">${fmt(r.valor)}</p>
-                                    <button onclick="deleteItemById('receitas', ${r.id})" class="text-slate-700 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                                </div>
-                            </div>`).join('')}
-                    </div>
-                </div>
-            `).join('');
-
-            // Tabela Investimentos (Mantido por ID)
+            // Tabela Investimentos
             document.getElementById('corpo-investimentos').innerHTML = state.investRV.map((a) => {
-                const custo = a.qtd * a.pm;
-                const atual = a.qtd * (a.cotacao || 0);
-                const lucro = atual - custo;
-                const rent = custo > 0 ? (lucro/custo)*100 : 0;
-                return `
-                <tr class="hover:bg-white/5 transition border-b border-slate-800/30">
+                const custo = a.qtd * a.pm; const atual = a.qtd * (a.cotacao || 0); const lucro = atual - custo; const rent = custo > 0 ? (lucro/custo)*100 : 0;
+                return `<tr class="hover:bg-white/5 transition border-b border-slate-800/30">
                     <td class="p-4 font-black cursor-pointer" onclick="openForm('rv', ${a.id})">${a.ticker}<br><span class="text-[8px] opacity-40 font-normal">Sync: ${a.lastSync}</span></td>
                     <td class="p-4 text-xs font-bold text-slate-400">${a.qtd} <br> <span class="opacity-40 font-normal">PM: ${fmt(a.pm)}</span></td>
-                    <td class="p-4 font-bold text-slate-500">${fmt(custo)}</td>
-                    <td class="p-4 font-bold text-indigo-400">${fmt(a.cotacao || 0)}</td>
-                    <td class="p-4 font-black">${fmt(atual)}</td>
+                    <td class="p-4 font-bold text-slate-500">${fmt(custo)}</td><td class="p-4 font-bold text-indigo-400">${fmt(a.cotacao || 0)}</td><td class="p-4 font-black">${fmt(atual)}</td>
                     <td class="p-4 font-black ${lucro >= 0 ? 'text-emerald-500' : 'text-rose-500'}">${fmt(lucro)}<br><span class="text-[9px] font-bold">${rent.toFixed(2)}%</span></td>
                     <td class="p-4 text-right"><button onclick="deleteItemById('investRV', ${a.id})" class="text-slate-700 hover:text-rose-500 transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td>
                 </tr>`;
             }).join('') + state.investRF.map((f) => `
                 <tr class="bg-emerald-500/5 border-b border-slate-800/30">
-                    <td class="p-4 font-black cursor-pointer" onclick="openForm('rf', ${f.id})">${f.nome}</td>
-                    <td class="p-4">${fmt(f.valor)}</td>
-                    <td class="p-4 font-bold text-slate-500">${fmt(f.valor)}</td>
-                    <td class="p-4 text-center">-</td>
-                    <td class="p-4 font-black">${fmt(f.valor)}</td>
-                    <td class="p-4 text-xs italic opacity-40 text-emerald-400">Renda Fixa</td>
+                    <td class="p-4 font-black cursor-pointer" onclick="openForm('rf', ${f.id})">${f.nome}</td><td class="p-4">${fmt(f.valor)}</td><td class="p-4 font-bold text-slate-500">${fmt(f.valor)}</td>
+                    <td class="p-4 text-center">-</td><td class="p-4 font-black">${fmt(f.valor)}</td><td class="p-4 text-xs italic opacity-40 text-emerald-400">Renda Fixa</td>
                     <td class="p-4 text-right"><button onclick="deleteItemById('investRF', ${f.id})" class="text-slate-700 hover:text-rose-500 transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td>
                 </tr>`).join('');
 
-            // Agenda Rápida
-            document.getElementById('lista-agenda').innerHTML = state.despesas.filter(d => d.status === 'pendente').sort((a,b) => a.venc > b.venc ? 1 : -1).slice(0,4).map(d => `
-                <div class="p-3 bg-slate-900 border-l-4 ${d.venc < hoje ? 'border-rose-500' : 'border-amber-500'} rounded-xl flex justify-between text-xs">
-                    <span>${d.descricao}</span><span class="font-bold">${fmt(d.valor)}</span>
-                </div>`).join('') || '<p class="text-xs text-slate-500 italic">✓ Nenhuma conta pendente.</p>';
-
-            renderCharts(recPagas, desPagas);
+            renderCharts(res.receitaRecebidaMes, res.despesaPagaMes);
             lucide.createIcons();
+        }
+
+        function renderList(type, isAll) {
+            const listKey = type === 'receita' ? 'receitas' : 'despesas';
+            const containerId = type === 'receita' ? 'lista-receitas-agrupadas' : 'lista-despesas-agrupadas';
+            const totalId = type === 'receita' ? 'total-geral-receitas' : 'total-geral-despesas-previsto';
+            const accentClass = type === 'receita' ? 'text-emerald-500' : 'text-rose-500';
+            const bgStatus = type === 'receita' ? 'bg-emerald-500 border-emerald-500' : 'bg-rose-500 border-rose-500';
+            const hoverBorder = type === 'receita' ? 'hover:border-emerald-500' : 'hover:border-rose-500';
+
+            let items = state[listKey];
+            if(!isAll) items = items.filter(i => i.venc && i.venc.startsWith(state.selectedMonth));
+
+            // Agrupar por Mês para exibição
+            const agrupado = items.reduce((acc, item) => {
+                const label = item.venc ? new Date(item.venc + "T00:00:00").toLocaleString('pt-br', { month: 'long', year: 'numeric' }) : 'Sem Data';
+                if(!acc[label]) acc[label] = { items: [], total: 0 };
+                acc[label].items.push(item);
+                acc[label].total += item.valor;
+                return acc;
+            }, {});
+
+            document.getElementById(totalId).innerText = `Total ${isAll ? 'Geral' : 'do Mês'}: ${fmt(items.reduce((a,c) => a + c.valor, 0))}`;
+            
+            document.getElementById(containerId).innerHTML = Object.keys(agrupado).map(mes => `
+                <div class="space-y-3">
+                    <div class="flex justify-between items-end border-b border-slate-800 pb-2">
+                        <h4 class="text-indigo-400 font-black uppercase text-[10px] tracking-widest">${mes}</h4>
+                        <span class="${accentClass} font-bold text-xs">Soma: ${fmt(agrupado[mes].total)}</span>
+                    </div>
+                    <div class="grid gap-3">
+                        ${agrupado[mes].items.map(i => `
+                            <div class="card p-4 flex justify-between items-center group">
+                                <div class="flex items-center gap-4">
+                                    <button onclick="toggleStatus('${type}', ${i.id})" class="w-8 h-8 rounded-full border-2 ${i.status === 'pago' ? bgStatus : 'border-slate-700'} flex items-center justify-center transition ${hoverBorder}">
+                                        ${i.status === 'pago' ? '<i data-lucide="check" class="text-white w-4 h-4"></i>' : ''}
+                                    </button>
+                                    <div onclick="openForm('${type}', ${i.id})" class="cursor-pointer">
+                                        <p class="font-bold ${i.status === 'pago' ? 'strikethrough' : ''}">${i.descricao} ${i.parcelaNum ? `<span class="parcela-tag">${i.parcelaNum}/${i.parcelaTotal}</span>` : ''}</p>
+                                        <p class="text-[10px] text-slate-500 uppercase font-bold">${i.categoria} • ${i.venc.split('-').reverse().join('/')}</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-4">
+                                    <p class="font-black ${accentClass}">${fmt(i.valor)}</p>
+                                    <button onclick="deleteItemById('${listKey}', ${i.id})" class="text-slate-700 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
         }
 
         let fChart;
@@ -616,7 +711,7 @@
             fChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: ['Mês Atual'],
+                    labels: ['Mês Selecionado'],
                     datasets: [
                         { label: 'Recebido', data: [r], backgroundColor: '#10b981', borderRadius: 8 },
                         { label: 'Pago', data: [d], backgroundColor: '#f43f5e', borderRadius: 8 }
@@ -627,11 +722,31 @@
         }
 
         function deleteItemById(type, id) { 
-            if(confirm('Excluir lançamento?')) { 
-                state[type] = state[type].filter(item => item.id != id);
-                save(); 
-                render(); 
-            } 
+            const item = state[type].find(i => i.id == id);
+            if(!item) return;
+
+            let action = 'single';
+            if (item.groupId) {
+                const choice = confirm("Este item faz parte de um parcelamento.\n\nClique OK para excluir APENAS ESTA parcela.\nClique CANCELAR para ver opções de grupo.");
+                if (!choice) {
+                    const groupChoice = prompt("Digite 'TUDO' para excluir todas as parcelas ou 'PROXIMAS' para excluir esta e as seguintes:");
+                    if(groupChoice?.toUpperCase() === 'TUDO') action = 'all';
+                    else if(groupChoice?.toUpperCase() === 'PROXIMAS') action = 'next';
+                    else return;
+                }
+            } else {
+                if(!confirm('Excluir lançamento?')) return;
+            }
+
+            if (action === 'single') {
+                state[type] = state[type].filter(i => i.id != id);
+            } else if (action === 'all') {
+                state[type] = state[type].filter(i => i.groupId !== item.groupId);
+            } else if (action === 'next') {
+                state[type] = state[type].filter(i => !(i.groupId === item.groupId && i.parcelaNum >= item.parcelaNum));
+            }
+            
+            save(); render(); 
         }
         
         function clearData() { if(confirm('Isso apagará todos os dados salvos localmente!')) { localStorage.clear(); location.reload(); } }
@@ -643,3 +758,5 @@
     </script>
 </body>
 </html>
+
+--- END OF FILE text/html ---
