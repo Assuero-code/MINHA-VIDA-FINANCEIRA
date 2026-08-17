@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Minha Vida Financeira | Alpha Master Plus</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -10,351 +10,241 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root { --bg: #020617; --card: #0f172a; --border: #1e293b; }
-        
-        /* Ajuste para iPhone: Previne o corte de conteúdo e garante rolagem suave */
         body { 
             font-family: 'Inter', sans-serif; 
             background-color: var(--bg); 
             color: #f1f5f9; 
-            margin: 0;
-            padding: 0;
-            height: 100vh;
-            height: 100dvh; /* Altura dinâmica para mobile */
+            margin: 0; padding: 0;
+            height: 100vh; height: 100dvh;
+            display: flex; flex-direction: column;
             overflow: hidden;
-            display: flex;
-            flex-direction: column;
         }
-
         .tab-content { 
             display: none; 
-            height: 100%;
+            flex: 1;
             overflow-y: auto; 
-            -webkit-overflow-scrolling: touch; /* Rolagem nativa iOS */
-            padding-bottom: 150px; /* Espaço extra para o menu mobile */
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 120px;
         }
-        
         .tab-content.active { display: block; }
-        
-        .card { background-color: #0f172a; border: 1px solid var(--border); border-radius: 1.5rem; }
-        
-        input, select, textarea { 
-            background: #1e293b !important; 
-            border: 1px solid #334155 !important; 
-            color: white !important; 
-            outline: none; 
-            padding: 12px; 
-            border-radius: 12px; 
-            width: 100%; 
-            font-size: 16px; /* Evita zoom automático no iPhone ao focar */
+        .card { background-color: #0f172a; border: 1px solid var(--border); border-radius: 1.2rem; }
+        input, select { 
+            background: #1e293b !important; border: 1px solid #334155 !important; 
+            color: white !important; padding: 12px; border-radius: 12px; width: 100%; font-size: 16px;
         }
-
-        .positive { color: #10b981; }
-        .negative { color: #f43f5e; }
-        
-        /* Scrollbar discreta */
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
-        
         .strikethrough { text-decoration: line-through; opacity: 0.4; }
         .nav-active { background-color: #1e293b; color: white !important; border-left: 4px solid #6366f1; }
+        .parcela-tag { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: #334155; color: #94a3b8; font-weight: 800; }
         
-        .parcela-tag { 
-            font-size: 9px; 
-            padding: 2px 6px; 
-            border-radius: 4px; 
-            background: #1e293b; 
-            color: #94a3b8; 
-            font-weight: 800; 
-            border: 1px solid #334155; 
-            margin-left: 8px; 
-        }
-
-        /* Ajuste para o Main em telas pequenas */
-        main {
-            flex: 1;
-            position: relative;
-            height: 100%;
-        }
+        /* Fix para telas desktop e mobile */
+        main { flex: 1; position: relative; overflow: hidden; display: flex; flex-direction: column; }
     </style>
 </head>
 <body class="antialiased">
 
     <!-- MENU MOBILE -->
-    <nav class="fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 flex justify-around p-4 z-[100] md:hidden">
+    <nav class="fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 flex justify-around p-4 z-[100] md:hidden pb-safe">
         <button onclick="showTab('dashboard')" id="mob-dashboard" class="text-slate-400 p-2"><i data-lucide="layout-dashboard"></i></button>
-        <button onclick="showTab('investimentos')" id="mob-investimentos" class="text-slate-400 p-2"><i data-lucide="line-chart"></i></button>
         <button onclick="showTab('receitas')" id="mob-receitas" class="text-slate-400 p-2"><i data-lucide="trending-up"></i></button>
         <button onclick="showTab('despesas')" id="mob-despesas" class="text-slate-400 p-2"><i data-lucide="trending-down"></i></button>
+        <button onclick="showTab('investimentos')" id="mob-investimentos" class="text-slate-400 p-2"><i data-lucide="line-chart"></i></button>
         <button onclick="showTab('configuracoes')" id="mob-configuracoes" class="text-slate-400 p-2"><i data-lucide="settings"></i></button>
     </nav>
 
     <div class="flex h-full w-full overflow-hidden">
         <!-- SIDEBAR DESKTOP -->
-        <aside class="hidden md:flex flex-col w-72 bg-slate-950 border-r border-slate-800 p-6 h-full">
+        <aside class="hidden md:flex flex-col w-72 bg-slate-950 border-r border-slate-800 p-6">
             <div class="flex items-center gap-3 mb-10">
                 <div class="bg-indigo-600 p-2 rounded-xl shadow-lg"><i data-lucide="wallet" class="text-white"></i></div>
                 <h1 class="text-lg font-black tracking-tighter uppercase leading-none">Minha Vida<br><span class="text-indigo-500 text-xs">Financeira</span></h1>
             </div>
             <nav class="space-y-2 flex-1">
-                <button onclick="showTab('dashboard')" id="nav-dashboard" class="flex items-center gap-3 w-full p-3 rounded-xl transition font-semibold text-slate-400 hover:bg-slate-900"><i data-lucide="layout-dashboard"></i> Dashboard</button>
-                <button onclick="showTab('receitas')" id="nav-receitas" class="flex items-center gap-3 w-full p-3 rounded-xl transition font-semibold text-slate-400 hover:bg-slate-900"><i data-lucide="trending-up" class="text-emerald-500"></i> Receitas</button>
-                <button onclick="showTab('despesas')" id="nav-despesas" class="flex items-center gap-3 w-full p-3 rounded-xl transition font-semibold text-slate-400 hover:bg-slate-900"><i data-lucide="trending-down" class="text-rose-500"></i> Despesas</button>
-                <button onclick="showTab('investimentos')" id="nav-investimentos" class="flex items-center gap-3 w-full p-3 rounded-xl transition font-semibold text-slate-400 hover:bg-slate-900"><i data-lucide="line-chart" class="text-amber-500"></i> Investimentos</button>
-                <button onclick="showTab('configuracoes')" id="nav-configuracoes" class="flex items-center gap-3 w-full p-3 rounded-xl transition font-semibold text-slate-400 hover:bg-slate-900"><i data-lucide="settings"></i> Configurações</button>
+                <button onclick="showTab('dashboard')" id="nav-dashboard" class="flex items-center gap-3 w-full p-3 rounded-xl transition text-slate-400 hover:bg-slate-900"><i data-lucide="layout-dashboard"></i> Dashboard</button>
+                <button onclick="showTab('receitas')" id="nav-receitas" class="flex items-center gap-3 w-full p-3 rounded-xl transition text-slate-400 hover:bg-slate-900"><i data-lucide="trending-up"></i> Receitas</button>
+                <button onclick="showTab('despesas')" id="nav-despesas" class="flex items-center gap-3 w-full p-3 rounded-xl transition text-slate-400 hover:bg-slate-900"><i data-lucide="trending-down"></i> Despesas</button>
+                <button onclick="showTab('investimentos')" id="nav-investimentos" class="flex items-center gap-3 w-full p-3 rounded-xl transition text-slate-400 hover:bg-slate-900"><i data-lucide="line-chart"></i> Investimentos</button>
+                <button onclick="showTab('configuracoes')" id="nav-configuracoes" class="flex items-center gap-3 w-full p-3 rounded-xl transition text-slate-400 hover:bg-slate-900"><i data-lucide="settings"></i> Configurações</button>
             </nav>
-            <div class="mt-auto p-4 bg-indigo-950/20 border border-indigo-500/20 rounded-2xl text-center">
-                <p class="text-[10px] text-indigo-300 font-bold uppercase mb-1 tracking-widest">Patrimônio Investido</p>
-                <h3 id="side-patrimonio" class="text-xl font-black text-white">R$ 0,00</h3>
-            </div>
         </aside>
 
         <!-- MAIN CONTENT -->
-        <main class="p-4 md:p-10">
-            <header class="flex justify-between items-start mb-8">
+        <main class="flex-1 flex flex-col p-4 md:p-10">
+            <header class="flex justify-between items-start mb-6">
                 <div>
-                    <h2 id="tab-title" class="text-2xl md:text-3xl font-black text-white tracking-tight">Dashboard</h2>
-                    <p id="current-date" class="text-slate-500 text-xs md:text-sm font-medium capitalize"></p>
+                    <h2 id="tab-title" class="text-2xl md:text-3xl font-black text-white">Dashboard</h2>
+                    <p id="current-date" class="text-slate-500 text-xs font-medium capitalize"></p>
                 </div>
-                <div class="flex flex-col items-end gap-3">
-                    <div class="flex items-center gap-2 bg-slate-900 border border-slate-800 p-2 rounded-xl">
-                        <i data-lucide="calendar" class="w-4 h-4 text-indigo-500 ml-2"></i>
-                        <select id="filtro-mes-global" onchange="changeFilterMonth(this.value)" class="!bg-transparent !border-none !p-1 text-[10px] md:text-xs font-bold w-32 md:w-40 cursor-pointer">
-                            <!-- Opções via JS -->
-                        </select>
-                    </div>
-                    <button onclick="syncAlphaVantage()" class="bg-slate-900 border border-slate-800 p-2 rounded-xl text-indigo-400" id="btn-sync">
-                        <i data-lucide="refresh-cw" id="sync-icon" class="w-5 h-5"></i>
-                    </button>
+                <div class="flex flex-col items-end gap-2">
+                    <select id="filtro-mes-global" onchange="changeFilterMonth(this.value)" class="!p-2 text-xs font-bold w-32 md:w-48"></select>
                 </div>
             </header>
 
             <!-- ABA DASHBOARD -->
             <section id="dashboard" class="tab-content active space-y-6">
-                <div id="alerta-vencidos-container" class="hidden">
-                    <div class="card p-6 border-rose-500 bg-rose-500/10">
-                        <div class="flex items-center gap-3 mb-4 text-rose-500">
-                            <i data-lucide="alert-circle"></i>
-                            <h4 class="font-black uppercase tracking-widest text-sm">Contas Vencidas</h4>
-                        </div>
-                        <div id="lista-vencidos-detalhe" class="space-y-2 mb-4"></div>
-                        <div class="pt-4 border-t border-rose-500/20 flex justify-between items-center">
-                            <span class="text-xs font-bold text-rose-300 uppercase">Total:</span>
-                            <span id="alerta-vencido-total" class="text-xl font-black text-rose-500">R$ 0,00</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-                    <div class="card p-4 md:p-5 border-emerald-500/20 bg-emerald-500/5">
-                        <p class="text-emerald-500 text-[9px] font-bold uppercase tracking-widest">Receitas (Real)</p>
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                    <div class="card p-4 border-emerald-500/20 bg-emerald-500/5">
+                        <p class="text-emerald-500 text-[10px] font-bold uppercase">Receitas (Real)</p>
                         <h3 id="dash-receita-mes" class="text-lg md:text-2xl font-black">R$ 0,00</h3>
-                        <p id="dash-receita-previsto" class="text-[8px] text-slate-500 mt-1"></p>
                     </div>
-                    <div class="card p-4 md:p-5 border-rose-500/20 bg-rose-500/5">
-                        <p class="text-rose-500 text-[9px] font-bold uppercase tracking-widest">Despesas Pagas</p>
-                        <h3 id="dash-despesa-paga-mes" class="text-lg md:text-2xl font-black text-rose-500">R$ 0,00</h3>
-                        <p id="dash-despesa-previsto" class="text-[8px] text-slate-500 mt-1"></p>
+                    <div class="card p-4 border-rose-500/20 bg-rose-500/5">
+                        <p class="text-rose-500 text-[10px] font-bold uppercase">Despesas (Pagas)</p>
+                        <h3 id="dash-despesa-paga-mes" class="text-lg md:text-2xl font-black">R$ 0,00</h3>
                     </div>
-                    <div class="card p-4 md:p-5 border-indigo-500/20 bg-indigo-500/5">
-                        <p class="text-indigo-400 text-[9px] font-bold uppercase tracking-widest">Saldo Real</p>
+                    <div class="card p-4 border-indigo-500/20 bg-indigo-500/5">
+                        <p class="text-indigo-400 text-[10px] font-bold uppercase">Saldo Real</p>
                         <h3 id="dash-saldo-real-mes" class="text-lg md:text-2xl font-black">R$ 0,00</h3>
-                        <p id="dash-saldo-anterior" class="text-[8px] text-slate-500 mt-1"></p>
                     </div>
-                    <div class="card p-4 md:p-5 bg-indigo-600 border-none shadow-lg">
-                        <p class="text-white/70 text-[9px] font-bold uppercase tracking-widest">Saldo Previsto</p>
+                    <div class="card p-4 bg-indigo-600 border-none">
+                        <p class="text-white/70 text-[10px] font-bold uppercase">Saldo Previsto</p>
                         <h3 id="dash-saldo-previsto-mes" class="text-lg md:text-2xl font-black text-white">R$ 0,00</h3>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                     <div class="card p-4">
-                        <h4 class="font-bold text-sm mb-4 flex items-center gap-2"><i data-lucide="bar-chart-3" class="text-indigo-500"></i> Fluxo do Mês</h4>
-                        <canvas id="chartFluxo"></canvas>
+                        <h4 class="font-bold text-sm mb-4">Fluxo do Mês</h4>
+                        <canvas id="chartFluxo" style="max-height: 200px;"></canvas>
                     </div>
                     <div class="card p-4">
-                        <h4 class="font-bold text-sm mb-4 flex items-center gap-2"><i data-lucide="calendar" class="text-amber-500"></i> Agenda do Mês</h4>
-                        <div id="lista-agenda" class="space-y-3"></div>
+                        <h4 class="font-bold text-sm mb-4">Pendências do Mês</h4>
+                        <div id="lista-agenda" class="space-y-2"></div>
                     </div>
                 </div>
             </section>
 
             <!-- ABA RECEITAS -->
             <section id="receitas" class="tab-content space-y-4">
-                <div class="flex justify-between items-center bg-slate-900/50 p-4 md:p-6 rounded-3xl border border-slate-800">
-                    <div>
-                        <h3 class="text-lg md:text-xl font-bold text-emerald-500">Receitas</h3>
-                        <p id="total-geral-receitas" class="text-[10px] text-slate-400 font-bold uppercase mt-1"></p>
-                    </div>
-                    <button onclick="openForm('receita')" class="bg-emerald-600 px-4 md:px-6 py-2 md:py-3 rounded-2xl font-bold text-xs md:text-base">+ Add</button>
+                <div class="flex justify-between items-center bg-slate-900 p-4 rounded-2xl border border-slate-800">
+                    <h3 class="font-bold text-emerald-500">Minhas Receitas</h3>
+                    <button onclick="openForm('receita')" class="bg-emerald-600 px-4 py-2 rounded-xl font-bold text-xs">+ Adicionar</button>
                 </div>
-                <div id="lista-receitas-agrupadas" class="space-y-6"></div>
+                <div id="lista-receitas-agrupadas" class="space-y-4"></div>
             </section>
 
             <!-- ABA DESPESAS -->
             <section id="despesas" class="tab-content space-y-4">
-                <div class="flex justify-between items-center bg-slate-900/50 p-4 md:p-6 rounded-3xl border border-slate-800">
-                    <div>
-                        <h3 class="text-lg md:text-xl font-bold text-rose-500">Despesas</h3>
-                        <p id="total-geral-despesas-previsto" class="text-[10px] text-slate-400 font-bold uppercase mt-1"></p>
-                    </div>
-                    <button onclick="openForm('despesa')" class="bg-rose-600 px-4 md:px-6 py-2 md:py-3 rounded-2xl font-bold text-xs md:text-base">+ Add</button>
+                <div class="flex justify-between items-center bg-slate-900 p-4 rounded-2xl border border-slate-800">
+                    <h3 class="font-bold text-rose-500">Minhas Despesas</h3>
+                    <button onclick="openForm('despesa')" class="bg-rose-600 px-4 py-2 rounded-xl font-bold text-xs">+ Adicionar</button>
                 </div>
-                <div id="lista-despesas-agrupadas" class="space-y-6"></div>
+                <div id="lista-despesas-agrupadas" class="space-y-4"></div>
             </section>
 
             <!-- ABA INVESTIMENTOS -->
-            <section id="investimentos" class="tab-content space-y-6">
+            <section id="investimentos" class="tab-content space-y-4">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="card p-5">
-                        <p class="text-[9px] font-black uppercase text-slate-500">Renda Variável (Mercado)</p>
-                        <h3 id="inv-rv-mercado" class="text-2xl font-black mt-1">R$ 0,00</h3>
-                        <button onclick="openForm('rv')" class="text-indigo-400 font-bold text-[10px] mt-2">+ NOVO ATIVO</button>
+                        <p class="text-[10px] font-bold text-slate-500 uppercase">Renda Variável</p>
+                        <h3 id="inv-rv-mercado" class="text-2xl font-black">R$ 0,00</h3>
+                        <button onclick="openForm('rv')" class="text-indigo-400 text-[10px] mt-2 font-bold">+ NOVO ATIVO</button>
                     </div>
                     <div class="card p-5">
-                        <p class="text-[9px] font-black uppercase text-slate-500">Renda Fixa</p>
-                        <h3 id="inv-rf-total" class="text-2xl font-black mt-1">R$ 0,00</h3>
-                        <button onclick="openForm('rf')" class="text-emerald-400 font-bold text-[10px] mt-2">+ NOVO TÍTULO</button>
+                        <p class="text-[10px] font-bold text-slate-500 uppercase">Renda Fixa</p>
+                        <h3 id="inv-rf-total" class="text-2xl font-black">R$ 0,00</h3>
+                        <button onclick="openForm('rf')" class="text-emerald-400 text-[10px] mt-2 font-bold">+ NOVO TÍTULO</button>
                     </div>
                 </div>
                 <div class="card overflow-hidden">
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-xs">
-                            <thead class="bg-slate-900 uppercase font-black text-slate-500 border-b border-slate-800">
-                                <tr>
-                                    <th class="p-4">Ativo</th>
-                                    <th class="p-4">Qtd</th>
-                                    <th class="p-4">Atual</th>
-                                    <th class="p-4 text-right">Ação</th>
-                                </tr>
-                            </thead>
-                            <tbody id="corpo-investimentos" class="divide-y divide-slate-800/50"></tbody>
-                        </table>
-                    </div>
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-900 border-b border-slate-800">
+                            <tr><th class="p-4">Ativo</th><th class="p-4">Valor</th><th class="p-4 text-right">Ação</th></tr>
+                        </thead>
+                        <tbody id="corpo-investimentos"></tbody>
+                    </table>
                 </div>
             </section>
 
-            <!-- ABA CONFIGURAÇÕES -->
-            <section id="configuracoes" class="tab-content space-y-6">
-                <div class="card p-6 md:p-8 max-w-xl mx-auto">
-                    <h3 class="text-xl font-black mb-4">Configurações</h3>
-                    <div class="space-y-4">
-                        <div>
-                            <label class="text-[10px] font-black text-slate-500 uppercase ml-1">Alpha Vantage API Key</label>
-                            <input type="password" id="cfg-api-key" placeholder="Chave da API...">
-                        </div>
-                        <button onclick="saveConfig()" class="bg-indigo-600 w-full p-4 rounded-2xl font-black">Salvar</button>
-                        <button onclick="clearData()" class="w-full p-3 rounded-xl border border-rose-500/30 text-rose-500 font-bold text-xs uppercase">Resetar Dados</button>
-                    </div>
+            <!-- ABA CONFIG -->
+            <section id="configuracoes" class="tab-content space-y-4">
+                <div class="card p-6 max-w-md mx-auto">
+                    <h3 class="font-bold mb-4">Configurações</h3>
+                    <button onclick="clearData()" class="w-full p-4 bg-rose-600/20 text-rose-500 rounded-xl font-bold text-xs">APAGAR TODOS OS DADOS</button>
                 </div>
             </section>
         </main>
     </div>
 
-    <!-- MODAL FORMULARIO -->
-    <div id="modal-form" class="fixed inset-0 bg-black/95 backdrop-blur-md hidden z-[200] flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-[2.5rem] max-w-md w-full p-6 md:p-8 shadow-2xl overflow-y-auto max-h-[90vh]">
-            <h3 id="form-title" class="text-xl font-black mb-6">Lançamento</h3>
+    <!-- MODAL -->
+    <div id="modal-form" class="fixed inset-0 bg-black/90 backdrop-blur-sm hidden z-[200] flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-md p-6 overflow-y-auto max-h-[90vh]">
+            <h3 id="form-title" class="text-xl font-bold mb-6">Lançamento</h3>
             <form id="main-form" class="space-y-4">
                 <input type="hidden" id="form-type">
                 <input type="hidden" id="form-id">
-
-                <div>
-                    <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Descrição</label>
-                    <input type="text" id="inp-desc" required>
+                
+                <input type="text" id="inp-desc" placeholder="Descrição / Ticker" required>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <input type="number" step="0.01" id="inp-valor" placeholder="Valor R$">
+                    <input type="date" id="inp-venc">
                 </div>
 
-                <div id="box-comum" class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Valor R$</label>
-                        <input type="number" step="0.01" id="inp-valor">
-                    </div>
-                    <div>
-                        <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Data</label>
-                        <input type="date" id="inp-venc">
-                    </div>
-                </div>
-
-                <div id="box-parcelamento" class="bg-slate-950/50 p-4 rounded-xl border border-slate-800 space-y-3">
-                    <label class="flex items-center gap-2 cursor-pointer">
-                        <input type="checkbox" id="inp-is-parcelado" class="!w-4 !h-4" onchange="toggleParcelasView(this.checked)">
-                        <span class="text-xs font-bold text-slate-400 uppercase">Parcelar</span>
+                <div id="box-parcelas" class="p-3 bg-slate-950 rounded-xl border border-slate-800">
+                    <label class="flex items-center gap-2 text-xs text-slate-400 mb-2">
+                        <input type="checkbox" id="inp-is-parcelado" class="w-4 h-4" onchange="document.getElementById('box-qtd').classList.toggle('hidden', !this.checked)">
+                        Parcelar este lançamento
                     </label>
-                    <div id="box-qtd-parcelas" class="hidden">
-                        <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Qtd Parcelas (1-12)</label>
-                        <input type="number" id="inp-qtd-parcelas" min="1" max="12" value="1">
+                    <div id="box-qtd" class="hidden">
+                        <input type="number" id="inp-qtd-parcelas" min="1" max="12" placeholder="Qtd de Parcelas">
                     </div>
                 </div>
 
-                <div id="box-cat">
-                    <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Categoria</label>
-                    <select id="inp-cat" onchange="checkNewCategory(this)"></select>
-                </div>
+                <select id="inp-cat"></select>
 
                 <div id="box-invest" class="grid grid-cols-2 gap-4 hidden">
-                    <div><label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Qtd</label><input type="number" step="0.0001" id="inp-qtd"></div>
-                    <div><label class="text-[10px] font-bold text-slate-500 uppercase ml-1">P. Médio</label><input type="number" step="0.01" id="inp-pm"></div>
+                    <input type="number" step="0.0001" id="inp-qtd" placeholder="Quantidade">
+                    <input type="number" step="0.01" id="inp-pm" placeholder="Preço Médio">
                 </div>
 
-                <button type="submit" class="w-full bg-indigo-600 p-4 rounded-2xl font-black text-white text-lg shadow-xl">Salvar</button>
-                <button type="button" onclick="closeModal()" class="w-full text-slate-500 font-bold text-sm">Cancelar</button>
+                <button type="submit" class="w-full bg-indigo-600 p-4 rounded-xl font-bold">Salvar Dados</button>
+                <button type="button" onclick="closeModal()" class="w-full text-slate-500 text-sm font-bold">Cancelar</button>
             </form>
         </div>
     </div>
 
     <script>
-        // --- DATA ENGINE ---
-        let state = JSON.parse(localStorage.getItem('mvf_alpha_final_v1')) || {
-            receitas: [], despesas: [], investRV: [], investRF: [], config: { apiKey: '' },
-            categoriasReceitas: ['Salário', 'Investimento', 'Venda', 'Extra'],
-            categoriasDespesas: ['Aluguel', 'Alimentação', 'Transporte', 'Saúde', 'Lazer', 'Educação'],
+        let state = JSON.parse(localStorage.getItem('mvf_v2')) || {
+            receitas: [], despesas: [], investRV: [], investRF: [],
+            categoriasReceitas: ['Salário', 'Investimento', 'Extra'],
+            categoriasDespesas: ['Aluguel', 'Saúde', 'Lazer', 'Alimentação'],
             selectedMonth: new Date().toISOString().slice(0, 7)
         };
 
-        const save = () => localStorage.setItem('mvf_alpha_final_v1', JSON.stringify(state));
-        const fmt = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
+        const save = () => {
+            localStorage.setItem('mvf_v2', JSON.stringify(state));
+            render();
+        };
 
-        // --- NAVEGAÇÃO ---
+        const fmt = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v || 0);
+
         function showTab(id) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('aside button, nav button').forEach(b => {
-                b.classList.remove('nav-active');
-                b.classList.replace('text-white', 'text-slate-400');
-            });
-            
             document.getElementById(id).classList.add('active');
+            
+            document.querySelectorAll('nav button, aside button').forEach(b => b.classList.remove('nav-active', 'text-white'));
             document.getElementById('nav-' + id)?.classList.add('nav-active');
-            document.getElementById('mob-' + id)?.classList.replace('text-slate-400', 'text-white');
+            document.getElementById('mob-' + id)?.classList.add('text-white');
             
-            document.getElementById('tab-title').innerText = id === 'configuracoes' ? 'Ajustes' : id.charAt(0).toUpperCase() + id.slice(1);
-            if (id === 'configuracoes') document.getElementById('cfg-api-key').value = state.config.apiKey;
-            
+            document.getElementById('tab-title').innerText = id.charAt(0).toUpperCase() + id.slice(1);
             render();
             lucide.createIcons();
         }
 
-        // --- FILTRO MES ---
         function populateMonthFilter() {
             const select = document.getElementById('filtro-mes-global');
             const months = new Set();
-            [...state.receitas, ...state.despesas].forEach(item => { if(item.venc) months.add(item.venc.slice(0, 7)); });
-            let now = new Date();
-            for(let i=-2; i<=6; i++) {
-                let d = new Date(now.getFullYear(), now.getMonth() + i, 1);
-                months.add(d.toISOString().slice(0, 7));
-            }
-            const sortedMonths = Array.from(months).sort();
+            months.add(new Date().toISOString().slice(0, 7));
+            [...state.receitas, ...state.despesas].forEach(i => i.venc && months.add(i.venc.slice(0, 7)));
+            
+            const sorted = Array.from(months).sort();
             let html = '<option value="all">TODOS</option>';
-            sortedMonths.forEach(m => {
-                const label = new Date(m + "-02").toLocaleString('pt-br', { month: 'short', year: '2-digit' });
-                html += `<option value="${m}" ${state.selectedMonth === m ? 'selected' : ''}>${label.toUpperCase()}</option>`;
+            sorted.forEach(m => {
+                html += `<option value="${m}" ${state.selectedMonth === m ? 'selected' : ''}>${m.split('-').reverse().join('/')}</option>`;
             });
             select.innerHTML = html;
         }
 
-        function changeFilterMonth(val) { state.selectedMonth = val; save(); render(); }
-
-        // --- FORM E LOGICA ---
-        function toggleParcelasView(checked) { document.getElementById('box-qtd-parcelas').classList.toggle('hidden', !checked); }
+        function changeFilterMonth(val) { state.selectedMonth = val; save(); }
 
         function openForm(type, id = null) {
             const form = document.getElementById('main-form');
@@ -363,21 +253,20 @@
             document.getElementById('form-id').value = id || '';
             
             const isInvest = (type === 'rv' || type === 'rf');
-            document.getElementById('box-comum').classList.toggle('hidden', type === 'rv');
             document.getElementById('box-invest').classList.toggle('hidden', type !== 'rv');
-            document.getElementById('box-parcelamento').classList.toggle('hidden', id !== null || isInvest);
-            document.getElementById('box-cat').classList.toggle('hidden', isInvest);
+            document.getElementById('box-parcelas').classList.toggle('hidden', isInvest || id !== null);
+            
+            const cats = type === 'receita' ? state.categoriasReceitas : state.categoriasDespesas;
+            document.getElementById('inp-cat').innerHTML = cats.map(c => `<option value="${c}">${c}</option>`).join('');
+            document.getElementById('inp-cat').classList.toggle('hidden', isInvest);
 
-            if (!isInvest) updateCategorySelect(type);
-            if (id !== null) {
-                const list = state[type === 'receita' ? 'receitas' : type === 'despesa' ? 'despesas' : type === 'rv' ? 'investRV' : 'investRF'];
+            if(id) {
+                const list = (type === 'receita') ? state.receitas : (type === 'despesa') ? state.despesas : (type === 'rv') ? state.investRV : state.investRF;
                 const item = list.find(i => i.id == id);
-                if (item) {
-                    document.getElementById('inp-desc').value = item.ticker || item.descricao || item.nome;
+                if(item) {
+                    document.getElementById('inp-desc').value = item.descricao || item.ticker || '';
                     document.getElementById('inp-valor').value = item.valor || '';
                     document.getElementById('inp-venc').value = item.venc || '';
-                    document.getElementById('inp-qtd').value = item.qtd || '';
-                    document.getElementById('inp-pm').value = item.pm || '';
                 }
             }
             document.getElementById('modal-form').classList.remove('hidden');
@@ -389,68 +278,67 @@
             e.preventDefault();
             const type = document.getElementById('form-type').value;
             const id = document.getElementById('form-id').value;
-            const isParcelado = document.getElementById('inp-is-parcelado').checked && !id;
+            const isParcelado = document.getElementById('inp-is-parcelado').checked;
 
-            if (isParcelado) {
-                generateParcelas(type);
+            if (isParcelado && !id) {
+                const qtd = parseInt(document.getElementById('inp-qtd-parcelas').value) || 1;
+                const total = parseFloat(document.getElementById('inp-valor').value);
+                const valorP = Math.floor((total / qtd) * 100) / 100;
+                const sobra = parseFloat((total - (valorP * qtd)).toFixed(2));
+
+                for (let i = 1; i <= qtd; i++) {
+                    let d = new Date(document.getElementById('inp-venc').value + 'T12:00:00');
+                    d.setMonth(d.getMonth() + (i - 1));
+                    const item = {
+                        id: Date.now() + Math.random(),
+                        descricao: document.getElementById('inp-desc').value,
+                        valor: i === qtd ? valorP + sobra : valorP,
+                        venc: d.toISOString().slice(0, 10),
+                        categoria: document.getElementById('inp-cat').value,
+                        status: 'pendente',
+                        parcela: `${i}/${qtd}`
+                    };
+                    state[type === 'receita' ? 'receitas' : 'despesas'].push(item);
+                }
             } else {
-                let list = type === 'receita' ? 'receitas' : type === 'despesa' ? 'despesas' : type === 'rv' ? 'investRV' : 'investRF';
-                let newItem = { 
-                    id: id ? parseFloat(id) : Date.now(), 
-                    status: 'pendente',
+                let list = (type === 'receita') ? 'receitas' : (type === 'despesa') ? 'despesas' : (type === 'rv') ? 'investRV' : 'investRF';
+                const item = {
+                    id: id ? parseFloat(id) : Date.now(),
                     descricao: document.getElementById('inp-desc').value,
+                    ticker: document.getElementById('inp-desc').value.toUpperCase(),
                     valor: parseFloat(document.getElementById('inp-valor').value),
                     venc: document.getElementById('inp-venc').value,
                     categoria: document.getElementById('inp-cat').value,
                     qtd: parseFloat(document.getElementById('inp-qtd').value),
                     pm: parseFloat(document.getElementById('inp-pm').value),
-                    ticker: document.getElementById('inp-desc').value.toUpperCase()
+                    status: 'pendente'
                 };
                 if(id) state[list] = state[list].filter(i => i.id != id);
-                state[list].push(newItem);
+                state[list].push(item);
+                // Mudar para o mês do item para garantir que ele apareça
+                if(item.venc) state.selectedMonth = item.venc.slice(0, 7);
             }
-            save(); closeModal(); render();
+            save(); closeModal();
         };
 
-        function generateParcelas(type) {
-            const total = parseFloat(document.getElementById('inp-valor').value);
-            const qtd = parseInt(document.getElementById('inp-qtd-parcelas').value);
-            const valorP = Math.floor((total * 100) / qtd) / 100;
-            const sobra = parseFloat((total - (valorP * qtd)).toFixed(2));
-            const baseDate = document.getElementById('inp-venc').value;
-            const groupId = Date.now();
-
-            for (let i = 1; i <= qtd; i++) {
-                let d = new Date(baseDate + "T12:00:00");
-                d.setMonth(d.setMonth() + (i - 1));
-                state[type === 'receita' ? 'receitas' : 'despesas'].push({
-                    id: Date.now() + Math.random(),
-                    groupId,
-                    descricao: document.getElementById('inp-desc').value,
-                    valor: i === qtd ? valorP + sobra : valorP,
-                    venc: d.toISOString().split('T')[0],
-                    categoria: document.getElementById('inp-cat').value,
-                    status: 'pendente',
-                    parcelaNum: i,
-                    parcelaTotal: qtd
-                });
-            }
-        }
-
-        // --- CALCULOS E RENDER ---
         function getChain(target) {
             let months = new Set();
-            [...state.receitas, ...state.despesas].forEach(i => { if(i.venc) months.add(i.venc.slice(0,7)) });
+            [...state.receitas, ...state.despesas].forEach(i => i.venc && months.add(i.venc.slice(0,7)));
+            months.add(new Date().toISOString().slice(0,7));
+            
             let sorted = Array.from(months).sort();
-            let p = 0, r = 0, res = { recR: 0, recP: 0, desR: 0, desP: 0, antR: 0, antP: 0, finalR: 0, finalP: 0 };
+            let p = 0, r = 0, res = { recR: 0, desR: 0, finalR: 0, finalP: 0 };
 
             sorted.forEach(m => {
                 let recM = state.receitas.filter(i => i.venc?.startsWith(m));
                 let desM = state.despesas.filter(i => i.venc?.startsWith(m));
-                let rP = recM.reduce((a,c)=>a+c.valor,0), rR = recM.filter(i=>i.status==='pago').reduce((a,c)=>a+c.valor,0);
-                let dP = desM.reduce((a,c)=>a+c.valor,0), dR = desM.filter(i=>i.status==='pago').reduce((a,c)=>a+c.valor,0);
+                
+                let rP = recM.reduce((a,c)=>a+c.valor,0);
+                let rR = recM.filter(i=>i.status==='pago').reduce((a,c)=>a+c.valor,0);
+                let dP = desM.reduce((a,c)=>a+c.valor,0);
+                let dR = desM.filter(i=>i.status==='pago').reduce((a,c)=>a+c.valor,0);
 
-                if(m === target) { res.antR = r; res.antP = p; res.recR = rR; res.recP = rP; res.desR = dR; res.desP = dP; }
+                if(m === target) { res.recR = rR; res.desR = dR; }
                 p += (rP - dP); r += (rR - dR);
                 if(m === target) { res.finalR = r; res.finalP = p; }
             });
@@ -459,110 +347,73 @@
 
         function render() {
             populateMonthFilter();
+            const isAll = state.selectedMonth === 'all';
+            const hoje = new Date().toISOString().slice(0, 10);
             const res = getChain(state.selectedMonth);
-            const hoje = new Date().toISOString().split('T')[0];
 
+            // Dashboard
             document.getElementById('dash-receita-mes').innerText = fmt(res.recR);
-            document.getElementById('dash-receita-previsto').innerText = `Total: ${fmt(res.recP)}`;
             document.getElementById('dash-despesa-paga-mes').innerText = fmt(res.desR);
-            document.getElementById('dash-despesa-previsto').innerText = `Total: ${fmt(res.desP)}`;
             document.getElementById('dash-saldo-real-mes').innerText = fmt(res.finalR);
-            document.getElementById('dash-saldo-anterior').innerText = `Ant: ${fmt(res.antR)}`;
             document.getElementById('dash-saldo-previsto-mes').innerText = fmt(res.finalP);
 
-            const vencidos = state.despesas.filter(d => d.venc < hoje && d.status === 'pendente');
-            document.getElementById('alerta-vencidos-container').classList.toggle('hidden', vencidos.length === 0);
-            document.getElementById('alerta-vencido-total').innerText = fmt(vencidos.reduce((a,c)=>a+c.valor,0));
+            // Listas
+            ['receita', 'despesa'].forEach(type => {
+                const list = state[type + 's'].filter(i => isAll || i.venc?.startsWith(state.selectedMonth));
+                document.getElementById(`lista-${type}s-agrupadas`).innerHTML = list.sort((a,b)=>a.venc.localeCompare(b.venc)).map(i => `
+                    <div class="card p-4 flex justify-between items-center">
+                        <div class="flex items-center gap-3">
+                            <button onclick="toggleStatus('${type}', ${i.id})" class="w-7 h-7 rounded-full border-2 ${i.status==='pago'?(type==='receita'?'bg-emerald-500':'bg-rose-500'):'border-slate-700'}">
+                                ${i.status==='pago'?'<i data-lucide="check" class="w-4 h-4 mx-auto text-white"></i>':''}
+                            </button>
+                            <div onclick="openForm('${type}', ${i.id})">
+                                <p class="text-sm font-bold ${i.status==='pago'?'strikethrough':''}">${i.descricao} ${i.parcela?`<span class="parcela-tag">${i.parcela}</span>`:''}</p>
+                                <p class="text-[10px] text-slate-500 uppercase">${i.venc?.split('-').reverse().join('/')} • ${i.categoria}</p>
+                            </div>
+                        </div>
+                        <p class="font-bold ${type==='receita'?'text-emerald-500':'text-rose-500'}">${fmt(i.valor)}</p>
+                        <button onclick="deleteItem('${type}s', ${i.id})" class="text-slate-800 ml-2"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    </div>
+                `).join('');
+            });
 
-            renderList('receita');
-            renderList('despesa');
-            renderInvest();
+            // Investimentos
+            const rvVal = state.investRV.reduce((a,c)=>a+(c.qtd*c.pm),0);
+            const rfVal = state.investRF.reduce((a,c)=>a+c.valor,0);
+            document.getElementById('inv-rv-mercado').innerText = fmt(rvVal);
+            document.getElementById('inv-rf-total').innerText = fmt(rfVal);
+            document.getElementById('corpo-investimentos').innerHTML = state.investRV.map(i => `
+                <tr class="border-b border-slate-800"><td class="p-4">${i.ticker}</td><td class="p-4">${fmt(i.qtd*i.pm)}</td><td class="p-4 text-right"><button onclick="deleteItem('investRV', ${i.id})"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td></tr>
+            `).join('');
+
+            // Pendencias
+            document.getElementById('lista-agenda').innerHTML = state.despesas
+                .filter(d => d.status === 'pendente' && (isAll || d.venc?.startsWith(state.selectedMonth)))
+                .slice(0, 5).map(d => `<div class="text-xs p-2 bg-slate-900 rounded flex justify-between"><span>${d.descricao}</span><span class="text-rose-500">${fmt(d.valor)}</span></div>`).join('');
+
+            renderChart(res.recR, res.desR);
             lucide.createIcons();
         }
 
-        function renderList(type) {
-            const isAll = state.selectedMonth === 'all';
-            let list = state[type === 'receita' ? 'receitas' : 'despesas'].filter(i => isAll || i.venc?.startsWith(state.selectedMonth));
-            let html = list.length ? '' : '<p class="text-center text-slate-600 py-10 text-xs">Nenhum registro encontrado.</p>';
-            
-            list.sort((a,b)=>a.venc.localeCompare(b.venc)).forEach(i => {
-                html += `
-                <div class="card p-4 flex justify-between items-center mb-3">
-                    <div class="flex items-center gap-3">
-                        <button onclick="toggleStatus('${type}', ${i.id})" class="w-7 h-7 rounded-full border-2 ${i.status==='pago' ? (type==='receita'?'bg-emerald-500':'bg-rose-500') : 'border-slate-700'}">
-                            ${i.status==='pago'?'<i data-lucide="check" class="text-white w-4 h-4 mx-auto"></i>':''}
-                        </button>
-                        <div onclick="openForm('${type}', ${i.id})">
-                            <p class="text-sm font-bold ${i.status==='pago'?'strikethrough':''}">${i.descricao} ${i.parcelaNum?`<span class="parcela-tag">${i.parcelaNum}/${i.parcelaTotal}</span>`:''}</p>
-                            <p class="text-[9px] text-slate-500 uppercase font-bold">${i.venc.split('-').reverse().slice(0,2).join('/')} • ${i.categoria}</p>
-                        </div>
-                    </div>
-                    <p class="text-sm font-black ${type==='receita'?'text-emerald-500':'text-rose-500'}">${fmt(i.valor)}</p>
-                </div>`;
-            });
-            document.getElementById(`lista-${type}s-agrupadas`).innerHTML = html;
-        }
-
-        function renderInvest() {
-            const rvM = state.investRV.reduce((a,c)=>a+(c.qtd*(c.cotacao||0)),0);
-            const rfT = state.investRF.reduce((a,c)=>a+c.valor,0);
-            document.getElementById('inv-rv-mercado').innerText = fmt(rvM);
-            document.getElementById('inv-rf-total').innerText = fmt(rfT);
-            document.getElementById('side-patrimonio').innerText = fmt(rvM + rfT);
-
-            let html = state.investRV.map(i => `
-                <tr class="border-b border-slate-800/50">
-                    <td class="p-4 font-bold">${i.ticker}</td>
-                    <td class="p-4">${i.qtd}</td>
-                    <td class="p-4 text-indigo-400">${fmt(i.cotacao||0)}</td>
-                    <td class="p-4 text-right"><button onclick="deleteItemById('investRV', ${i.id})"><i data-lucide="trash-2" class="w-4 h-4 text-slate-600"></i></button></td>
-                </tr>`).join('');
-            document.getElementById('corpo-investimentos').innerHTML = html;
-        }
-
         function toggleStatus(type, id) {
-            let list = type === 'receita' ? 'receitas' : 'despesas';
-            let item = state[list].find(i => i.id == id);
+            const list = state[type + 's'];
+            const item = list.find(i => i.id == id);
             if(item) item.status = item.status === 'pago' ? 'pendente' : 'pago';
-            save(); render();
+            save();
         }
 
-        function deleteItemById(list, id) { if(confirm('Excluir?')) { state[list] = state[list].filter(i => i.id != id); save(); render(); } }
-        function saveConfig() { state.config.apiKey = document.getElementById('cfg-api-key').value; save(); alert('Salvo!'); }
+        function deleteItem(list, id) { if(confirm('Excluir?')) { state[list] = state[list].filter(i => i.id != id); save(); } }
         function clearData() { if(confirm('Apagar tudo?')) { localStorage.clear(); location.reload(); } }
-        function updateCategorySelect(t) {
-            const cats = t === 'receita' ? state.categoriasReceitas : state.categoriasDespesas;
-            document.getElementById('inp-cat').innerHTML = cats.map(c => `<option value="${c}">${c}</option>`).join('') + '<option value="NEW">+ NOVA</option>';
-        }
-        function checkNewCategory(s) { if(s.value === "NEW") { let n = prompt("Nome:"); if(n) { let list = document.getElementById('form-type').value === 'receita' ? 'categoriasReceitas' : 'categoriasDespesas'; state[list].push(n); save(); updateCategorySelect(document.getElementById('form-type').value); } } }
 
         let fChart;
-        function renderCharts(r, d) {
-            const ctx = document.getElementById('chartFluxo').getContext('2d');
+        function renderChart(r, d) {
+            const ctx = document.getElementById('chartFluxo');
             if (fChart) fChart.destroy();
             fChart = new Chart(ctx, {
                 type: 'doughnut',
-                data: {
-                    labels: ['Recebido', 'Pago'],
-                    datasets: [{ data: [r, d], backgroundColor: ['#10b981', '#f43f5e'], borderWidth: 0 }]
-                },
-                options: { plugins: { legend: { display: false } }, cutout: '70%' }
+                data: { datasets: [{ data: [r, d], backgroundColor: ['#10b981', '#f43f5e'], borderWidth: 0 }] },
+                options: { cutout: '80%' }
             });
-        }
-
-        async function syncAlphaVantage() {
-            if (!state.config.apiKey) return alert("API Key necessária!");
-            const icon = document.getElementById('sync-icon');
-            icon.classList.add('animate-spin');
-            for (let a of state.investRV) {
-                try {
-                    const res = await fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${a.ticker}.SA&apikey=${state.config.apiKey}`);
-                    const data = await res.json();
-                    if (data["Global Quote"]) a.cotacao = parseFloat(data["Global Quote"]["05. price"]);
-                } catch(e) {}
-                await new Promise(r => setTimeout(r, 1000));
-            }
-            save(); render(); icon.classList.remove('animate-spin');
         }
 
         window.onload = () => {
