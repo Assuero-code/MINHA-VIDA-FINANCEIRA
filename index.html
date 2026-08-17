@@ -38,7 +38,6 @@
         
         main { flex: 1; position: relative; overflow: hidden; display: flex; flex-direction: column; }
         
-        /* Ajuste para tabela rolar no mobile */
         .table-container { overflow-x: auto; -webkit-overflow-scrolling: touch; }
         table { min-width: 800px; }
     </style>
@@ -87,6 +86,14 @@
 
             <!-- ABA DASHBOARD -->
             <section id="dashboard" class="tab-content active space-y-6">
+                <!-- ALERTA SUTIL DE VENCIDOS -->
+                <div id="alerta-vencidos" class="hidden">
+                    <div class="bg-rose-500/10 border border-rose-500/20 p-3 rounded-xl flex items-center gap-3 text-rose-500">
+                        <i data-lucide="alert-circle" class="w-5 h-5"></i>
+                        <p class="text-xs font-bold uppercase tracking-wider">Atenção: Você possui contas vencidas!</p>
+                    </div>
+                </div>
+
                 <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
                     <div class="card p-4 border-emerald-500/20 bg-emerald-500/5">
                         <p class="text-emerald-500 text-[10px] font-bold uppercase">Receitas (Real)</p>
@@ -430,12 +437,17 @@
             populateMonthFilter();
             const isAll = state.selectedMonth === 'all';
             const res = getChain(state.selectedMonth);
+            const hojeStr = new Date().toISOString().slice(0, 10);
 
             // Dashboard
             document.getElementById('dash-receita-mes').innerText = fmt(res.recR);
             document.getElementById('dash-despesa-paga-mes').innerText = fmt(res.desR);
             document.getElementById('dash-saldo-real-mes').innerText = fmt(res.finalR);
             document.getElementById('dash-saldo-previsto-mes').innerText = fmt(res.finalP);
+
+            // Alerta Sutil de Vencidos
+            const vencidosGeral = state.despesas.filter(d => d.status === 'pendente' && d.venc < hojeStr);
+            document.getElementById('alerta-vencidos').classList.toggle('hidden', vencidosGeral.length === 0);
 
             // Cálculos Investimentos
             const invCustoRV = state.investRV.reduce((a,c) => a + (c.qtd * c.pm), 0);
@@ -471,7 +483,7 @@
                 `).join('');
             });
 
-            // Tabela Investimentos (Nova lógica de detalhes)
+            // Tabela Investimentos
             document.getElementById('corpo-investimentos').innerHTML = state.investRV.map(i => {
                 const custoTotal = i.qtd * i.pm;
                 const mercadoTotal = i.qtd * (i.cotacao || i.pm);
@@ -507,10 +519,21 @@
                     </td>
                 </tr>`).join('');
 
-            // Pendencias
+            // Pendencias (Com data e alerta)
             document.getElementById('lista-agenda').innerHTML = state.despesas
                 .filter(d => d.status === 'pendente' && (isAll || d.venc?.startsWith(state.selectedMonth)))
-                .slice(0, 5).map(d => `<div class="text-xs p-2 bg-slate-900 rounded flex justify-between"><span>${d.descricao}</span><span class="text-rose-500">${fmt(d.valor)}</span></div>`).join('');
+                .sort((a,b) => a.venc.localeCompare(b.venc))
+                .slice(0, 8).map(d => {
+                    const isVencida = d.venc < hojeStr;
+                    return `
+                    <div class="text-[11px] p-2 bg-slate-900 rounded-lg flex justify-between items-center border ${isVencida ? 'border-rose-500/30' : 'border-transparent'}">
+                        <div class="flex flex-col">
+                            <span class="font-bold ${isVencida ? 'text-rose-400' : 'text-slate-200'}">${d.descricao}</span>
+                            <span class="text-[9px] text-slate-500">${d.venc.split('-').reverse().slice(0,2).join('/')}</span>
+                        </div>
+                        <span class="font-bold ${isVencida ? 'text-rose-500' : 'text-rose-400/80'}">${fmt(d.valor)}</span>
+                    </div>`;
+                }).join('') || '<p class="text-xs text-slate-600 text-center py-4">Nenhuma pendência.</p>';
 
             renderChart(res.recR, res.desR);
             lucide.createIcons();
