@@ -36,8 +36,11 @@
         .nav-active { background-color: #1e293b; color: white !important; border-left: 4px solid #6366f1; }
         .parcela-tag { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: #334155; color: #94a3b8; font-weight: 800; }
         
-        /* Fix para telas desktop e mobile */
         main { flex: 1; position: relative; overflow: hidden; display: flex; flex-direction: column; }
+        
+        /* Ajuste para tabela rolar no mobile */
+        .table-container { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        table { min-width: 800px; }
     </style>
 </head>
 <body class="antialiased">
@@ -84,7 +87,6 @@
 
             <!-- ABA DASHBOARD -->
             <section id="dashboard" class="tab-content active space-y-6">
-                <!-- CARDS PRINCIPAIS -->
                 <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
                     <div class="card p-4 border-emerald-500/20 bg-emerald-500/5">
                         <p class="text-emerald-500 text-[10px] font-bold uppercase">Receitas (Real)</p>
@@ -104,7 +106,6 @@
                     </div>
                 </div>
 
-                <!-- NOVOS CARDS DE INVESTIMENTO -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div class="card p-4 border-amber-500/20 bg-amber-500/5 flex justify-between items-center">
                         <div>
@@ -156,7 +157,7 @@
             <section id="investimentos" class="tab-content space-y-4">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="card p-5">
-                        <p class="text-[10px] font-bold text-slate-500 uppercase">Renda Variável</p>
+                        <p class="text-[10px] font-bold text-slate-500 uppercase">Renda Variável (Mercado)</p>
                         <h3 id="inv-rv-mercado" class="text-2xl font-black">R$ 0,00</h3>
                         <button onclick="openForm('rv')" class="text-indigo-400 text-[10px] mt-2 font-bold">+ NOVO ATIVO</button>
                     </div>
@@ -166,10 +167,19 @@
                         <button onclick="openForm('rf')" class="text-emerald-400 text-[10px] mt-2 font-bold">+ NOVO TÍTULO</button>
                     </div>
                 </div>
-                <div class="card overflow-hidden">
+                <div class="card table-container">
                     <table class="w-full text-left text-xs">
                         <thead class="bg-slate-900 border-b border-slate-800">
-                            <tr><th class="p-4">Ativo</th><th class="p-4">Custo</th><th class="p-4">Mercado</th><th class="p-4 text-right">Ação</th></tr>
+                            <tr>
+                                <th class="p-4">Ativo</th>
+                                <th class="p-4">Qtd</th>
+                                <th class="p-4">P. Médio</th>
+                                <th class="p-4">Total Custo</th>
+                                <th class="p-4">Cotação</th>
+                                <th class="p-4">Total Atual</th>
+                                <th class="p-4">Resultado</th>
+                                <th class="p-4 text-right">Ação</th>
+                            </tr>
                         </thead>
                         <tbody id="corpo-investimentos"></tbody>
                     </table>
@@ -282,7 +292,7 @@
                     if(data["Global Quote"] && data["Global Quote"]["05. price"]) {
                         inv.cotacao = parseFloat(data["Global Quote"]["05. price"]);
                     }
-                    await new Promise(r => setTimeout(r, 1000)); // Delay para API free
+                    await new Promise(r => setTimeout(r, 1000)); 
                 } catch (e) { console.error(e); }
             }
             btn.classList.remove('animate-spin');
@@ -461,23 +471,40 @@
                 `).join('');
             });
 
-            // Tabela Investimentos
+            // Tabela Investimentos (Nova lógica de detalhes)
             document.getElementById('corpo-investimentos').innerHTML = state.investRV.map(i => {
-                const custo = i.qtd * i.pm;
-                const mercado = i.qtd * (i.cotacao || i.pm);
+                const custoTotal = i.qtd * i.pm;
+                const mercadoTotal = i.qtd * (i.cotacao || i.pm);
+                const resultado = mercadoTotal - custoTotal;
+                const pct = custoTotal > 0 ? (resultado / custoTotal) * 100 : 0;
+                
                 return `
-                <tr class="border-b border-slate-800">
-                    <td class="p-4 font-bold">${i.ticker}</td>
-                    <td class="p-4">${fmt(custo)}</td>
-                    <td class="p-4 font-bold ${mercado >= custo ? 'text-emerald-500' : 'text-rose-500'}">${fmt(mercado)}</td>
-                    <td class="p-4 text-right"><button onclick="deleteItem('investRV', ${i.id})"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td>
+                <tr class="border-b border-slate-800 hover:bg-slate-900/50 transition">
+                    <td class="p-4 font-bold text-indigo-400">${i.ticker}</td>
+                    <td class="p-4">${i.qtd}</td>
+                    <td class="p-4 text-slate-400">${fmt(i.pm)}</td>
+                    <td class="p-4 font-medium text-slate-300">${fmt(custoTotal)}</td>
+                    <td class="p-4 text-cyan-400">${fmt(i.cotacao || i.pm)}</td>
+                    <td class="p-4 font-bold">${fmt(mercadoTotal)}</td>
+                    <td class="p-4 font-bold ${resultado >= 0 ? 'text-emerald-500' : 'text-rose-500'}">
+                        ${fmt(resultado)}<br><span class="text-[10px] opacity-70">${pct.toFixed(2)}%</span>
+                    </td>
+                    <td class="p-4 text-right">
+                        <button onclick="deleteItem('investRV', ${i.id})" class="text-slate-600 hover:text-rose-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    </td>
                 </tr>`;
             }).join('') + state.investRF.map(i => `
-                <tr class="border-b border-slate-800">
-                    <td class="p-4 font-bold">${i.nome || i.descricao}</td>
-                    <td class="p-4">${fmt(i.valor)}</td>
-                    <td class="p-4 font-bold text-emerald-500">${fmt(i.valor)}</td>
-                    <td class="p-4 text-right"><button onclick="deleteItem('investRF', ${i.id})"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td>
+                <tr class="border-b border-slate-800 bg-emerald-900/5 hover:bg-emerald-900/10 transition">
+                    <td class="p-4 font-bold text-emerald-400">${i.nome || i.descricao}</td>
+                    <td class="p-4">-</td>
+                    <td class="p-4">-</td>
+                    <td class="p-4 font-medium text-slate-300">${fmt(i.valor)}</td>
+                    <td class="p-4">-</td>
+                    <td class="p-4 font-bold">${fmt(i.valor)}</td>
+                    <td class="p-4 text-emerald-500 italic text-[10px]">Renda Fixa</td>
+                    <td class="p-4 text-right">
+                        <button onclick="deleteItem('investRF', ${i.id})" class="text-slate-600 hover:text-rose-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    </td>
                 </tr>`).join('');
 
             // Pendencias
@@ -496,8 +523,8 @@
             save();
         }
 
-        function deleteItem(list, id) { if(confirm('Excluir?')) { state[list] = state[list].filter(i => i.id != id); save(); } }
-        function clearData() { if(confirm('Apagar tudo?')) { localStorage.clear(); location.reload(); } }
+        function deleteItem(list, id) { if(confirm('Excluir lançamento?')) { state[list] = state[list].filter(i => i.id != id); save(); } }
+        function clearData() { if(confirm('Atenção: Isso apagará TODOS os seus dados salvos localmente. Deseja continuar?')) { localStorage.clear(); location.reload(); } }
 
         let fChart;
         function renderChart(r, d) {
