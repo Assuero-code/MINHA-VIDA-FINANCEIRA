@@ -7,6 +7,13 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- LIB FOR EXCEL EXPORT (.xlsx) -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <!-- LIBS FOR PDF EXPORT (.pdf) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root { --bg: #020617; --card: #0f172a; --border: #1e293b; }
@@ -77,9 +84,19 @@
                     <p id="current-date" class="text-slate-500 text-xs font-medium capitalize"></p>
                 </div>
                 <div class="flex flex-col items-end gap-2">
-                    <button onclick="syncAlphaVantage()" class="p-2 bg-slate-900 rounded-lg text-indigo-400" id="btn-sync">
-                        <i data-lucide="refresh-cw" id="sync-icon" class="w-4 h-4"></i>
-                    </button>
+                    <div class="flex items-center gap-2">
+                        <button onclick="syncAlphaVantage()" class="p-2 bg-slate-900 rounded-lg text-indigo-400 hover:bg-slate-800 transition" id="btn-sync" title="Sincronizar Cotações">
+                            <i data-lucide="refresh-cw" id="sync-icon" class="w-4 h-4"></i>
+                        </button>
+                        
+                        <!-- BOTÕES DE EXPORTAÇÃO PDF / EXCEL -->
+                        <button onclick="exportToExcel()" title="Exportar para Excel (.xlsx)" class="px-2.5 py-1.5 bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-600 hover:text-white rounded-lg text-xs font-bold transition flex items-center gap-1">
+                            <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i> <span class="hidden sm:inline">Excel</span>
+                        </button>
+                        <button onclick="exportToPDF()" title="Exportar Relatório PDF" class="px-2.5 py-1.5 bg-rose-600/20 text-rose-400 border border-rose-500/30 hover:bg-rose-600 hover:text-white rounded-lg text-xs font-bold transition flex items-center gap-1">
+                            <i data-lucide="file-text" class="w-3.5 h-3.5"></i> <span class="hidden sm:inline">PDF</span>
+                        </button>
+                    </div>
                     <select id="filtro-mes-global" onchange="changeFilterMonth(this.value)" class="!p-2 text-xs font-bold w-32 md:w-48"></select>
                 </div>
             </header>
@@ -143,7 +160,7 @@
 
                 <!-- SEÇÃO EXPANDIDA DE TODOS OS LANÇAMENTOS (QUANDO OPÇÃO "TODOS" FOR SELECIONADA) -->
                 <div id="secao-todos-lancamentos" class="card p-5 hidden space-y-4">
-                    <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                    <div class="flex justify-between items-center border-b border-slate-800 pb-3 flex-wrap gap-2">
                         <div>
                             <h4 class="font-bold text-base text-white flex items-center gap-2">
                                 <i data-lucide="layers" class="text-indigo-400 w-5 h-5"></i>
@@ -151,7 +168,13 @@
                             </h4>
                             <p class="text-xs text-slate-500">Visão consolidada de todas as receitas e despesas registradas no sistema</p>
                         </div>
-                        <div class="flex gap-2">
+                        <div class="flex gap-2 items-center flex-wrap">
+                            <button onclick="exportToExcel()" class="px-3 py-1 bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600 hover:text-white border border-emerald-500/30 rounded-lg text-xs font-bold transition flex items-center gap-1">
+                                <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i> Exportar Excel
+                            </button>
+                            <button onclick="exportToPDF()" class="px-3 py-1 bg-rose-600/20 text-rose-400 hover:bg-rose-600 hover:text-white border border-rose-500/30 rounded-lg text-xs font-bold transition flex items-center gap-1">
+                                <i data-lucide="file-text" class="w-3.5 h-3.5"></i> Exportar PDF
+                            </button>
                             <span id="badge-total-receitas" class="text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3 py-1 rounded-lg"></span>
                             <span id="badge-total-despesas" class="text-xs font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20 px-3 py-1 rounded-lg"></span>
                         </div>
@@ -177,18 +200,34 @@
 
             <!-- ABA RECEITAS -->
             <section id="receitas" class="tab-content space-y-4">
-                <div class="flex justify-between items-center bg-slate-900 p-4 rounded-2xl border border-slate-800">
+                <div class="flex justify-between items-center bg-slate-900 p-4 rounded-2xl border border-slate-800 flex-wrap gap-2">
                     <h3 class="font-bold text-emerald-500">Minhas Receitas</h3>
-                    <button onclick="openForm('receita')" class="bg-emerald-600 px-4 py-2 rounded-xl font-bold text-xs">+ Adicionar</button>
+                    <div class="flex gap-2">
+                        <button onclick="exportToExcel('receitas')" class="bg-slate-800 hover:bg-slate-700 text-emerald-400 px-3 py-2 rounded-xl font-bold text-xs flex items-center gap-1 border border-slate-700">
+                            <i data-lucide="file-spreadsheet" class="w-4 h-4"></i> Excel
+                        </button>
+                        <button onclick="exportToPDF('receitas')" class="bg-slate-800 hover:bg-slate-700 text-rose-400 px-3 py-2 rounded-xl font-bold text-xs flex items-center gap-1 border border-slate-700">
+                            <i data-lucide="file-text" class="w-4 h-4"></i> PDF
+                        </button>
+                        <button onclick="openForm('receita')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl font-bold text-xs transition">+ Adicionar</button>
+                    </div>
                 </div>
                 <div id="lista-receitas-agrupadas" class="space-y-4"></div>
             </section>
 
             <!-- ABA DESPESAS -->
             <section id="despesas" class="tab-content space-y-4">
-                <div class="flex justify-between items-center bg-slate-900 p-4 rounded-2xl border border-slate-800">
+                <div class="flex justify-between items-center bg-slate-900 p-4 rounded-2xl border border-slate-800 flex-wrap gap-2">
                     <h3 class="font-bold text-rose-500">Minhas Despesas</h3>
-                    <button onclick="openForm('despesa')" class="bg-rose-600 px-4 py-2 rounded-xl font-bold text-xs">+ Adicionar</button>
+                    <div class="flex gap-2">
+                        <button onclick="exportToExcel('despesas')" class="bg-slate-800 hover:bg-slate-700 text-emerald-400 px-3 py-2 rounded-xl font-bold text-xs flex items-center gap-1 border border-slate-700">
+                            <i data-lucide="file-spreadsheet" class="w-4 h-4"></i> Excel
+                        </button>
+                        <button onclick="exportToPDF('despesas')" class="bg-slate-800 hover:bg-slate-700 text-rose-400 px-3 py-2 rounded-xl font-bold text-xs flex items-center gap-1 border border-slate-700">
+                            <i data-lucide="file-text" class="w-4 h-4"></i> PDF
+                        </button>
+                        <button onclick="openForm('despesa')" class="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-xl font-bold text-xs transition">+ Adicionar</button>
+                    </div>
                 </div>
                 <div id="lista-despesas-agrupadas" class="space-y-4"></div>
             </section>
@@ -443,6 +482,185 @@
 
         function closeDocModal() {
             document.getElementById('modal-doc').classList.add('hidden');
+        }
+
+        // =========================================================
+        // NOVAS FUNÇÕES: EXPORTAÇÃO PARA EXCEL (.xlsx) E PDF (.pdf)
+        // =========================================================
+        function getFilteredExportData(filtroTipo = 'todos') {
+            const isAll = state.selectedMonth === 'all';
+            let list = [];
+
+            if (filtroTipo === 'receitas') {
+                list = state.receitas.map(r => ({ ...r, tipo: 'Receita' }));
+            } else if (filtroTipo === 'despesas') {
+                list = state.despesas.map(d => ({ ...d, tipo: 'Despesa' }));
+            } else {
+                list = [
+                    ...state.receitas.map(r => ({ ...r, tipo: 'Receita' })),
+                    ...state.despesas.map(d => ({ ...d, tipo: 'Despesa' }))
+                ];
+            }
+
+            if (!isAll) {
+                list = list.filter(item => item.venc?.startsWith(state.selectedMonth));
+            }
+
+            return list.sort((a, b) => (a.venc || '').localeCompare(b.venc || ''));
+        }
+
+        function exportToExcel(filtroTipo = 'todos') {
+            const items = getFilteredExportData(filtroTipo);
+            if (items.length === 0) {
+                alert("Nenhum lançamento encontrado para exportação no período selecionado.");
+                return;
+            }
+
+            const dataFormatted = items.map(item => ({
+                'Tipo': item.tipo,
+                'Descrição': item.descricao || '',
+                'Categoria': item.categoria || '',
+                'Data de Vencimento': item.venc ? item.venc.split('-').reverse().join('/') : '',
+                'Status': item.status === 'pago' ? 'Pago' : 'Pendente',
+                'Valor (R$)': item.valor || 0,
+                'Parcela': item.parcela || '1/1',
+                'Possui Anexo': item.comprovante ? 'Sim' : 'Não'
+            }));
+
+            const ws = XLSX.utils.json_to_sheet(dataFormatted);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Lançamentos");
+
+            // Configurar larguras das colunas
+            ws['!cols'] = [
+                { wch: 10 }, // Tipo
+                { wch: 30 }, // Descrição
+                { wch: 18 }, // Categoria
+                { wch: 18 }, // Data
+                { wch: 12 }, // Status
+                { wch: 15 }, // Valor
+                { wch: 10 }, // Parcela
+                { wch: 14 }  // Possui Anexo
+            ];
+
+            const mesNome = state.selectedMonth === 'all' ? 'TODOS_OS_PERIODOS' : state.selectedMonth;
+            const fileName = `Relatorio_Financeiro_${filtroTipo.toUpperCase()}_${mesNome}.xlsx`;
+            XLSX.writeFile(wb, fileName);
+        }
+
+        function exportToPDF(filtroTipo = 'todos') {
+            const items = getFilteredExportData(filtroTipo);
+            if (items.length === 0) {
+                alert("Nenhum lançamento encontrado para exportação no período selecionado.");
+                return;
+            }
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+            const mesNome = state.selectedMonth === 'all' ? 'Todos os Períodos' : state.selectedMonth.split('-').reverse().join('/');
+            const hojeStr = new Date().toLocaleDateString('pt-BR');
+
+            // Cálculos
+            const totalReceitas = items.filter(i => i.tipo === 'Receita').reduce((a,c) => a + c.valor, 0);
+            const totalDespesas = items.filter(i => i.tipo === 'Despesa').reduce((a,c) => a + c.valor, 0);
+            const saldoLiquido = totalReceitas - totalDespesas;
+
+            // Cabeçalho do PDF
+            doc.setFillColor(15, 23, 42); // slate-900
+            doc.rect(0, 0, 210, 32, 'F');
+
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(18);
+            doc.setFont("helvetica", "bold");
+            doc.text("MINHA VIDA FINANCEIRA", 14, 16);
+
+            doc.setFontSize(10);
+            doc.setFont("helvetica", "normal");
+            doc.setTextColor(148, 163, 184); // slate-400
+            doc.text(`Relatório de Lançamentos (${filtroTipo.toUpperCase()}) • Período: ${mesNome}`, 14, 24);
+            doc.text(`Emitido em: ${hojeStr}`, 150, 24);
+
+            // Quadrados de Resumo Sumário
+            let startY = 38;
+
+            doc.setFillColor(241, 245, 249); // slate-100
+            doc.roundedRect(14, startY, 56, 18, 3, 3, 'F');
+            doc.setFontSize(8); doc.setTextColor(5, 150, 105); doc.setFont("helvetica", "bold");
+            doc.text("TOTAL RECEITAS", 18, startY + 6);
+            doc.setFontSize(11); doc.setTextColor(15, 23, 42);
+            doc.text(fmt(totalReceitas), 18, startY + 13);
+
+            doc.setFillColor(241, 245, 249);
+            doc.roundedRect(77, startY, 56, 18, 3, 3, 'F');
+            doc.setFontSize(8); doc.setTextColor(225, 29, 72); doc.setFont("helvetica", "bold");
+            doc.text("TOTAL DESPESAS", 81, startY + 6);
+            doc.setFontSize(11); doc.setTextColor(15, 23, 42);
+            doc.text(fmt(totalDespesas), 81, startY + 13);
+
+            doc.setFillColor(241, 245, 249);
+            doc.roundedRect(140, startY, 56, 18, 3, 3, 'F');
+            doc.setFontSize(8); doc.setTextColor(79, 70, 229); doc.setFont("helvetica", "bold");
+            doc.text("SALDO RESULTANTE", 144, startY + 6);
+            doc.setFontSize(11); 
+            doc.setTextColor(saldoLiquido >= 0 ? 5 : 225, saldoLiquido >= 0 ? 150 : 29, saldoLiquido >= 0 ? 105 : 72);
+            doc.text(fmt(saldoLiquido), 144, startY + 13);
+
+            // Tabela Detalhada
+            const tableRows = items.map(i => [
+                i.tipo,
+                i.descricao + (i.parcela ? ` (${i.parcela})` : ''),
+                i.categoria || '-',
+                i.venc ? i.venc.split('-').reverse().join('/') : '-',
+                i.status === 'pago' ? 'Pago' : 'Pendente',
+                fmt(i.valor)
+            ]);
+
+            doc.autoTable({
+                startY: startY + 24,
+                head: [['Tipo', 'Descrição', 'Categoria', 'Vencimento', 'Status', 'Valor']],
+                body: tableRows,
+                theme: 'striped',
+                headStyles: {
+                    fillColor: [30, 41, 59], // slate-800
+                    textColor: [255, 255, 255],
+                    fontStyle: 'bold',
+                    fontSize: 9
+                },
+                styles: {
+                    fontSize: 8.5,
+                    cellPadding: 3
+                },
+                columnStyles: {
+                    0: { fontStyle: 'bold', width: 22 },
+                    1: { width: 65 },
+                    2: { width: 32 },
+                    3: { width: 25 },
+                    4: { width: 22 },
+                    5: { fontStyle: 'bold', halign: 'right', width: 28 }
+                },
+                didParseCell: function(data) {
+                    if (data.section === 'body' && data.column.index === 0) {
+                        if (data.cell.raw === 'Receita') {
+                            data.cell.styles.textColor = [16, 185, 129];
+                        } else {
+                            data.cell.styles.textColor = [244, 63, 94];
+                        }
+                    }
+                }
+            });
+
+            // Rodapé
+            const pageCount = doc.internal.getNumberOfPages();
+            for (let i = 1; i <= pageCount; i++) {
+                doc.setPage(i);
+                doc.setFontSize(8);
+                doc.setTextColor(148, 163, 184);
+                doc.text(`Minha Vida Financeira - Página ${i} de ${pageCount}`, 105, 290, { align: 'center' });
+            }
+
+            const fileName = `Relatorio_Financeiro_${filtroTipo.toUpperCase()}_${state.selectedMonth}.pdf`;
+            doc.save(fileName);
         }
 
         function openForm(type, id = null) {
