@@ -53,7 +53,7 @@
             background-attachment: fixed;
             color: var(--text-main);
             min-height: 100vh;
-            padding-bottom: calc(140px + var(--safe-area-bottom));
+            padding-bottom: calc(150px + var(--safe-area-bottom));
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -101,6 +101,9 @@
             color: var(--accent-primary);
             border: 1px solid rgba(56, 189, 248, 0.25);
             letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
         .progress-card {
@@ -113,13 +116,15 @@
         }
 
         .user-info-banner {
-            margin-top: 10px;
+            margin-top: 12px;
             font-size: 0.8rem;
             color: var(--text-muted);
             display: flex;
             flex-wrap: wrap;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .progress-info {
@@ -204,6 +209,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
         }
 
         .section-title { font-size: 1.2rem; font-weight: 800; color: var(--text-main); }
@@ -220,6 +227,7 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
+            position: relative;
         }
 
         .exercise-card.completed { border-color: var(--success-color); background: rgba(16, 185, 129, 0.05); }
@@ -248,13 +256,14 @@
             overflow: hidden;
             background: #000;
             border: 1px solid var(--card-border);
+            flex-shrink: 0;
         }
 
         .ex-img { width: 100%; height: 100%; object-fit: cover; }
 
-        .ex-title { font-size: 1rem; font-weight: 700; color: var(--text-main); }
+        .ex-title { font-size: 0.98rem; font-weight: 700; color: var(--text-main); }
 
-        .anatomy-info { font-size: 0.72rem; margin-top: 4px; }
+        .anatomy-info { font-size: 0.72rem; margin-top: 4px; line-height: 1.3; }
         .primary-muscle { color: var(--accent-primary); font-weight: 700; }
         .secondary-muscles { color: var(--text-muted); }
 
@@ -305,10 +314,11 @@
         .modal-content {
             background: var(--bg-dark);
             width: 100%;
-            max-width: 500px;
+            max-width: 540px;
             border: 1px solid var(--accent-primary);
             border-radius: var(--radius-xl);
             padding: 24px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
         }
 
         .form-select, .form-input {
@@ -346,10 +356,16 @@
             color: var(--text-muted);
             padding: 6px 10px;
             border-radius: 8px;
-            font-size: 0.7rem;
+            font-size: 0.72rem;
+            font-weight: 600;
             cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s;
         }
-        .action-btn-sm.delete:hover { border-color: var(--danger-color); color: var(--danger-color); }
+        .action-btn-sm:hover { border-color: var(--accent-primary); color: var(--accent-primary); }
+        .action-btn-sm.delete:hover { border-color: var(--danger-color); color: var(--danger-color); background: rgba(239,68,68,0.1); }
 
         .bottom-nav {
             position: fixed;
@@ -364,11 +380,40 @@
         }
 
         .nav-content { width: 100%; max-width: 768px; margin: 0 auto; display: flex; gap: 8px; flex-wrap: wrap; }
-        .btn-action { flex: 1; min-width: 100px; padding: 14px 8px; border-radius: 14px; border: none; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 0.78rem; }
+        .btn-action { flex: 1; min-width: 90px; padding: 12px 6px; border-radius: 14px; border: none; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; font-size: 0.75rem; text-align: center; }
         .btn-gen { background: var(--success-gradient); color: #fff; }
-        .btn-reset { background: rgba(239, 68, 68, 0.1); color: var(--danger-color); border: 1px solid var(--danger-color); }
+        .btn-add-ex { background: var(--accent-gradient); color: #fff; }
         .btn-profile { background: rgba(56, 189, 248, 0.12); color: var(--accent-primary); border: 1px solid rgba(56, 189, 248, 0.3); }
-        .btn-profile:hover { background: rgba(56, 189, 248, 0.25); }
+        .btn-logout { background: rgba(239, 68, 68, 0.12); color: var(--danger-color); border: 1px solid rgba(239, 68, 68, 0.3); }
+        .btn-logout:hover { background: rgba(239, 68, 68, 0.25); }
+
+        .profile-card-item {
+            background: rgba(22, 30, 46, 0.9);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-md);
+            padding: 12px 16px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.2s;
+        }
+        .profile-card-item.active-profile {
+            border-color: var(--accent-primary);
+            background: rgba(56, 189, 248, 0.08);
+        }
+
+        .ex-lib-card {
+            background: rgba(22, 30, 46, 0.6);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-md);
+            padding: 12px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .ex-lib-card:hover { border-color: var(--accent-primary); }
 
         @media (min-width: 640px) {
             .exercise-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
@@ -381,7 +426,7 @@
         <header>
             <div class="header-top">
                 <div class="brand-title"><i class="fa-solid fa-dumbbell"></i> MEU TREINO PRO</div>
-                <div class="today-badge" id="badgeName">TREINADOR IA</div>
+                <div class="today-badge" id="badgeName"><i class="fa-solid fa-user"></i> PERFIL</div>
             </div>
 
             <div class="progress-card">
@@ -413,199 +458,548 @@
         </main>
     </div>
 
-    <!-- [MODAL: QUESTIONÁRIO / ONBOARDING] -->
+    <!-- [MODAL: SELEÇÃO DE PERFIL / QUESTIONÁRIO] -->
     <div class="modal-overlay" id="onboardingModal">
         <div class="modal-content">
-            <h2 style="color: var(--accent-primary); margin-bottom: 15px;">Personalize seu Perfil</h2>
-            <div style="max-height: 70vh; overflow-y: auto; padding-right: 5px;">
-                <div class="form-group">
-                    <label style="font-size: 0.8rem; color: var(--text-muted)">Nome</label>
-                    <input type="text" id="regName" class="form-input" placeholder="Seu nome">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
+                <h2 style="color: var(--accent-primary); font-size:1.3rem;" id="modalTitle">Perfis do Sistema</h2>
+                <button id="closeProfileModalBtn" onclick="closeProfileModal()" style="display:none; background:none; border:none; color:var(--text-muted); font-size:1.4rem; cursor:pointer;"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <!-- Lista de Perfis Existentes -->
+            <div id="profilesListSection" style="display:none; margin-bottom: 15px;">
+                <label style="font-size:0.8rem; color:var(--text-muted); margin-bottom:8px; display:block;">Selecione um Perfil Salvo:</label>
+                <div id="profilesContainer" style="max-height: 40vh; overflow-y: auto;">
+                    <!-- Preenchido via JS -->
                 </div>
-                <div style="display:flex; gap:10px; margin-top: 10px;">
-                    <div style="flex:1">
-                        <label style="font-size: 0.8rem; color: var(--text-muted)">Peso (kg)</label>
-                        <input type="number" id="regWeight" class="form-input" placeholder="Ex: 80">
+                <button class="action-btn-sm" style="width:100%; padding:10px; margin-top:10px; justify-content:center; background:rgba(56, 189, 248, 0.1); color:var(--accent-primary);" onclick="showQuestionnaireForm()">
+                    <i class="fa-solid fa-user-plus"></i> + CRIAR NOVO PERFIL
+                </button>
+            </div>
+
+            <!-- Formulário de Questionário / Criar Perfil -->
+            <div id="questionnaireSection">
+                <h3 style="font-size:1rem; color:var(--text-main); margin-bottom:10px;">Preencha seu Questionário:</h3>
+                <div style="max-height: 55vh; overflow-y: auto; padding-right: 5px;">
+                    <div class="form-group">
+                        <label style="font-size: 0.8rem; color: var(--text-muted)">Nome</label>
+                        <input type="text" id="regName" class="form-input" placeholder="Seu nome">
                     </div>
-                    <div style="flex:1">
-                        <label style="font-size: 0.8rem; color: var(--text-muted)">Altura (cm)</label>
-                        <input type="number" id="regHeight" class="form-input" placeholder="Ex: 175">
+                    <div style="display:flex; gap:10px; margin-top: 10px;">
+                        <div style="flex:1">
+                            <label style="font-size: 0.8rem; color: var(--text-muted)">Peso (kg)</label>
+                            <input type="number" id="regWeight" class="form-input" placeholder="Ex: 80">
+                        </div>
+                        <div style="flex:1">
+                            <label style="font-size: 0.8rem; color: var(--text-muted)">Altura (cm)</label>
+                            <input type="number" id="regHeight" class="form-input" placeholder="Ex: 175">
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-top: 15px;">
+                        <label style="font-size: 0.8rem; color: var(--text-muted)">Qual seu objetivo principal?</label>
+                        <select id="regGoal" class="form-select">
+                            <option value="hipertrofia">Ganhar Massa Muscular (Hipertrofia)</option>
+                            <option value="forca">Ganhar Força</option>
+                            <option value="emagrecimento">Perder Gordura / Emagrecer</option>
+                            <option value="recomposicao">Perder Gordura + Ganhar Massa</option>
+                            <option value="condicionamento">Melhorar Condicionamento</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-top: 15px;">
+                        <label style="font-size: 0.8rem; color: var(--text-muted)">Dias disponíveis por semana?</label>
+                        <select id="regFreq" class="form-select">
+                            <option value="3">3 dias (Treino FullBody)</option>
+                            <option value="4">4 dias (Split AB)</option>
+                            <option value="5">5 dias (Split ABCDE)</option>
+                        </select>
                     </div>
                 </div>
-                <div class="form-group" style="margin-top: 15px;">
-                    <label style="font-size: 0.8rem; color: var(--text-muted)">Qual seu objetivo principal?</label>
-                    <select id="regGoal" class="form-select">
-                        <option value="hipertrofia">Ganhar Massa Muscular (Hipertrofia)</option>
-                        <option value="forca">Ganhar Força</option>
-                        <option value="emagrecimento">Perder Gordura / Emagrecer</option>
-                        <option value="recomposicao">Perder Gordura + Ganhar Massa</option>
-                        <option value="condicionamento">Melhorar Condicionamento</option>
-                    </select>
-                </div>
-                <div class="form-group" style="margin-top: 15px;">
-                    <label style="font-size: 0.8rem; color: var(--text-muted)">Dias disponíveis por semana?</label>
-                    <select id="regFreq" class="form-select">
-                        <option value="3">3 dias (Treino FullBody)</option>
-                        <option value="4">4 dias (Split AB)</option>
-                        <option value="5">5 dias (Split ABCDE)</option>
-                    </select>
+                <div style="display:flex; gap:10px;">
+                    <button class="btn-submit" onclick="finishOnboarding()">SALVAR E GERAR MEU TREINO</button>
                 </div>
             </div>
-            <button class="btn-submit" onclick="finishOnboarding()">SALVAR E GERAR MEU TREINO</button>
         </div>
     </div>
 
+    <!-- [MODAL: ADICIONAR EXERCÍCIO] -->
+    <div class="modal-overlay" id="addExerciseModal">
+        <div class="modal-content">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <h2 style="color: var(--accent-primary); font-size:1.2rem;"><i class="fa-solid fa-plus-circle"></i> Adicionar Exercício</h2>
+                <button onclick="closeAddExerciseModal()" style="background:none; border:none; color:var(--text-muted); font-size:1.4rem; cursor:pointer;"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <div class="form-group" style="margin-bottom:15px;">
+                <label style="font-size:0.8rem; color:var(--text-muted)">Filtrar por Grupo Muscular:</label>
+                <select id="filterMuscleGroup" class="form-select" onchange="renderExerciseLibrary()">
+                    <option value="todos">Todos os Grupos Musculares</option>
+                    <option value="peito">Peitoral</option>
+                    <option value="costas">Costas / Dorsal</option>
+                    <option value="quadriceps">Quadríceps</option>
+                    <option value="posterior_gluteo">Posterior de Coxa & Glúteos</option>
+                    <option value="ombros">Ombros / Deltoides</option>
+                    <option value="biceps">Bíceps & Antebraço</option>
+                    <option value="triceps">Tríceps</option>
+                    <option value="panturrilha_core">Panturrilhas & Core/Abdômen</option>
+                    <option value="custom">-- Cadastrar Exercício Personalizado --</option>
+                </select>
+            </div>
+
+            <!-- Lista de Exercícios da Biblioteca -->
+            <div id="libraryListContainer" style="max-height:50vh; overflow-y:auto; padding-right:4px;">
+                <!-- Preenchido via JS -->
+            </div>
+
+            <!-- Formulário de Exercício Personalizado -->
+            <div id="customExerciseForm" style="display:none; max-height:50vh; overflow-y:auto; padding-right:4px;">
+                <div class="form-group">
+                    <label style="font-size:0.8rem; color:var(--text-muted)">Nome do Exercício</label>
+                    <input type="text" id="customExTitle" class="form-input" placeholder="Ex: Agachamento Sumô">
+                </div>
+                <div class="form-group" style="margin-top:10px;">
+                    <label style="font-size:0.8rem; color:var(--text-muted)">Músculo Primário Trabalhado</label>
+                    <input type="text" id="customExPrimary" class="form-input" placeholder="Ex: Glúteo Máximo, Adutores">
+                </div>
+                <div class="form-group" style="margin-top:10px;">
+                    <label style="font-size:0.8rem; color:var(--text-muted)">Músculos Secundários</label>
+                    <input type="text" id="customExSecondary" class="form-input" placeholder="Ex: Quadríceps, Core">
+                </div>
+                <div class="form-group" style="margin-top:10px;">
+                    <label style="font-size:0.8rem; color:var(--text-muted)">Dica / Motivo de Execução</label>
+                    <input type="text" id="customExWhy" class="form-input" placeholder="Ex: Foco no afastamento das pernas e rotação externa de quadril.">
+                </div>
+                <button class="btn-submit" style="margin-top:15px;" onclick="addCustomExerciseSubmit()">ADICIONAR AO TREINO</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- BARRA NAVEGAÇÃO INFERIOR -->
     <nav class="bottom-nav">
         <div class="nav-content">
-            <button class="btn-action btn-gen" onclick="generatePersonalizedWorkout()"><i class="fa-solid fa-wand-magic-sparkles"></i> REGERAR TREINO</button>
-            <button class="btn-action btn-reset" onclick="resetProgress()"><i class="fa-solid fa-rotate-left"></i> ZERAR TREINO</button>
-            <button class="btn-action btn-profile" onclick="resetProfile()"><i class="fa-solid fa-user-gear"></i> RESETAR PERFIL</button>
+            <button class="btn-action btn-gen" onclick="generatePersonalizedWorkout()"><i class="fa-solid fa-wand-magic-sparkles"></i> REGERAR</button>
+            <button class="btn-action btn-add-ex" onclick="openAddExerciseModal()"><i class="fa-solid fa-plus"></i> EXERCÍCIO</button>
+            <button class="btn-action btn-profile" onclick="openProfileModal()"><i class="fa-solid fa-users"></i> PERFIS</button>
+            <button class="btn-action btn-logout" onclick="logoutProfile()"><i class="fa-solid fa-right-from-bracket"></i> SAIR</button>
         </div>
     </nav>
 
     <script>
-        // --- BIBLIOTECA DE EXERCÍCIOS BASEADA EM EVIDÊNCIAS (ACSM 2026) ---
+        // --- BIBLIOTECA DE EXERCÍCIOS COMPLETA COM MÚSCULOS PRIMÁRIOS E SECUNDÁRIOS ---
         const EXERCISE_LIBRARY = {
-            hipertrofia: {
-                peito: [
-                    { title: "Supino Reto (Barra)", primary: "Peitoral Maior", secondary: "Tríceps, Deltoide Anterior", img: "img/supino-reto.png", why: "Exercício multiarticular base para volume e sobrecarga." },
-                    { title: "Supino Inclinado (Halteres)", primary: "Peitoral Superior", secondary: "Deltoide Anterior", img: "img/supino-inclinado.png", why: "Foco na porção clavicular do peitoral." },
-                    { title: "Crossover (Polia Alta)", primary: "Peitoral (Esternal)", secondary: "Deltoide Anterior", img: "img/cross-over.png", why: "Isolamento mecânico com tensão constante." }
-                ],
-                costas: [
-                    { title: "Puxada Frontal", primary: "Latíssimo do Dorso", secondary: "Bíceps, Braquial", img: "img/puxada-frontal.png", why: "Desenvolvimento de largura dorsal." },
-                    { title: "Remada Baixa", primary: "Romboides, Trapézio", secondary: "Bíceps, Latíssimo", img: "img/remada-baixa.png", why: "Foco na espessura das costas e estabilidade escapular." },
-                    { title: "Pulldown Corda", primary: "Latíssimo do Dorso", secondary: "Tríceps (Longo)", img: "img/pulldown-corda.png", why: "Isolamento do latíssimo sem fadiga excessiva do bíceps." }
-                ],
-                pernas: [
-                    { title: "Agachamento Livre", primary: "Quadríceps, Glúteo Máximo", secondary: "Eretores da Espinha, Isquiotibiais", img: "img/agachamento-livre.png", why: "Rei dos exercícios para membros inferiores." },
-                    { title: "Leg Press 45°", primary: "Quadríceps", secondary: "Glúteos", img: "img/leg-press.png", why: "Permite alto volume com segurança lombar." },
-                    { title: "Cadeira Extensora", primary: "Quadríceps", secondary: "Nenhum", img: "img/extensora.png", why: "Isolamento do quadríceps na fase concêntrica máxima." }
-                ]
-            },
-            forca: {
-                base: [
-                    { title: "Agachamento Costa", primary: "Membros Inferiores", secondary: "Core", img: "img/agachamento-livre.png", why: "Padrão de movimento fundamental para força sistêmica." },
-                    { title: "Supino Reto", primary: "Peitoral, Tríceps", secondary: "Ombros", img: "img/supino-reto.png", why: "Principal empurre horizontal para força bruta." },
-                    { title: "Levantamento Terra Romeno", primary: "Cadeia Posterior", secondary: "Lombar, Pegada", img: "img/stiff.png", why: "Fortalecimento de quadril e eretores." }
-                ]
-            },
-            geral: {
-                ombros: [
-                    { title: "Desenvolvimento Halteres", primary: "Deltoide Anterior/Lateral", secondary: "Tríceps", img: "img/desenvolvimento.png", why: "Construção de base estável para ombros." },
-                    { title: "Elevação Lateral", primary: "Deltoide Lateral", secondary: "Trapézio", img: "img/elevacao-lateral.png", why: "Isolamento para largura dos ombros." }
-                ],
-                biceps: [{ title: "Rosca Direta Polia", primary: "Bíceps Braquial", secondary: "Antebraço", img: "img/rosca-polia.png", why: "Tensão mecânica constante no pico do bíceps." }],
-                triceps: [{ title: "Tríceps Corda", primary: "Tríceps (Lateral/Medial)", secondary: "Ancôneo", img: "img/triceps-corda.png", why: "Permite maior amplitude na extensão de cotovelo." }]
-            }
+            peito: [
+                { title: "Supino Reto (Barra)", primary: "Peitoral Maior (Esternal)", secondary: "Tríceps Braquial, Deltoide Anterior", img: "img/supino-reto.png", why: "Exercício multiarticular base para volume e sobrecarga progressiva." },
+                { title: "Supino Inclinado (Halteres)", primary: "Peitoral Superior (Clavicular)", secondary: "Deltoide Anterior, Tríceps Braquial", img: "img/supino-inclinado.png", why: "Foco no preenchimento da porção superior do peitoral." },
+                { title: "Supino Declinado (Barra/Halter)", primary: "Peitoral Inferior", secondary: "Tríceps Braquial, Deltoide Anterior", img: "img/supino-declinado.png", why: "Ênfase na porção inferior e definição da linha peitoral." },
+                { title: "Crossover Polia Alta", primary: "Peitoral Inferior / Esternal", secondary: "Deltoide Anterior", img: "img/cross-over.png", why: "Isolamento com pico de contração e tensão mecânica constante." },
+                { title: "Crossover Polia Baixa", primary: "Peitoral Superior", secondary: "Deltoide Anterior, Bíceps (cabeça curta)", img: "img/cross-over-baixo.png", why: "Trabalha a porção clavicular com vetor de força ascendente." },
+                { title: "Crucifixo Reto com Halteres", primary: "Peitoral Maior", secondary: "Deltoide Anterior", img: "img/crucifixo-reto.png", why: "Excelente para o alongamento sob carga das fibras peitorais." },
+                { title: "Flexão de Braços (Push-up)", primary: "Peitoral Maior", secondary: "Tríceps, Deltoide Anterior, Core", img: "img/flexao.png", why: "Exercício calistênico para controle motor e resistência muscular." },
+                { title: "Peck Deck / Voador", primary: "Peitoral Maior", secondary: "Deltoide Anterior", img: "img/voador.png", why: "Isolamento seguro sem sobrecarga excessiva nos punhos." }
+            ],
+            costas: [
+                { title: "Puxada Frontal (Pulley)", primary: "Latíssimo do Dorso", secondary: "Bíceps, Braquial, Romboides", img: "img/puxada-frontal.png", why: "Desenvolvimento da largura dorsal e formato em V." },
+                { title: "Remada Curvada com Barra", primary: "Romboides, Trapézio Médio", secondary: "Latíssimo, Bíceps, Eretores da Espinha", img: "img/remada-curvada.png", why: "Construção de espessura e densidade nas costas." },
+                { title: "Remada Baixa (Triângulo)", primary: "Romboides, Latíssimo do Dorso", secondary: "Bíceps Braquial, Deltoide Posterior", img: "img/remada-baixa.png", why: "Estabilidade escapular e foco no miolo das costas." },
+                { title: "Remada Unilateral com Halter (Serrote)", primary: "Latíssimo do Dorso, Romboides", secondary: "Bíceps, Core", img: "img/remada-unilateral.png", why: "Permite grande amplitude e correção de assimetrias." },
+                { title: "Pulldown na Polia Alta", primary: "Latíssimo do Dorso", secondary: "Tríceps (Cabeça Longa)", img: "img/pulldown-corda.png", why: "Isolamento do latíssimo sem fadiga precoce dos bíceps." },
+                { title: "Barra Fixa (Pull-up)", primary: "Latíssimo do Dorso, Romboides", secondary: "Bíceps Braquial, Antebraço", img: "img/barra-fixa.png", why: "Exercício corporal fundamental para força e massa dorsal." },
+                { title: "Remada Cavalinho (T-Bar)", primary: "Espessura de Costas (Trapézio/Romboides)", secondary: "Latíssimo, Bíceps, Lombar", img: "img/remada-cavalinho.png", why: "Trabalho com carga elevada para ganho de volume." }
+            ],
+            quadriceps: [
+                { title: "Agachamento Livre com Barra", primary: "Quadríceps, Glúteo Máximo", secondary: "Eretores da Espinha, Isquiotibiais, Core", img: "img/agachamento-livre.png", why: "Exercício soberano para ganho de força e hipertrofia global." },
+                { title: "Leg Press 45°", primary: "Quadríceps", secondary: "Glúteos, Isquiotibiais", img: "img/leg-press.png", why: "Alto volume de carga com suporte e proteção lombar." },
+                { title: "Cadeira Extensora", primary: "Quadríceps (Reto Femural/Vastos)", secondary: "Nenhum (Isolado)", img: "img/extensora.png", why: "Isolamento concêntrico e pico de contração do quadríceps." },
+                { title: "Agachamento Búlgaro", primary: "Quadríceps, Glúteo Médio/Máximo", secondary: "Isquiotibiais, Core", img: "img/bulgaro.png", why: "Unilateral exigente para força, estabilidade e hipertrofia." },
+                { title: "Passada / Afundo com Halteres", primary: "Quadríceps, Glúteo Máximo", secondary: "Isquiotibiais, Panturrilhas", img: "img/passada.png", why: "Dinâmico para membros inferiores e condicionamento." }
+            ],
+            posterior_gluteo: [
+                { title: "Stiff / Levantamento Terra Romeno", primary: "Isquiotibiais, Glúteo Máximo", secondary: "Eretores da Espinha, Pegada", img: "img/stiff.png", why: "Trabalha o alongamento sob carga da cadeia posterior." },
+                { title: "Mesa Flexora", primary: "Isquiotibiais (Semitendíneo/Bíceps Femoral)", secondary: "Gastrocnêmio", img: "img/mesa-flexora.png", why: "Isolamento direto para flexão de joelho." },
+                { title: "Cadeira Flexora", primary: "Isquiotibiais", secondary: "Gastrocnêmio", img: "img/cadeira-flexora.png", why: "Trabalha os posteriores de coxa na posição sentada." },
+                { title: "Elevação Pélvica (Hip Thrust)", primary: "Glúteo Máximo", secondary: "Isquiotibiais, Quadríceps", img: "img/hip-thrust.png", why: "Maior pico de ativação mecânica para os glúteos." },
+                { title: "Cadeira Abdutora", primary: "Glúteo Médio e Mínimo", secondary: "Tensor da Fáscia Lata", img: "img/abdutora.png", why: "Desenvolvimento da porção lateral dos glúteos." }
+            ],
+            ombros: [
+                { title: "Desenvolvimento com Halteres", primary: "Deltoide Anterior e Lateral", secondary: "Tríceps, Trapézio Superior", img: "img/desenvolvimento.png", why: "Construção de base de ombros largos e fortes." },
+                { title: "Elevação Lateral com Halteres", primary: "Deltoide Lateral", secondary: "Trapézio Superior", img: "img/elevacao-lateral.png", why: "Foco exclusivo na largura e formato de 'V' nos ombros." },
+                { title: "Elevação Lateral na Polia", primary: "Deltoide Lateral", secondary: "Trapézio", img: "img/elevacao-lateral-polia.png", why: "Tensão constante do início ao fim do movimento." },
+                { title: "Elevação Frontal", primary: "Deltoide Anterior", secondary: "Peitoral Clavicular", img: "img/elevacao-frontal.png", why: "Isolamento da parte da frente dos ombros." },
+                { title: "Crucifixo Invertido / Face Pull", primary: "Deltoide Posterior, Romboides", secondary: "Trapézio, Manguito Rotador", img: "img/face-pull.png", why: "Saúde dos ombros, postura e densidade posterior." },
+                { title: "Encolhimento de Ombros", primary: "Trapézio Superior", secondary: "Elevador da Escápula", img: "img/encolhimento.png", why: "Desenvolvimento de volume e massa no trapézio." }
+            ],
+            biceps: [
+                { title: "Rosca Direta com Barra W", primary: "Bíceps Braquial", secondary: "Braquiorradial, Antebraço", img: "img/rosca-direta.png", why: "Exercício clássico de sobrecarga para braços." },
+                { title: "Rosca Alternada com Halteres", primary: "Bíceps Braquial (Supinação)", secondary: "Braquial", img: "img/rosca-alternada.png", why: "Permite rotação completa do punho para ativação máxima." },
+                { title: "Rosca Martelo", primary: "Braquial, Braquiorradial", secondary: "Bíceps (cabeça longa)", img: "img/rosca-martelo.png", why: "Aumenta a espessura do braço e antebraço." },
+                { title: "Rosca Scott", primary: "Bíceps Braquial (Cabeça Curta)", secondary: "Braquial", img: "img/rosca-scott.png", why: "Isolamento rígido impedindo roubo com os ombros." },
+                { title: "Rosca Concentrada", primary: "Pico do Bíceps", secondary: "Braquial", img: "img/rosca-concentrada.png", why: "Foco no ápice de contração muscular." }
+            ],
+            triceps: [
+                { title: "Tríceps Corda na Polia", primary: "Tríceps (Cabeça Lateral e Medial)", secondary: "Ancôneo", img: "img/triceps-corda.png", why: "Permite rotação final e extensão completa do cotovelo." },
+                { title: "Tríceps Testa (Barra W)", primary: "Tríceps (Cabeça Longa)", secondary: "Ancôneo", img: "img/triceps-testa.png", why: "Excelente para a massa geral do tríceps." },
+                { title: "Tríceps Francês na Polia/Halter", primary: "Tríceps (Cabeça Longa)", secondary: "Deltoide Posterior", img: "img/triceps-frances.png", why: "Alongamento profundo da cabeça longa overhead." },
+                { title: "Mergulho em Paralelas / Banco", primary: "Tríceps Braquial, Peitoral Inferior", secondary: "Deltoide Anterior", img: "img/paralelas.png", why: "Multiarticular potente para tríceps pesado." },
+                { title: "Tríceps Pulley Barra Reta", primary: "Tríceps Braquial", secondary: "Ancôneo", img: "img/triceps-pulley.png", why: "Carga consistente para força de empurrão." }
+            ],
+            panturrilha_core: [
+                { title: "Gêmeos em Pé (Máquina/Halter)", primary: "Gastrocnêmio (Panturrilha)", secondary: "Sóleo", img: "img/panturrilha-pe.png", why: "Desenvolvimento da porção superior da panturrilha." },
+                { title: "Gêmeos Sentado (Soleira)", primary: "Sóleo (Panturrilha)", secondary: "Gastrocnêmio", img: "img/panturrilha-sentado.png", why: "Trabalha o músculo sóleo profundo com joelhos flexionados." },
+                { title: "Abdominal Supra na Polia / Solo", primary: "Reto Abdominal (Superior)", secondary: "Oblíquos", img: "img/abdominal-supra.png", why: "Fortalecimento e hipertrofia da parede abdominal." },
+                { title: "Elevação de Pernas (Infra)", primary: "Reto Abdominal (Inferior)", secondary: "Flexores do Quadril", img: "img/abdominal-infra.png", why: "Foco na porção inferior do abdômen." },
+                { title: "Prancha Ventral Isométrica", primary: "Transverso do Abdômen, Core", secondary: "Eretores, Glúteos, Ombros", img: "img/prancha.png", why: "Estabilidade de coluna e resistência do core." }
+            ]
         };
 
-        // --- ESTADO GLOBAL ---
-        let userData = JSON.parse(localStorage.getItem('proWorkout_user')) || null;
-        let workoutPlan = JSON.parse(localStorage.getItem('proWorkout_plan')) || null;
+        // --- GERENCIAMENTO DE ESTADO E MULTIPERFÍS ---
+        let activeProfileId = localStorage.getItem('proWorkout_active_profile_id') || null;
+        let profilesData = JSON.parse(localStorage.getItem('proWorkout_profiles')) || {};
+        
+        // Migração do estado antigo se existir apenas um perfil
+        const legacyUser = JSON.parse(localStorage.getItem('proWorkout_user'));
+        const legacyPlan = JSON.parse(localStorage.getItem('proWorkout_plan'));
+        if (legacyUser && Object.keys(profilesData).length === 0) {
+            const defaultId = 'prof_' + Date.now();
+            profilesData[defaultId] = {
+                id: defaultId,
+                name: legacyUser.name || 'Meu Perfil',
+                weight: legacyUser.weight || '80',
+                height: legacyUser.height || '175',
+                goal: legacyUser.goal || 'hipertrofia',
+                freq: legacyUser.freq || '3',
+                workoutPlan: legacyPlan || null
+            };
+            activeProfileId = defaultId;
+            saveProfilesState();
+        }
+
+        let userData = null;
+        let workoutPlan = null;
         let currentDayIdx = 0;
 
         window.onload = () => {
-            if (!userData) {
-                document.getElementById('onboardingModal').style.display = 'flex';
+            loadCurrentProfileSession();
+        };
+
+        function saveProfilesState() {
+            localStorage.setItem('proWorkout_profiles', JSON.stringify(profilesData));
+            if (activeProfileId) {
+                localStorage.setItem('proWorkout_active_profile_id', activeProfileId);
             } else {
+                localStorage.removeItem('proWorkout_active_profile_id');
+            }
+        }
+
+        function loadCurrentProfileSession() {
+            if (activeProfileId && profilesData[activeProfileId]) {
+                userData = profilesData[activeProfileId];
+                workoutPlan = profilesData[activeProfileId].workoutPlan;
+                document.getElementById('onboardingModal').style.display = 'none';
                 updateUI();
                 renderAll();
+            } else {
+                openProfileModal();
             }
-        };
+        }
+
+        // --- SISTEMA DE SELEÇÃO E SAIR (LOGOUT) DE PERFIL ---
+        function openProfileModal() {
+            const hasProfiles = Object.keys(profilesData).length > 0;
+            const container = document.getElementById('profilesContainer');
+            const modalOverlay = document.getElementById('onboardingModal');
+            
+            modalOverlay.style.display = 'flex';
+
+            if (hasProfiles) {
+                document.getElementById('modalTitle').innerText = "Gerenciar Perfis";
+                document.getElementById('closeProfileModalBtn').style.display = activeProfileId ? "block" : "none";
+                document.getElementById('profilesListSection').style.display = "block";
+                document.getElementById('questionnaireSection').style.display = "none";
+
+                container.innerHTML = '';
+                Object.values(profilesData).forEach(p => {
+                    const isActive = p.id === activeProfileId;
+                    const card = document.createElement('div');
+                    card.className = `profile-card-item ${isActive ? 'active-profile' : ''}`;
+                    card.innerHTML = `
+                        <div>
+                            <div style="font-weight:700; color:#fff;">${p.name.toUpperCase()} ${isActive ? '<span style="font-size:0.68rem; color:var(--accent-primary); background:rgba(56,189,248,0.15); padding:2px 6px; border-radius:4px; margin-left:6px;">ATIVO</span>' : ''}</div>
+                            <div style="font-size:0.75rem; color:var(--text-muted);">⚖️ ${p.weight}kg | 📏 ${p.height}cm | 🎯 ${p.goal.toUpperCase()}</div>
+                        </div>
+                        <div style="display:flex; gap:6px;">
+                            ${!isActive ? `<button class="action-btn-sm" onclick="selectProfile('${p.id}')"><i class="fa-solid fa-check"></i> Entrar</button>` : ''}
+                            <button class="action-btn-sm delete" onclick="deleteProfile('${p.id}')"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            } else {
+                showQuestionnaireForm();
+                document.getElementById('closeProfileModalBtn').style.display = "none";
+            }
+        }
+
+        function closeProfileModal() {
+            if (activeProfileId) {
+                document.getElementById('onboardingModal').style.display = 'none';
+            }
+        }
+
+        function showQuestionnaireForm() {
+            document.getElementById('modalTitle').innerText = "Novo Perfil / Questionário";
+            document.getElementById('profilesListSection').style.display = "none";
+            document.getElementById('questionnaireSection').style.display = "block";
+            document.getElementById('regName').value = '';
+            document.getElementById('regWeight').value = '';
+            document.getElementById('regHeight').value = '';
+        }
+
+        function selectProfile(pId) {
+            activeProfileId = pId;
+            saveProfilesState();
+            loadCurrentProfileSession();
+        }
+
+        function logoutProfile() {
+            if (confirm("Deseja sair do perfil atual para selecionar outro ou preencher o questionário?")) {
+                activeProfileId = null;
+                saveProfilesState();
+                userData = null;
+                workoutPlan = null;
+                document.getElementById('workout-container').innerHTML = '';
+                document.getElementById('badgeName').innerText = 'SEM PERFIL';
+                document.getElementById('userInfoBanner').innerHTML = '';
+                document.getElementById('progressPercent').innerText = '0%';
+                document.getElementById('progressBarFill').style.width = '0%';
+                openProfileModal();
+            }
+        }
+
+        function deleteProfile(pId) {
+            if (confirm("Tem certeza que deseja excluir este perfil permanentemente?")) {
+                delete profilesData[pId];
+                if (activeProfileId === pId) {
+                    activeProfileId = Object.keys(profilesData)[0] || null;
+                }
+                saveProfilesState();
+                loadCurrentProfileSession();
+            }
+        }
 
         function finishOnboarding() {
             const name = document.getElementById('regName').value;
             if (!name) return alert("Por favor, digite seu nome");
 
-            userData = {
+            const newId = 'prof_' + Date.now();
+            const newProfile = {
+                id: newId,
                 name: name,
-                weight: document.getElementById('regWeight').value,
-                height: document.getElementById('regHeight').value,
+                weight: document.getElementById('regWeight').value || '70',
+                height: document.getElementById('regHeight').value || '170',
                 goal: document.getElementById('regGoal').value,
-                freq: document.getElementById('regFreq').value
+                freq: document.getElementById('regFreq').value,
+                workoutPlan: null
             };
 
-            localStorage.setItem('proWorkout_user', JSON.stringify(userData));
+            profilesData[newId] = newProfile;
+            activeProfileId = newId;
+            userData = newProfile;
+
+            // Gerar treino inicial
+            generatePersonalizedWorkout(false);
+            saveProfilesState();
+            
             document.getElementById('onboardingModal').style.display = 'none';
-            generatePersonalizedWorkout();
+            updateUI();
+            renderAll();
         }
 
-        // --- LÓGICA DE GERAÇÃO DE TREINO (O CORAÇÃO DO SISTEMA) ---
-        function generatePersonalizedWorkout() {
+        // --- GERAÇÃO DE TREINO PERSONALIZADO ---
+        function generatePersonalizedWorkout(alertUser = true) {
             if (!userData) return;
             
-            const goal = userData.goal;
             const freq = parseInt(userData.freq);
             let newPlan = [];
 
-            // Estratégia de Split baseada em Frequência
             if (freq === 3) {
-                // Full Body 3x
                 for (let i = 0; i < 5; i++) {
-                    const exercises = i % 2 === 0 ? getFullBodySet(1) : [];
-                    newPlan.push({ day: i, label: `Treino FB`, exercises: exercises });
+                    const exercises = i % 2 === 0 ? getFullBodySet() : [];
+                    newPlan.push({ day: i, label: `Treino FullBody ${i % 2 === 0 ? 'Ativo' : 'Descanso'}`, exercises: exercises });
                 }
             } else if (freq === 4) {
-                // AB 2x
                 for (let i = 0; i < 5; i++) {
                     const label = i % 2 === 0 ? "Superior" : "Inferior";
                     const exercises = i < 4 ? getABSet(label) : [];
-                    newPlan.push({ day: i, label: label, exercises: exercises });
+                    newPlan.push({ day: i, label: `Treino ${label}`, exercises: exercises });
                 }
             } else {
-                // ABCDE
                 const splits = ["Peito", "Costas", "Pernas", "Ombros", "Braços"];
                 for (let i = 0; i < 5; i++) {
-                    newPlan.push({ day: i, label: splits[i], exercises: getABCDE(splits[i]) });
+                    newPlan.push({ day: i, label: `Treino ${splits[i]}`, exercises: getABCDE(splits[i]) });
                 }
             }
 
             workoutPlan = newPlan;
-            localStorage.setItem('proWorkout_plan', JSON.stringify(workoutPlan));
+            profilesData[activeProfileId].workoutPlan = workoutPlan;
+            saveProfilesState();
+
             updateUI();
             renderAll();
-            alert("🎯 Treino gerado com sucesso baseando-se em seu objetivo!");
+            if (alertUser) alert("🎯 Treino gerado com sucesso para o perfil atual!");
         }
 
-        function getFullBodySet(type) {
-            const lib = EXERCISE_LIBRARY.hipertrofia;
-            return [lib.peito[0], lib.costas[0], lib.pernas[0], EXERCISE_LIBRARY.geral.ombros[0]].map(ex => ({...ex, completed: false, load: "", id: Math.random()}));
+        function getFullBodySet() {
+            return [
+                EXERCISE_LIBRARY.peito[0],
+                EXERCISE_LIBRARY.costas[0],
+                EXERCISE_LIBRARY.quadriceps[0],
+                EXERCISE_LIBRARY.ombros[0],
+                EXERCISE_LIBRARY.panturrilha_core[2]
+            ].map(ex => ({...ex, completed: false, load: "", id: Math.random()}));
         }
 
         function getABSet(type) {
-            const lib = EXERCISE_LIBRARY.hipertrofia;
             if (type === "Superior") {
-                return [lib.peito[0], lib.costas[0], EXERCISE_LIBRARY.geral.ombros[0], EXERCISE_LIBRARY.geral.biceps[0]].map(ex => ({...ex, completed: false, load: "", id: Math.random()}));
+                return [
+                    EXERCISE_LIBRARY.peito[0],
+                    EXERCISE_LIBRARY.costas[0],
+                    EXERCISE_LIBRARY.ombros[0],
+                    EXERCISE_LIBRARY.biceps[0]
+                ].map(ex => ({...ex, completed: false, load: "", id: Math.random()}));
             } else {
-                return [lib.pernas[0], lib.pernas[1], EXERCISE_LIBRARY.geral.triceps[0]].map(ex => ({...ex, completed: false, load: "", id: Math.random()}));
+                return [
+                    EXERCISE_LIBRARY.quadriceps[0],
+                    EXERCISE_LIBRARY.posterior_gluteo[0],
+                    EXERCISE_LIBRARY.triceps[0],
+                    EXERCISE_LIBRARY.panturrilha_core[0]
+                ].map(ex => ({...ex, completed: false, load: "", id: Math.random()}));
             }
         }
 
         function getABCDE(type) {
-            const lib = EXERCISE_LIBRARY.hipertrofia;
             let pool = [];
-            if (type === "Peito") pool = [...lib.peito];
-            else if (type === "Costas") pool = [...lib.costas];
-            else if (type === "Pernas") pool = [...lib.pernas];
-            else if (type === "Ombros") pool = [...EXERCISE_LIBRARY.geral.ombros];
-            else pool = [...EXERCISE_LIBRARY.geral.biceps, ...EXERCISE_LIBRARY.geral.triceps];
+            if (type === "Peito") pool = [...EXERCISE_LIBRARY.peito];
+            else if (type === "Costas") pool = [...EXERCISE_LIBRARY.costas];
+            else if (type === "Pernas") pool = [...EXERCISE_LIBRARY.quadriceps, ...EXERCISE_LIBRARY.posterior_gluteo];
+            else if (type === "Ombros") pool = [...EXERCISE_LIBRARY.ombros];
+            else pool = [...EXERCISE_LIBRARY.biceps, ...EXERCISE_LIBRARY.triceps];
             
-            return pool.map(ex => ({...ex, completed: false, load: "", id: Math.random()}));
+            return pool.slice(0, 4).map(ex => ({...ex, completed: false, load: "", id: Math.random()}));
+        }
+
+        // --- SISTEMA DE ADICIONAR EXERCÍCIOS ---
+        function openAddExerciseModal(dayIdx = currentDayIdx) {
+            currentDayIdx = dayIdx;
+            document.getElementById('addExerciseModal').style.display = 'flex';
+            document.getElementById('filterMuscleGroup').value = 'todos';
+            renderExerciseLibrary();
+        }
+
+        function closeAddExerciseModal() {
+            document.getElementById('addExerciseModal').style.display = 'none';
+        }
+
+        function renderExerciseLibrary() {
+            const group = document.getElementById('filterMuscleGroup').value;
+            const container = document.getElementById('libraryListContainer');
+            const customForm = document.getElementById('customExerciseForm');
+
+            if (group === 'custom') {
+                container.style.display = 'none';
+                customForm.style.display = 'block';
+                return;
+            }
+
+            container.style.display = 'block';
+            customForm.style.display = 'none';
+            container.innerHTML = '';
+
+            let list = [];
+            if (group === 'todos') {
+                Object.values(EXERCISE_LIBRARY).forEach(arr => list.push(...arr));
+            } else if (EXERCISE_LIBRARY[group]) {
+                list = EXERCISE_LIBRARY[group];
+            }
+
+            list.forEach(ex => {
+                const item = document.createElement('div');
+                item.className = 'ex-lib-card';
+                item.innerHTML = `
+                    <div class="ex-img-wrapper"><img src="${ex.img}" class="ex-img" onerror="this.src='https://placehold.co/120x120/1e293b/38bdf8?text=EXERCICIO'"></div>
+                    <div style="flex:1;">
+                        <div class="ex-title">${ex.title}</div>
+                        <div class="anatomy-info">
+                            <span class="primary-muscle">${ex.primary}</span>
+                            <span class="secondary-muscles"> | ${ex.secondary}</span>
+                        </div>
+                        <div class="why-tag">💡 ${ex.why}</div>
+                    </div>
+                    <button class="action-btn-sm" style="color:var(--accent-primary); border-color:var(--accent-primary);" onclick="addExerciseToWorkout('${encodeURIComponent(JSON.stringify(ex))}')">
+                        <i class="fa-solid fa-plus"></i> Add
+                    </button>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function addExerciseToWorkout(jsonStr) {
+            if (!workoutPlan || !workoutPlan[currentDayIdx]) return;
+            const ex = JSON.parse(decodeURIComponent(jsonStr));
+            const newEx = { ...ex, completed: false, load: "", id: Math.random() };
+
+            workoutPlan[currentDayIdx].exercises.push(newEx);
+            profilesData[activeProfileId].workoutPlan = workoutPlan;
+            saveProfilesState();
+
+            renderAll();
+            closeAddExerciseModal();
+            alert(`✅ "${ex.title}" adicionado ao treino de ${workoutPlan[currentDayIdx].label}!`);
+        }
+
+        function addCustomExerciseSubmit() {
+            const title = document.getElementById('customExTitle').value;
+            const primary = document.getElementById('customExPrimary').value;
+            const secondary = document.getElementById('customExSecondary').value;
+            const why = document.getElementById('customExWhy').value;
+
+            if (!title) return alert("Por favor, informe o nome do exercício.");
+
+            const customEx = {
+                title: title,
+                primary: primary || "Músculos Principais",
+                secondary: secondary || "Estabilizadores",
+                img: "img/custom-exercise.png",
+                why: why || "Exercício personalizado adicionado pelo usuário."
+            };
+
+            addExerciseToWorkout(encodeURIComponent(JSON.stringify(customEx)));
+            document.getElementById('customExTitle').value = '';
+            document.getElementById('customExPrimary').value = '';
+            document.getElementById('customExSecondary').value = '';
+            document.getElementById('customExWhy').value = '';
+        }
+
+        function removeExercise(dayIdx, exId) {
+            if (confirm("Deseja remover este exercício do treino?")) {
+                workoutPlan[dayIdx].exercises = workoutPlan[dayIdx].exercises.filter(e => e.id !== exId);
+                profilesData[activeProfileId].workoutPlan = workoutPlan;
+                saveProfilesState();
+                renderAll();
+            }
         }
 
         // --- RENDERIZAÇÃO E INTERAÇÃO ---
         function updateUI() {
             if (!userData) return;
-            document.getElementById('badgeName').innerText = userData.name.toUpperCase();
+            document.getElementById('badgeName').innerHTML = `<i class="fa-solid fa-user"></i> ${userData.name.toUpperCase()}`;
             document.getElementById('userInfoBanner').innerHTML = `
                 <span>⚖️ ${userData.weight}kg</span>
                 <span>📏 ${userData.height}cm</span>
                 <span>🎯 ${userData.goal.toUpperCase()}</span>
                 <span>📅 ${userData.freq}X/SEM</span>
-                <button class="action-btn-sm" style="margin-left: auto; color: var(--danger-color); border-color: rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.1);" onclick="resetProfile()">
-                    <i class="fa-solid fa-user-slash"></i> Resetar Perfil
-                </button>
+                <div style="margin-left:auto; display:flex; gap:6px;">
+                    <button class="action-btn-sm" onclick="openProfileModal()"><i class="fa-solid fa-users"></i> Perfis</button>
+                    <button class="action-btn-sm delete" onclick="logoutProfile()"><i class="fa-solid fa-right-from-bracket"></i> Sair</button>
+                </div>
             `;
         }
 
@@ -621,7 +1015,14 @@
                 
                 let exHtml = '';
                 if (dayPlan.exercises.length === 0) {
-                    exHtml = '<div style="color:var(--text-subtle); padding: 20px; text-align: center;">Dia de Descanso ou Cardio leve</div>';
+                    exHtml = `
+                        <div style="color:var(--text-subtle); padding: 30px; text-align: center; background:rgba(22,30,46,0.4); border-radius:var(--radius-lg); border:1px dashed var(--card-border);">
+                            <i class="fa-solid fa-dumbbell" style="font-size:2rem; margin-bottom:10px; opacity:0.4;"></i>
+                            <div>Nenhum exercício neste dia.</div>
+                            <button class="action-btn-sm" style="margin-top:12px; color:var(--accent-primary); border-color:var(--accent-primary);" onclick="openAddExerciseModal(${idx})">
+                                <i class="fa-solid fa-plus"></i> Adicionar Exercício
+                            </button>
+                        </div>`;
                 } else {
                     dayPlan.exercises.forEach(ex => {
                         exHtml += `
@@ -643,7 +1044,10 @@
                                     <label style="font-size:0.6rem">CARGA</label>
                                     <input type="text" class="load-input" value="${ex.load}" placeholder="0kg" onchange="updateLoad(${idx}, ${ex.id}, this.value)">
                                 </div>
-                                <button class="action-btn-sm" onclick="startTimer(60)">DESCANSO 60s</button>
+                                <div style="display:flex; gap:6px;">
+                                    <button class="action-btn-sm" onclick="startTimer(60)"><i class="fa-solid fa-stopwatch"></i> 60s</button>
+                                    <button class="action-btn-sm delete" onclick="removeExercise(${idx}, ${ex.id})"><i class="fa-solid fa-trash"></i></button>
+                                </div>
                             </div>
                         </div>`;
                     });
@@ -652,7 +1056,12 @@
                 section.innerHTML = `
                     <div class="section-header">
                         <div class="section-title">${dayPlan.label}</div>
-                        <span class="today-badge">${dayPlan.exercises.length} EXERCÍCIOS</span>
+                        <div style="display:flex; gap:8px; align-items:center;">
+                            <span class="today-badge">${dayPlan.exercises.length} EXERCÍCIOS</span>
+                            <button class="action-btn-sm" style="color: var(--accent-primary); border-color: rgba(56, 189, 248, 0.3); background: rgba(56, 189, 248, 0.1);" onclick="openAddExerciseModal(${idx})">
+                                <i class="fa-solid fa-plus"></i> Add
+                            </button>
+                        </div>
                     </div>
                     <div class="exercise-list">${exHtml}</div>
                 `;
@@ -669,15 +1078,21 @@
 
         function toggleTask(dayIdx, exId) {
             const ex = workoutPlan[dayIdx].exercises.find(e => e.id === exId);
-            ex.completed = !ex.completed;
-            localStorage.setItem('proWorkout_plan', JSON.stringify(workoutPlan));
-            renderAll();
+            if (ex) {
+                ex.completed = !ex.completed;
+                profilesData[activeProfileId].workoutPlan = workoutPlan;
+                saveProfilesState();
+                renderAll();
+            }
         }
 
         function updateLoad(dayIdx, exId, val) {
             const ex = workoutPlan[dayIdx].exercises.find(e => e.id === exId);
-            ex.load = val;
-            localStorage.setItem('proWorkout_plan', JSON.stringify(workoutPlan));
+            if (ex) {
+                ex.load = val;
+                profilesData[activeProfileId].workoutPlan = workoutPlan;
+                saveProfilesState();
+            }
         }
 
         function updateStats() {
@@ -695,41 +1110,9 @@
             document.getElementById('progressBarFill').style.width = perc + '%';
         }
 
-        function resetProgress() {
-            if (!workoutPlan) return;
-            if (confirm("Deseja zerar o progresso dos exercícios marcados?")){
-                workoutPlan.forEach(d => d.exercises.forEach(e => e.completed = false));
-                localStorage.setItem('proWorkout_plan', JSON.stringify(workoutPlan));
-                renderAll();
-            }
-        }
-
-        function resetProfile() {
-            if (confirm("Tem certeza que deseja resetar seu perfil?\n\nIsso apagará seus dados (nome, peso, altura, objetivo e frequência) e permitirá cadastrar um novo perfil.")) {
-                localStorage.removeItem('proWorkout_user');
-                localStorage.removeItem('proWorkout_plan');
-                userData = null;
-                workoutPlan = null;
-                
-                document.getElementById('regName').value = '';
-                document.getElementById('regWeight').value = '';
-                document.getElementById('regHeight').value = '';
-                document.getElementById('regGoal').value = 'hipertrofia';
-                document.getElementById('regFreq').value = '3';
-
-                document.getElementById('onboardingModal').style.display = 'flex';
-                
-                document.getElementById('workout-container').innerHTML = '';
-                document.getElementById('badgeName').innerText = 'TREINADOR IA';
-                document.getElementById('userInfoBanner').innerHTML = '';
-                document.getElementById('progressPercent').innerText = '0%';
-                document.getElementById('progressBarFill').style.width = '0%';
-            }
-        }
-
         function startTimer(sec) {
             if (navigator.vibrate) navigator.vibrate(50);
-            alert("Cronômetro de 60s iniciado mentalmente! (Funcionalidade de timer ativa no app)");
+            alert("Cronômetro de 60s iniciado!");
         }
     </script>
 </body>
