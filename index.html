@@ -3,1117 +3,567 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Meu Treino">
-    <meta name="theme-color" content="#0b0f19">
-    <title>Meu Treino Diário | Pro Workout</title>
-    
-    <!-- Google Fonts & Font Awesome Icons -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
+    <title>Minha Vida Financeira | Alpha Master Plus</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --bg-dark: #090d16;
-            --card-bg: rgba(22, 30, 46, 0.75);
-            --card-border: rgba(255, 255, 255, 0.08);
-            --accent-primary: #38bdf8;
-            --accent-gradient: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
-            --accent-glow: rgba(56, 189, 248, 0.35);
-            --success-color: #10b981;
-            --success-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            --danger-color: #ef4444;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --text-subtle: #64748b;
-            --radius-xl: 22px;
-            --radius-lg: 16px;
-            --radius-md: 12px;
-            --shadow-card: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
-            --safe-area-bottom: env(safe-area-inset-bottom, 20px);
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            -webkit-tap-highlight-color: transparent;
-            user-select: none;
-        }
-
-        body {
-            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-            background-color: var(--bg-dark);
-            background-image: 
-                radial-gradient(circle at 10% 10%, rgba(56, 189, 248, 0.08) 0%, transparent 40%),
-                radial-gradient(circle at 90% 80%, rgba(129, 140, 248, 0.08) 0%, transparent 40%);
-            background-attachment: fixed;
-            color: var(--text-main);
-            min-height: 100vh;
-            padding-bottom: calc(150px + var(--safe-area-bottom));
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .app-wrapper {
-            width: 100%;
-            max-width: 768px;
-            padding: 16px 16px 0 16px;
-        }
-
-        header {
-            margin-bottom: 20px;
-            padding: 12px 4px;
-        }
-
-        .header-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-        }
-
-        .brand-title {
-            font-size: 1.5rem;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-            background: var(--accent-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .brand-title i { -webkit-text-fill-color: var(--accent-primary); }
-
-        .today-badge {
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            padding: 5px 12px;
-            border-radius: 20px;
-            background: rgba(56, 189, 248, 0.12);
-            color: var(--accent-primary);
-            border: 1px solid rgba(56, 189, 248, 0.25);
-            letter-spacing: 0.5px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .progress-card {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: var(--radius-lg);
-            padding: 14px 16px;
-            backdrop-filter: blur(16px);
-            box-shadow: var(--shadow-card);
-        }
-
-        .user-info-banner {
-            margin-top: 12px;
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: 10px;
-            padding-top: 10px;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .progress-info {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--text-muted);
-            margin-bottom: 8px;
-        }
-
-        .progress-bar-bg {
-            width: 100%;
-            height: 8px;
-            background: rgba(255, 255, 255, 0.08);
-            border-radius: 10px;
+        :root { --bg: #020617; --card: #0f172a; --border: #1e293b; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--bg); 
+            color: #f1f5f9; 
+            margin: 0; padding: 0;
+            height: 100vh; height: 100dvh;
+            display: flex; flex-direction: column;
             overflow: hidden;
         }
-
-        .progress-bar-fill {
-            height: 100%;
-            width: 0%;
-            background: var(--accent-gradient);
-            border-radius: 10px;
-            transition: width 0.4s ease;
-            box-shadow: 0 0 12px var(--accent-glow);
+        .tab-content { 
+            display: none; 
+            flex: 1;
+            overflow-y: auto; 
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 120px;
         }
-
-        .day-tabs-container {
-            margin-bottom: 20px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            background: rgba(9, 13, 22, 0.85);
-            backdrop-filter: blur(20px);
-            padding: 10px 0;
-            margin-left: -16px;
-            margin-right: -16px;
-            padding-left: 16px;
-            padding-right: 16px;
+        .tab-content.active { display: block; }
+        .card { background-color: #0f172a; border: 1px solid var(--border); border-radius: 1.2rem; }
+        input, select { 
+            background: #1e293b !important; border: 1px solid #334155 !important; 
+            color: white !important; padding: 12px; border-radius: 12px; width: 100%; font-size: 16px;
         }
-
-        .day-tabs {
-            display: flex;
-            gap: 10px;
-            overflow-x: auto;
-            scrollbar-width: none;
-        }
-        .day-tabs::-webkit-scrollbar { display: none; }
-
-        .tab-btn {
-            flex: 0 0 auto;
-            padding: 10px 18px;
-            background: var(--card-bg);
-            border: 2px solid var(--card-border);
-            border-radius: var(--radius-md);
-            color: var(--text-muted);
-            font-size: 0.85rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.25s ease;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .tab-btn.active {
-            background: var(--accent-gradient);
-            color: #ffffff;
-            border-color: var(--accent-primary);
-            box-shadow: 0 4px 16px var(--accent-glow);
-            transform: translateY(-2px);
-        }
-
-        .day-section { display: none; animation: fadeIn 0.35s ease-out; }
-        .day-section.active { display: block; }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-
-        .section-header {
-            margin-bottom: 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-
-        .section-title { font-size: 1.2rem; font-weight: 800; color: var(--text-main); }
-
-        .exercise-list { display: flex; flex-direction: column; gap: 14px; }
-
-        .exercise-card {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: var(--radius-xl);
-            padding: 14px;
-            box-shadow: var(--shadow-card);
-            transition: all 0.25s ease;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            position: relative;
-        }
-
-        .exercise-card.completed { border-color: var(--success-color); background: rgba(16, 185, 129, 0.05); }
-
-        .exercise-main-row { display: flex; align-items: center; gap: 14px; cursor: pointer; }
-
-        .checkbox-btn {
-            width: 32px;
-            height: 32px;
-            border-radius: 10px;
-            border: 2px solid var(--accent-primary);
-            background: rgba(255, 255, 255, 0.03);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            transition: all 0.2s;
-        }
-
-        .exercise-card.completed .checkbox-btn { background: var(--success-gradient); border-color: transparent; color: #fff; }
-
-        .ex-img-wrapper {
-            width: 68px;
-            height: 68px;
-            border-radius: var(--radius-md);
-            overflow: hidden;
-            background: #000;
-            border: 1px solid var(--card-border);
-            flex-shrink: 0;
-        }
-
-        .ex-img { width: 100%; height: 100%; object-fit: cover; }
-
-        .ex-title { font-size: 0.98rem; font-weight: 700; color: var(--text-main); }
-
-        .anatomy-info { font-size: 0.72rem; margin-top: 4px; line-height: 1.3; }
-        .primary-muscle { color: var(--accent-primary); font-weight: 700; }
-        .secondary-muscles { color: var(--text-muted); }
-
-        .why-tag {
-            font-size: 0.68rem;
-            color: var(--success-color);
-            background: rgba(16, 185, 129, 0.1);
-            padding: 4px 8px;
-            border-radius: 6px;
-            margin-top: 5px;
-            display: inline-block;
-        }
-
-        .load-input-group {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(0,0,0,0.3);
-            padding: 6px 12px;
-            border-radius: 8px;
-            border: 1px solid var(--card-border);
-        }
-
-        .load-input {
-            width: 50px;
-            background: transparent;
-            border: none;
-            color: var(--accent-primary);
-            font-weight: 700;
-            outline: none;
-            text-align: right;
-            font-family: inherit;
-        }
-
-        .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.92);
-            backdrop-filter: blur(8px);
-            z-index: 3000;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            overflow-y: auto;
-        }
-
-        .modal-content {
-            background: var(--bg-dark);
-            width: 100%;
-            max-width: 540px;
-            border: 1px solid var(--accent-primary);
-            border-radius: var(--radius-xl);
-            padding: 24px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
-        }
-
-        .form-select, .form-input {
-            width: 100%;
-            padding: 14px;
-            background: #161e2e;
-            border: 2px solid var(--card-border);
-            border-radius: 12px;
-            color: #fff;
-            margin-top: 8px;
-            appearance: none;
-            font-family: inherit;
-        }
-
-        .form-select:focus, .form-input:focus { border-color: var(--accent-primary); outline: none; }
-
-        .form-select option { background: #161e2e; color: #fff; }
-
-        .btn-submit {
-            width: 100%;
-            padding: 16px;
-            background: var(--accent-gradient);
-            border: none;
-            border-radius: 14px;
-            color: #fff;
-            font-weight: 800;
-            cursor: pointer;
-            margin-top: 20px;
-            box-shadow: 0 4px 15px var(--accent-glow);
-        }
-
-        .action-btn-sm {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid var(--card-border);
-            color: var(--text-muted);
-            padding: 6px 10px;
-            border-radius: 8px;
-            font-size: 0.72rem;
-            font-weight: 600;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            transition: all 0.2s;
-        }
-        .action-btn-sm:hover { border-color: var(--accent-primary); color: var(--accent-primary); }
-        .action-btn-sm.delete:hover { border-color: var(--danger-color); color: var(--danger-color); background: rgba(239,68,68,0.1); }
-
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(9, 13, 22, 0.95);
-            backdrop-filter: blur(20px);
-            border-top: 1px solid var(--card-border);
-            padding: 12px 16px calc(12px + var(--safe-area-bottom));
-            z-index: 1000;
-        }
-
-        .nav-content { width: 100%; max-width: 768px; margin: 0 auto; display: flex; gap: 8px; flex-wrap: wrap; }
-        .btn-action { flex: 1; min-width: 90px; padding: 12px 6px; border-radius: 14px; border: none; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; font-size: 0.75rem; text-align: center; }
-        .btn-gen { background: var(--success-gradient); color: #fff; }
-        .btn-add-ex { background: var(--accent-gradient); color: #fff; }
-        .btn-profile { background: rgba(56, 189, 248, 0.12); color: var(--accent-primary); border: 1px solid rgba(56, 189, 248, 0.3); }
-        .btn-logout { background: rgba(239, 68, 68, 0.12); color: var(--danger-color); border: 1px solid rgba(239, 68, 68, 0.3); }
-        .btn-logout:hover { background: rgba(239, 68, 68, 0.25); }
-
-        .profile-card-item {
-            background: rgba(22, 30, 46, 0.9);
-            border: 1px solid var(--card-border);
-            border-radius: var(--radius-md);
-            padding: 12px 16px;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            transition: all 0.2s;
-        }
-        .profile-card-item.active-profile {
-            border-color: var(--accent-primary);
-            background: rgba(56, 189, 248, 0.08);
-        }
-
-        .ex-lib-card {
-            background: rgba(22, 30, 46, 0.6);
-            border: 1px solid var(--card-border);
-            border-radius: var(--radius-md);
-            padding: 12px;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        .ex-lib-card:hover { border-color: var(--accent-primary); }
-
-        @media (min-width: 640px) {
-            .exercise-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
-        }
+        .strikethrough { text-decoration: line-through; opacity: 0.4; }
+        .nav-active { background-color: #1e293b; color: white !important; border-left: 4px solid #6366f1; }
+        .parcela-tag { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: #334155; color: #94a3b8; font-weight: 800; }
+        
+        main { flex: 1; position: relative; overflow: hidden; display: flex; flex-direction: column; }
+        
+        .table-container { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        table { min-width: 800px; }
     </style>
 </head>
-<body>
+<body class="antialiased">
 
-    <div class="app-wrapper">
-        <header>
-            <div class="header-top">
-                <div class="brand-title"><i class="fa-solid fa-dumbbell"></i> MEU TREINO PRO</div>
-                <div class="today-badge" id="badgeName"><i class="fa-solid fa-user"></i> PERFIL</div>
+    <!-- MENU MOBILE -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 flex justify-around p-4 z-[100] md:hidden pb-safe">
+        <button onclick="showTab('dashboard')" id="mob-dashboard" class="text-slate-400 p-2"><i data-lucide="layout-dashboard"></i></button>
+        <button onclick="showTab('receitas')" id="mob-receitas" class="text-slate-400 p-2"><i data-lucide="trending-up"></i></button>
+        <button onclick="showTab('despesas')" id="mob-despesas" class="text-slate-400 p-2"><i data-lucide="trending-down"></i></button>
+        <button onclick="showTab('investimentos')" id="mob-investimentos" class="text-slate-400 p-2"><i data-lucide="line-chart"></i></button>
+        <button onclick="showTab('configuracoes')" id="mob-configuracoes" class="text-slate-400 p-2"><i data-lucide="settings"></i></button>
+    </nav>
+
+    <div class="flex h-full w-full overflow-hidden">
+        <!-- SIDEBAR DESKTOP -->
+        <aside class="hidden md:flex flex-col w-72 bg-slate-950 border-r border-slate-800 p-6">
+            <div class="flex items-center gap-3 mb-10">
+                <div class="bg-indigo-600 p-2 rounded-xl shadow-lg"><i data-lucide="wallet" class="text-white"></i></div>
+                <h1 class="text-lg font-black tracking-tighter uppercase leading-none">Minha Vida<br><span class="text-indigo-500 text-xs">Financeira</span></h1>
             </div>
+            <nav class="space-y-2 flex-1">
+                <button onclick="showTab('dashboard')" id="nav-dashboard" class="flex items-center gap-3 w-full p-3 rounded-xl transition text-slate-400 hover:bg-slate-900"><i data-lucide="layout-dashboard"></i> Dashboard</button>
+                <button onclick="showTab('receitas')" id="nav-receitas" class="flex items-center gap-3 w-full p-3 rounded-xl transition text-slate-400 hover:bg-slate-900"><i data-lucide="trending-up"></i> Receitas</button>
+                <button onclick="showTab('despesas')" id="nav-despesas" class="flex items-center gap-3 w-full p-3 rounded-xl transition text-slate-400 hover:bg-slate-900"><i data-lucide="trending-down"></i> Despesas</button>
+                <button onclick="showTab('investimentos')" id="nav-investimentos" class="flex items-center gap-3 w-full p-3 rounded-xl transition text-slate-400 hover:bg-slate-900"><i data-lucide="line-chart"></i> Investimentos</button>
+                <button onclick="showTab('configuracoes')" id="nav-configuracoes" class="flex items-center gap-3 w-full p-3 rounded-xl transition text-slate-400 hover:bg-slate-900"><i data-lucide="settings"></i> Configurações</button>
+            </nav>
+        </aside>
 
-            <div class="progress-card">
-                <div class="progress-info">
-                    <span>Evolução da Semana</span>
-                    <span id="progressPercent">0%</span>
+        <!-- MAIN CONTENT -->
+        <main class="flex-1 flex flex-col p-4 md:p-10">
+            <header class="flex justify-between items-start mb-6">
+                <div>
+                    <h2 id="tab-title" class="text-2xl md:text-3xl font-black text-white">Dashboard</h2>
+                    <p id="current-date" class="text-slate-500 text-xs font-medium capitalize"></p>
                 </div>
-                <div class="progress-bar-bg">
-                    <div class="progress-bar-fill" id="progressBarFill"></div>
+                <div class="flex flex-col items-end gap-2">
+                    <button onclick="syncAlphaVantage()" class="p-2 bg-slate-900 rounded-lg text-indigo-400" id="btn-sync">
+                        <i data-lucide="refresh-cw" id="sync-icon" class="w-4 h-4"></i>
+                    </button>
+                    <select id="filtro-mes-global" onchange="changeFilterMonth(this.value)" class="!p-2 text-xs font-bold w-32 md:w-48"></select>
                 </div>
-                <div class="user-info-banner" id="userInfoBanner">
-                    <!-- Preenchido via JS -->
-                </div>
-            </div>
-        </header>
+            </header>
 
-        <div class="day-tabs-container">
-            <div class="day-tabs" id="dayTabs">
-                <button class="tab-btn active" onclick="switchDay(0)">SEG<span style="font-size:0.6rem">Treino A</span></button>
-                <button class="tab-btn" onclick="switchDay(1)">TER<span style="font-size:0.6rem">Treino B</span></button>
-                <button class="tab-btn" onclick="switchDay(2)">QUA<span style="font-size:0.6rem">Treino C</span></button>
-                <button class="tab-btn" onclick="switchDay(3)">QUI<span style="font-size:0.6rem">Treino D</span></button>
-                <button class="tab-btn" onclick="switchDay(4)">SEX<span style="font-size:0.6rem">Treino E</span></button>
-            </div>
-        </div>
+            <!-- ABA DASHBOARD -->
+            <section id="dashboard" class="tab-content active space-y-6">
+                <!-- ALERTA SUTIL DE VENCIDOS -->
+                <div id="alerta-vencidos" class="hidden">
+                    <div class="bg-rose-500/10 border border-rose-500/20 p-3 rounded-xl flex items-center gap-3 text-rose-500">
+                        <i data-lucide="alert-circle" class="w-5 h-5"></i>
+                        <p class="text-xs font-bold uppercase tracking-wider">Atenção: Você possui contas vencidas!</p>
+                    </div>
+                </div>
 
-        <main id="workout-container">
-            <!-- Os treinos serão injetados aqui -->
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                    <div class="card p-4 border-emerald-500/20 bg-emerald-500/5">
+                        <p class="text-emerald-500 text-[10px] font-bold uppercase">Receitas (Real)</p>
+                        <h3 id="dash-receita-mes" class="text-lg md:text-2xl font-black">R$ 0,00</h3>
+                    </div>
+                    <div class="card p-4 border-rose-500/20 bg-rose-500/5">
+                        <p class="text-rose-500 text-[10px] font-bold uppercase">Despesas (Pagas)</p>
+                        <h3 id="dash-despesa-paga-mes" class="text-lg md:text-2xl font-black">R$ 0,00</h3>
+                    </div>
+                    <div class="card p-4 border-indigo-500/20 bg-indigo-500/5">
+                        <p class="text-indigo-400 text-[10px] font-bold uppercase">Saldo Real</p>
+                        <h3 id="dash-saldo-real-mes" class="text-lg md:text-2xl font-black">R$ 0,00</h3>
+                    </div>
+                    <div class="card p-4 bg-indigo-600 border-none">
+                        <p class="text-white/70 text-[10px] font-bold uppercase">Saldo Previsto</p>
+                        <h3 id="dash-saldo-previsto-mes" class="text-lg md:text-2xl font-black text-white">R$ 0,00</h3>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div class="card p-4 border-amber-500/20 bg-amber-500/5 flex justify-between items-center">
+                        <div>
+                            <p class="text-amber-500 text-[10px] font-bold uppercase">Investimento Feito (Custo)</p>
+                            <h3 id="dash-inv-custo" class="text-lg md:text-2xl font-black">R$ 0,00</h3>
+                        </div>
+                        <i data-lucide="arrow-down-right" class="text-amber-500 opacity-20 w-8 h-8"></i>
+                    </div>
+                    <div class="card p-4 border-cyan-500/20 bg-cyan-500/5 flex justify-between items-center">
+                        <div>
+                            <p class="text-cyan-500 text-[10px] font-bold uppercase">Patrimônio Atual (Mercado)</p>
+                            <h3 id="dash-inv-atual" class="text-lg md:text-2xl font-black">R$ 0,00</h3>
+                        </div>
+                        <i data-lucide="trending-up" class="text-cyan-500 opacity-20 w-8 h-8"></i>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div class="card p-4">
+                        <h4 class="font-bold text-sm mb-4">Fluxo do Mês</h4>
+                        <canvas id="chartFluxo" style="max-height: 200px;"></canvas>
+                    </div>
+                    <div class="card p-4">
+                        <h4 class="font-bold text-sm mb-4">Pendências do Mês</h4>
+                        <div id="lista-agenda" class="space-y-2"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ABA RECEITAS -->
+            <section id="receitas" class="tab-content space-y-4">
+                <div class="flex justify-between items-center bg-slate-900 p-4 rounded-2xl border border-slate-800">
+                    <h3 class="font-bold text-emerald-500">Minhas Receitas</h3>
+                    <button onclick="openForm('receita')" class="bg-emerald-600 px-4 py-2 rounded-xl font-bold text-xs">+ Adicionar</button>
+                </div>
+                <div id="lista-receitas-agrupadas" class="space-y-4"></div>
+            </section>
+
+            <!-- ABA DESPESAS -->
+            <section id="despesas" class="tab-content space-y-4">
+                <div class="flex justify-between items-center bg-slate-900 p-4 rounded-2xl border border-slate-800">
+                    <h3 class="font-bold text-rose-500">Minhas Despesas</h3>
+                    <button onclick="openForm('despesa')" class="bg-rose-600 px-4 py-2 rounded-xl font-bold text-xs">+ Adicionar</button>
+                </div>
+                <div id="lista-despesas-agrupadas" class="space-y-4"></div>
+            </section>
+
+            <!-- ABA INVESTIMENTOS -->
+            <section id="investimentos" class="tab-content space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="card p-5">
+                        <p class="text-[10px] font-bold text-slate-500 uppercase">Renda Variável (Mercado)</p>
+                        <h3 id="inv-rv-mercado" class="text-2xl font-black">R$ 0,00</h3>
+                        <button onclick="openForm('rv')" class="text-indigo-400 text-[10px] mt-2 font-bold">+ NOVO ATIVO</button>
+                    </div>
+                    <div class="card p-5">
+                        <p class="text-[10px] font-bold text-slate-500 uppercase">Renda Fixa</p>
+                        <h3 id="inv-rf-total" class="text-2xl font-black">R$ 0,00</h3>
+                        <button onclick="openForm('rf')" class="text-emerald-400 text-[10px] mt-2 font-bold">+ NOVO TÍTULO</button>
+                    </div>
+                </div>
+                <div class="card table-container">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-900 border-b border-slate-800">
+                            <tr>
+                                <th class="p-4">Ativo</th>
+                                <th class="p-4">Qtd</th>
+                                <th class="p-4">P. Médio</th>
+                                <th class="p-4">Total Custo</th>
+                                <th class="p-4">Cotação</th>
+                                <th class="p-4">Total Atual</th>
+                                <th class="p-4">Resultado</th>
+                                <th class="p-4 text-right">Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody id="corpo-investimentos"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ABA CONFIG -->
+            <section id="configuracoes" class="tab-content space-y-4">
+                <div class="card p-6 max-w-md mx-auto space-y-6">
+                    <h3 class="font-bold mb-4">Configurações</h3>
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-500 uppercase mb-2 block">Alpha Vantage API Key</label>
+                        <input type="password" id="cfg-api-key" placeholder="Insira sua chave aqui..." class="mb-2">
+                        <button onclick="saveApiKey()" class="bg-indigo-600 w-full p-2 rounded-xl text-xs font-bold">Salvar Chave</button>
+                    </div>
+                    <hr class="border-slate-800">
+                    <button onclick="clearData()" class="w-full p-4 bg-rose-600/20 text-rose-500 rounded-xl font-bold text-xs uppercase">Apagar todos os dados</button>
+                </div>
+            </section>
         </main>
     </div>
 
-    <!-- [MODAL: SELEÇÃO DE PERFIL / QUESTIONÁRIO] -->
-    <div class="modal-overlay" id="onboardingModal">
-        <div class="modal-content">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
-                <h2 style="color: var(--accent-primary); font-size:1.3rem;" id="modalTitle">Perfis do Sistema</h2>
-                <button id="closeProfileModalBtn" onclick="closeProfileModal()" style="display:none; background:none; border:none; color:var(--text-muted); font-size:1.4rem; cursor:pointer;"><i class="fa-solid fa-xmark"></i></button>
-            </div>
+    <!-- MODAL -->
+    <div id="modal-form" class="fixed inset-0 bg-black/90 backdrop-blur-sm hidden z-[200] flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-md p-6 overflow-y-auto max-h-[90vh]">
+            <h3 id="form-title" class="text-xl font-bold mb-6">Lançamento</h3>
+            <form id="main-form" class="space-y-4">
+                <input type="hidden" id="form-type">
+                <input type="hidden" id="form-id">
+                
+                <input type="text" id="inp-desc" placeholder="Descrição / Ticker" required>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <input type="number" step="0.01" id="inp-valor" placeholder="Valor R$">
+                    <input type="date" id="inp-venc">
+                </div>
 
-            <!-- Lista de Perfis Existentes -->
-            <div id="profilesListSection" style="display:none; margin-bottom: 15px;">
-                <label style="font-size:0.8rem; color:var(--text-muted); margin-bottom:8px; display:block;">Selecione um Perfil Salvo:</label>
-                <div id="profilesContainer" style="max-height: 40vh; overflow-y: auto;">
-                    <!-- Preenchido via JS -->
+                <div id="box-parcelas" class="p-3 bg-slate-950 rounded-xl border border-slate-800">
+                    <label class="flex items-center gap-2 text-xs text-slate-400 mb-2">
+                        <input type="checkbox" id="inp-is-parcelado" class="w-4 h-4" onchange="document.getElementById('box-qtd').classList.toggle('hidden', !this.checked)">
+                        Parcelar este lançamento
+                    </label>
+                    <div id="box-qtd" class="hidden">
+                        <input type="number" id="inp-qtd-parcelas" min="1" max="12" placeholder="Qtd de Parcelas">
+                    </div>
                 </div>
-                <button class="action-btn-sm" style="width:100%; padding:10px; margin-top:10px; justify-content:center; background:rgba(56, 189, 248, 0.1); color:var(--accent-primary);" onclick="showQuestionnaireForm()">
-                    <i class="fa-solid fa-user-plus"></i> + CRIAR NOVO PERFIL
-                </button>
-            </div>
 
-            <!-- Formulário de Questionário / Criar Perfil -->
-            <div id="questionnaireSection">
-                <h3 style="font-size:1rem; color:var(--text-main); margin-bottom:10px;">Preencha seu Questionário:</h3>
-                <div style="max-height: 55vh; overflow-y: auto; padding-right: 5px;">
-                    <div class="form-group">
-                        <label style="font-size: 0.8rem; color: var(--text-muted)">Nome</label>
-                        <input type="text" id="regName" class="form-input" placeholder="Seu nome">
-                    </div>
-                    <div style="display:flex; gap:10px; margin-top: 10px;">
-                        <div style="flex:1">
-                            <label style="font-size: 0.8rem; color: var(--text-muted)">Peso (kg)</label>
-                            <input type="number" id="regWeight" class="form-input" placeholder="Ex: 80">
-                        </div>
-                        <div style="flex:1">
-                            <label style="font-size: 0.8rem; color: var(--text-muted)">Altura (cm)</label>
-                            <input type="number" id="regHeight" class="form-input" placeholder="Ex: 175">
-                        </div>
-                    </div>
-                    <div class="form-group" style="margin-top: 15px;">
-                        <label style="font-size: 0.8rem; color: var(--text-muted)">Qual seu objetivo principal?</label>
-                        <select id="regGoal" class="form-select">
-                            <option value="hipertrofia">Ganhar Massa Muscular (Hipertrofia)</option>
-                            <option value="forca">Ganhar Força</option>
-                            <option value="emagrecimento">Perder Gordura / Emagrecer</option>
-                            <option value="recomposicao">Perder Gordura + Ganhar Massa</option>
-                            <option value="condicionamento">Melhorar Condicionamento</option>
-                        </select>
-                    </div>
-                    <div class="form-group" style="margin-top: 15px;">
-                        <label style="font-size: 0.8rem; color: var(--text-muted)">Dias disponíveis por semana?</label>
-                        <select id="regFreq" class="form-select">
-                            <option value="3">3 dias (Treino FullBody)</option>
-                            <option value="4">4 dias (Split AB)</option>
-                            <option value="5">5 dias (Split ABCDE)</option>
-                        </select>
-                    </div>
+                <select id="inp-cat"></select>
+
+                <div id="box-invest" class="grid grid-cols-2 gap-4 hidden">
+                    <input type="number" step="0.0001" id="inp-qtd" placeholder="Quantidade">
+                    <input type="number" step="0.01" id="inp-pm" placeholder="Preço Médio">
                 </div>
-                <div style="display:flex; gap:10px;">
-                    <button class="btn-submit" onclick="finishOnboarding()">SALVAR E GERAR MEU TREINO</button>
-                </div>
-            </div>
+
+                <button type="submit" class="w-full bg-indigo-600 p-4 rounded-xl font-bold">Salvar Dados</button>
+                <button type="button" onclick="closeModal()" class="w-full text-slate-500 text-sm font-bold">Cancelar</button>
+            </form>
         </div>
     </div>
-
-    <!-- [MODAL: ADICIONAR EXERCÍCIO] -->
-    <div class="modal-overlay" id="addExerciseModal">
-        <div class="modal-content">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                <h2 style="color: var(--accent-primary); font-size:1.2rem;"><i class="fa-solid fa-plus-circle"></i> Adicionar Exercício</h2>
-                <button onclick="closeAddExerciseModal()" style="background:none; border:none; color:var(--text-muted); font-size:1.4rem; cursor:pointer;"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-
-            <div class="form-group" style="margin-bottom:15px;">
-                <label style="font-size:0.8rem; color:var(--text-muted)">Filtrar por Grupo Muscular:</label>
-                <select id="filterMuscleGroup" class="form-select" onchange="renderExerciseLibrary()">
-                    <option value="todos">Todos os Grupos Musculares</option>
-                    <option value="peito">Peitoral</option>
-                    <option value="costas">Costas / Dorsal</option>
-                    <option value="quadriceps">Quadríceps</option>
-                    <option value="posterior_gluteo">Posterior de Coxa & Glúteos</option>
-                    <option value="ombros">Ombros / Deltoides</option>
-                    <option value="biceps">Bíceps & Antebraço</option>
-                    <option value="triceps">Tríceps</option>
-                    <option value="panturrilha_core">Panturrilhas & Core/Abdômen</option>
-                    <option value="custom">-- Cadastrar Exercício Personalizado --</option>
-                </select>
-            </div>
-
-            <!-- Lista de Exercícios da Biblioteca -->
-            <div id="libraryListContainer" style="max-height:50vh; overflow-y:auto; padding-right:4px;">
-                <!-- Preenchido via JS -->
-            </div>
-
-            <!-- Formulário de Exercício Personalizado -->
-            <div id="customExerciseForm" style="display:none; max-height:50vh; overflow-y:auto; padding-right:4px;">
-                <div class="form-group">
-                    <label style="font-size:0.8rem; color:var(--text-muted)">Nome do Exercício</label>
-                    <input type="text" id="customExTitle" class="form-input" placeholder="Ex: Agachamento Sumô">
-                </div>
-                <div class="form-group" style="margin-top:10px;">
-                    <label style="font-size:0.8rem; color:var(--text-muted)">Músculo Primário Trabalhado</label>
-                    <input type="text" id="customExPrimary" class="form-input" placeholder="Ex: Glúteo Máximo, Adutores">
-                </div>
-                <div class="form-group" style="margin-top:10px;">
-                    <label style="font-size:0.8rem; color:var(--text-muted)">Músculos Secundários</label>
-                    <input type="text" id="customExSecondary" class="form-input" placeholder="Ex: Quadríceps, Core">
-                </div>
-                <div class="form-group" style="margin-top:10px;">
-                    <label style="font-size:0.8rem; color:var(--text-muted)">Dica / Motivo de Execução</label>
-                    <input type="text" id="customExWhy" class="form-input" placeholder="Ex: Foco no afastamento das pernas e rotação externa de quadril.">
-                </div>
-                <button class="btn-submit" style="margin-top:15px;" onclick="addCustomExerciseSubmit()">ADICIONAR AO TREINO</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- BARRA NAVEGAÇÃO INFERIOR -->
-    <nav class="bottom-nav">
-        <div class="nav-content">
-            <button class="btn-action btn-gen" onclick="generatePersonalizedWorkout()"><i class="fa-solid fa-wand-magic-sparkles"></i> REGERAR</button>
-            <button class="btn-action btn-add-ex" onclick="openAddExerciseModal()"><i class="fa-solid fa-plus"></i> EXERCÍCIO</button>
-            <button class="btn-action btn-profile" onclick="openProfileModal()"><i class="fa-solid fa-users"></i> PERFIS</button>
-            <button class="btn-action btn-logout" onclick="logoutProfile()"><i class="fa-solid fa-right-from-bracket"></i> SAIR</button>
-        </div>
-    </nav>
 
     <script>
-        // --- BIBLIOTECA DE EXERCÍCIOS COMPLETA COM MÚSCULOS PRIMÁRIOS E SECUNDÁRIOS ---
-        const EXERCISE_LIBRARY = {
-            peito: [
-                { title: "Supino Reto (Barra)", primary: "Peitoral Maior (Esternal)", secondary: "Tríceps Braquial, Deltoide Anterior", img: "img/supino-reto.png", why: "Exercício multiarticular base para volume e sobrecarga progressiva." },
-                { title: "Supino Inclinado (Halteres)", primary: "Peitoral Superior (Clavicular)", secondary: "Deltoide Anterior, Tríceps Braquial", img: "img/supino-inclinado.png", why: "Foco no preenchimento da porção superior do peitoral." },
-                { title: "Supino Declinado (Barra/Halter)", primary: "Peitoral Inferior", secondary: "Tríceps Braquial, Deltoide Anterior", img: "img/supino-declinado.png", why: "Ênfase na porção inferior e definição da linha peitoral." },
-                { title: "Crossover Polia Alta", primary: "Peitoral Inferior / Esternal", secondary: "Deltoide Anterior", img: "img/cross-over.png", why: "Isolamento com pico de contração e tensão mecânica constante." },
-                { title: "Crossover Polia Baixa", primary: "Peitoral Superior", secondary: "Deltoide Anterior, Bíceps (cabeça curta)", img: "img/cross-over-baixo.png", why: "Trabalha a porção clavicular com vetor de força ascendente." },
-                { title: "Crucifixo Reto com Halteres", primary: "Peitoral Maior", secondary: "Deltoide Anterior", img: "img/crucifixo-reto.png", why: "Excelente para o alongamento sob carga das fibras peitorais." },
-                { title: "Flexão de Braços (Push-up)", primary: "Peitoral Maior", secondary: "Tríceps, Deltoide Anterior, Core", img: "img/flexao.png", why: "Exercício calistênico para controle motor e resistência muscular." },
-                { title: "Peck Deck / Voador", primary: "Peitoral Maior", secondary: "Deltoide Anterior", img: "img/voador.png", why: "Isolamento seguro sem sobrecarga excessiva nos punhos." }
-            ],
-            costas: [
-                { title: "Puxada Frontal (Pulley)", primary: "Latíssimo do Dorso", secondary: "Bíceps, Braquial, Romboides", img: "img/puxada-frontal.png", why: "Desenvolvimento da largura dorsal e formato em V." },
-                { title: "Remada Curvada com Barra", primary: "Romboides, Trapézio Médio", secondary: "Latíssimo, Bíceps, Eretores da Espinha", img: "img/remada-curvada.png", why: "Construção de espessura e densidade nas costas." },
-                { title: "Remada Baixa (Triângulo)", primary: "Romboides, Latíssimo do Dorso", secondary: "Bíceps Braquial, Deltoide Posterior", img: "img/remada-baixa.png", why: "Estabilidade escapular e foco no miolo das costas." },
-                { title: "Remada Unilateral com Halter (Serrote)", primary: "Latíssimo do Dorso, Romboides", secondary: "Bíceps, Core", img: "img/remada-unilateral.png", why: "Permite grande amplitude e correção de assimetrias." },
-                { title: "Pulldown na Polia Alta", primary: "Latíssimo do Dorso", secondary: "Tríceps (Cabeça Longa)", img: "img/pulldown-corda.png", why: "Isolamento do latíssimo sem fadiga precoce dos bíceps." },
-                { title: "Barra Fixa (Pull-up)", primary: "Latíssimo do Dorso, Romboides", secondary: "Bíceps Braquial, Antebraço", img: "img/barra-fixa.png", why: "Exercício corporal fundamental para força e massa dorsal." },
-                { title: "Remada Cavalinho (T-Bar)", primary: "Espessura de Costas (Trapézio/Romboides)", secondary: "Latíssimo, Bíceps, Lombar", img: "img/remada-cavalinho.png", why: "Trabalho com carga elevada para ganho de volume." }
-            ],
-            quadriceps: [
-                { title: "Agachamento Livre com Barra", primary: "Quadríceps, Glúteo Máximo", secondary: "Eretores da Espinha, Isquiotibiais, Core", img: "img/agachamento-livre.png", why: "Exercício soberano para ganho de força e hipertrofia global." },
-                { title: "Leg Press 45°", primary: "Quadríceps", secondary: "Glúteos, Isquiotibiais", img: "img/leg-press.png", why: "Alto volume de carga com suporte e proteção lombar." },
-                { title: "Cadeira Extensora", primary: "Quadríceps (Reto Femural/Vastos)", secondary: "Nenhum (Isolado)", img: "img/extensora.png", why: "Isolamento concêntrico e pico de contração do quadríceps." },
-                { title: "Agachamento Búlgaro", primary: "Quadríceps, Glúteo Médio/Máximo", secondary: "Isquiotibiais, Core", img: "img/bulgaro.png", why: "Unilateral exigente para força, estabilidade e hipertrofia." },
-                { title: "Passada / Afundo com Halteres", primary: "Quadríceps, Glúteo Máximo", secondary: "Isquiotibiais, Panturrilhas", img: "img/passada.png", why: "Dinâmico para membros inferiores e condicionamento." }
-            ],
-            posterior_gluteo: [
-                { title: "Stiff / Levantamento Terra Romeno", primary: "Isquiotibiais, Glúteo Máximo", secondary: "Eretores da Espinha, Pegada", img: "img/stiff.png", why: "Trabalha o alongamento sob carga da cadeia posterior." },
-                { title: "Mesa Flexora", primary: "Isquiotibiais (Semitendíneo/Bíceps Femoral)", secondary: "Gastrocnêmio", img: "img/mesa-flexora.png", why: "Isolamento direto para flexão de joelho." },
-                { title: "Cadeira Flexora", primary: "Isquiotibiais", secondary: "Gastrocnêmio", img: "img/cadeira-flexora.png", why: "Trabalha os posteriores de coxa na posição sentada." },
-                { title: "Elevação Pélvica (Hip Thrust)", primary: "Glúteo Máximo", secondary: "Isquiotibiais, Quadríceps", img: "img/hip-thrust.png", why: "Maior pico de ativação mecânica para os glúteos." },
-                { title: "Cadeira Abdutora", primary: "Glúteo Médio e Mínimo", secondary: "Tensor da Fáscia Lata", img: "img/abdutora.png", why: "Desenvolvimento da porção lateral dos glúteos." }
-            ],
-            ombros: [
-                { title: "Desenvolvimento com Halteres", primary: "Deltoide Anterior e Lateral", secondary: "Tríceps, Trapézio Superior", img: "img/desenvolvimento.png", why: "Construção de base de ombros largos e fortes." },
-                { title: "Elevação Lateral com Halteres", primary: "Deltoide Lateral", secondary: "Trapézio Superior", img: "img/elevacao-lateral.png", why: "Foco exclusivo na largura e formato de 'V' nos ombros." },
-                { title: "Elevação Lateral na Polia", primary: "Deltoide Lateral", secondary: "Trapézio", img: "img/elevacao-lateral-polia.png", why: "Tensão constante do início ao fim do movimento." },
-                { title: "Elevação Frontal", primary: "Deltoide Anterior", secondary: "Peitoral Clavicular", img: "img/elevacao-frontal.png", why: "Isolamento da parte da frente dos ombros." },
-                { title: "Crucifixo Invertido / Face Pull", primary: "Deltoide Posterior, Romboides", secondary: "Trapézio, Manguito Rotador", img: "img/face-pull.png", why: "Saúde dos ombros, postura e densidade posterior." },
-                { title: "Encolhimento de Ombros", primary: "Trapézio Superior", secondary: "Elevador da Escápula", img: "img/encolhimento.png", why: "Desenvolvimento de volume e massa no trapézio." }
-            ],
-            biceps: [
-                { title: "Rosca Direta com Barra W", primary: "Bíceps Braquial", secondary: "Braquiorradial, Antebraço", img: "img/rosca-direta.png", why: "Exercício clássico de sobrecarga para braços." },
-                { title: "Rosca Alternada com Halteres", primary: "Bíceps Braquial (Supinação)", secondary: "Braquial", img: "img/rosca-alternada.png", why: "Permite rotação completa do punho para ativação máxima." },
-                { title: "Rosca Martelo", primary: "Braquial, Braquiorradial", secondary: "Bíceps (cabeça longa)", img: "img/rosca-martelo.png", why: "Aumenta a espessura do braço e antebraço." },
-                { title: "Rosca Scott", primary: "Bíceps Braquial (Cabeça Curta)", secondary: "Braquial", img: "img/rosca-scott.png", why: "Isolamento rígido impedindo roubo com os ombros." },
-                { title: "Rosca Concentrada", primary: "Pico do Bíceps", secondary: "Braquial", img: "img/rosca-concentrada.png", why: "Foco no ápice de contração muscular." }
-            ],
-            triceps: [
-                { title: "Tríceps Corda na Polia", primary: "Tríceps (Cabeça Lateral e Medial)", secondary: "Ancôneo", img: "img/triceps-corda.png", why: "Permite rotação final e extensão completa do cotovelo." },
-                { title: "Tríceps Testa (Barra W)", primary: "Tríceps (Cabeça Longa)", secondary: "Ancôneo", img: "img/triceps-testa.png", why: "Excelente para a massa geral do tríceps." },
-                { title: "Tríceps Francês na Polia/Halter", primary: "Tríceps (Cabeça Longa)", secondary: "Deltoide Posterior", img: "img/triceps-frances.png", why: "Alongamento profundo da cabeça longa overhead." },
-                { title: "Mergulho em Paralelas / Banco", primary: "Tríceps Braquial, Peitoral Inferior", secondary: "Deltoide Anterior", img: "img/paralelas.png", why: "Multiarticular potente para tríceps pesado." },
-                { title: "Tríceps Pulley Barra Reta", primary: "Tríceps Braquial", secondary: "Ancôneo", img: "img/triceps-pulley.png", why: "Carga consistente para força de empurrão." }
-            ],
-            panturrilha_core: [
-                { title: "Gêmeos em Pé (Máquina/Halter)", primary: "Gastrocnêmio (Panturrilha)", secondary: "Sóleo", img: "img/panturrilha-pe.png", why: "Desenvolvimento da porção superior da panturrilha." },
-                { title: "Gêmeos Sentado (Soleira)", primary: "Sóleo (Panturrilha)", secondary: "Gastrocnêmio", img: "img/panturrilha-sentado.png", why: "Trabalha o músculo sóleo profundo com joelhos flexionados." },
-                { title: "Abdominal Supra na Polia / Solo", primary: "Reto Abdominal (Superior)", secondary: "Oblíquos", img: "img/abdominal-supra.png", why: "Fortalecimento e hipertrofia da parede abdominal." },
-                { title: "Elevação de Pernas (Infra)", primary: "Reto Abdominal (Inferior)", secondary: "Flexores do Quadril", img: "img/abdominal-infra.png", why: "Foco na porção inferior do abdômen." },
-                { title: "Prancha Ventral Isométrica", primary: "Transverso do Abdômen, Core", secondary: "Eretores, Glúteos, Ombros", img: "img/prancha.png", why: "Estabilidade de coluna e resistência do core." }
-            ]
+        let state = JSON.parse(localStorage.getItem('mvf_v2')) || {
+            receitas: [], despesas: [], investRV: [], investRF: [],
+            categoriasReceitas: ['Salário', 'Investimento', 'Extra'],
+            categoriasDespesas: ['Aluguel', 'Saúde', 'Lazer', 'Alimentação'],
+            selectedMonth: new Date().toISOString().slice(0, 7),
+            config: { apiKey: '' }
         };
 
-        // --- GERENCIAMENTO DE ESTADO E MULTIPERFÍS ---
-        let activeProfileId = localStorage.getItem('proWorkout_active_profile_id') || null;
-        let profilesData = JSON.parse(localStorage.getItem('proWorkout_profiles')) || {};
-        
-        // Migração do estado antigo se existir apenas um perfil
-        const legacyUser = JSON.parse(localStorage.getItem('proWorkout_user'));
-        const legacyPlan = JSON.parse(localStorage.getItem('proWorkout_plan'));
-        if (legacyUser && Object.keys(profilesData).length === 0) {
-            const defaultId = 'prof_' + Date.now();
-            profilesData[defaultId] = {
-                id: defaultId,
-                name: legacyUser.name || 'Meu Perfil',
-                weight: legacyUser.weight || '80',
-                height: legacyUser.height || '175',
-                goal: legacyUser.goal || 'hipertrofia',
-                freq: legacyUser.freq || '3',
-                workoutPlan: legacyPlan || null
-            };
-            activeProfileId = defaultId;
-            saveProfilesState();
+        const save = () => {
+            localStorage.setItem('mvf_v2', JSON.stringify(state));
+            render();
+        };
+
+        const fmt = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v || 0);
+
+        function showTab(id) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            
+            document.querySelectorAll('nav button, aside button').forEach(b => b.classList.remove('nav-active', 'text-white'));
+            document.getElementById('nav-' + id)?.classList.add('nav-active');
+            document.getElementById('mob-' + id)?.classList.add('text-white');
+            
+            document.getElementById('tab-title').innerText = id.charAt(0).toUpperCase() + id.slice(1);
+            if(id === 'configuracoes') document.getElementById('cfg-api-key').value = state.config?.apiKey || '';
+            render();
+            lucide.createIcons();
         }
 
-        let userData = null;
-        let workoutPlan = null;
-        let currentDayIdx = 0;
+        function saveApiKey() {
+            state.config = state.config || {};
+            state.config.apiKey = document.getElementById('cfg-api-key').value;
+            save();
+            alert("Chave API salva com sucesso!");
+        }
+
+        async function syncAlphaVantage() {
+            const key = state.config?.apiKey;
+            if(!key) return alert("Configure a API Key nas configurações primeiro.");
+            
+            const btn = document.getElementById('sync-icon');
+            btn.classList.add('animate-spin');
+
+            for (let inv of state.investRV) {
+                try {
+                    const symbol = inv.ticker.includes('.') ? inv.ticker : `${inv.ticker}.SA`;
+                    const res = await fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=${key}`);
+                    const data = await res.json();
+                    if(data["Global Quote"] && data["Global Quote"]["05. price"]) {
+                        inv.cotacao = parseFloat(data["Global Quote"]["05. price"]);
+                    }
+                    await new Promise(r => setTimeout(r, 1000)); 
+                } catch (e) { console.error(e); }
+            }
+            btn.classList.remove('animate-spin');
+            save();
+        }
+
+        function populateMonthFilter() {
+            const select = document.getElementById('filtro-mes-global');
+            const months = new Set();
+            months.add(new Date().toISOString().slice(0, 7));
+            [...state.receitas, ...state.despesas].forEach(i => i.venc && months.add(i.venc.slice(0, 7)));
+            
+            const sorted = Array.from(months).sort();
+            let html = '<option value="all">TODOS</option>';
+            sorted.forEach(m => {
+                html += `<option value="${m}" ${state.selectedMonth === m ? 'selected' : ''}>${m.split('-').reverse().join('/')}</option>`;
+            });
+            select.innerHTML = html;
+        }
+
+        function changeFilterMonth(val) { state.selectedMonth = val; save(); }
+
+        function openForm(type, id = null) {
+            const form = document.getElementById('main-form');
+            form.reset();
+            document.getElementById('form-type').value = type;
+            document.getElementById('form-id').value = id || '';
+            
+            const isInvest = (type === 'rv' || type === 'rf');
+            document.getElementById('box-invest').classList.toggle('hidden', type !== 'rv');
+            document.getElementById('box-parcelas').classList.toggle('hidden', isInvest || id !== null);
+            
+            const cats = type === 'receita' ? state.categoriasReceitas : state.categoriasDespesas;
+            document.getElementById('inp-cat').innerHTML = cats.map(c => `<option value="${c}">${c}</option>`).join('');
+            document.getElementById('inp-cat').classList.toggle('hidden', isInvest);
+
+            if(id) {
+                const list = (type === 'receita') ? state.receitas : (type === 'despesa') ? state.despesas : (type === 'rv') ? state.investRV : state.investRF;
+                const item = list.find(i => i.id == id);
+                if(item) {
+                    document.getElementById('inp-desc').value = item.descricao || item.ticker || '';
+                    document.getElementById('inp-valor').value = item.valor || '';
+                    document.getElementById('inp-venc').value = item.venc || '';
+                    if(type === 'rv') {
+                        document.getElementById('inp-qtd').value = item.qtd;
+                        document.getElementById('inp-pm').value = item.pm;
+                    }
+                }
+            }
+            document.getElementById('modal-form').classList.remove('hidden');
+        }
+
+        function closeModal() { document.getElementById('modal-form').classList.add('hidden'); }
+
+        document.getElementById('main-form').onsubmit = (e) => {
+            e.preventDefault();
+            const type = document.getElementById('form-type').value;
+            const id = document.getElementById('form-id').value;
+            const isParcelado = document.getElementById('inp-is-parcelado').checked;
+
+            if (isParcelado && !id) {
+                const qtd = parseInt(document.getElementById('inp-qtd-parcelas').value) || 1;
+                const total = parseFloat(document.getElementById('inp-valor').value);
+                const valorP = Math.floor((total / qtd) * 100) / 100;
+                const sobra = parseFloat((total - (valorP * qtd)).toFixed(2));
+
+                for (let i = 1; i <= qtd; i++) {
+                    let d = new Date(document.getElementById('inp-venc').value + 'T12:00:00');
+                    d.setMonth(d.getMonth() + (i - 1));
+                    const item = {
+                        id: Date.now() + Math.random(),
+                        descricao: document.getElementById('inp-desc').value,
+                        valor: i === qtd ? valorP + sobra : valorP,
+                        venc: d.toISOString().slice(0, 10),
+                        categoria: document.getElementById('inp-cat').value,
+                        status: 'pendente',
+                        parcela: `${i}/${qtd}`
+                    };
+                    state[type === 'receita' ? 'receitas' : 'despesas'].push(item);
+                }
+            } else {
+                let list = (type === 'receita') ? 'receitas' : (type === 'despesa') ? 'despesas' : (type === 'rv') ? 'investRV' : 'investRF';
+                const item = {
+                    id: id ? parseFloat(id) : Date.now(),
+                    descricao: document.getElementById('inp-desc').value,
+                    ticker: document.getElementById('inp-desc').value.toUpperCase(),
+                    valor: parseFloat(document.getElementById('inp-valor').value),
+                    venc: document.getElementById('inp-venc').value,
+                    categoria: document.getElementById('inp-cat').value,
+                    qtd: parseFloat(document.getElementById('inp-qtd').value),
+                    pm: parseFloat(document.getElementById('inp-pm').value),
+                    status: 'pendente'
+                };
+                if(id) state[list] = state[list].filter(i => i.id != id);
+                state[list].push(item);
+                if(item.venc) state.selectedMonth = item.venc.slice(0, 7);
+            }
+            save(); closeModal();
+        };
+
+        function cloneItem(list, id) {
+            const original = state[list].find(i => i.id == id);
+            if(original) {
+                const copy = {...original, id: Date.now() + Math.random(), status: 'pendente'};
+                state[list].push(copy);
+                save();
+            }
+        }
+
+        function getChain(target) {
+            let months = new Set();
+            [...state.receitas, ...state.despesas].forEach(i => i.venc && months.add(i.venc.slice(0,7)));
+            months.add(new Date().toISOString().slice(0,7));
+            
+            let sorted = Array.from(months).sort();
+            let p = 0, r = 0, res = { recR: 0, desR: 0, finalR: 0, finalP: 0 };
+
+            sorted.forEach(m => {
+                let recM = state.receitas.filter(i => i.venc?.startsWith(m));
+                let desM = state.despesas.filter(i => i.venc?.startsWith(m));
+                
+                let rP = recM.reduce((a,c)=>a+c.valor,0);
+                let rR = recM.filter(i=>i.status==='pago').reduce((a,c)=>a+c.valor,0);
+                let dP = desM.reduce((a,c)=>a+c.valor,0);
+                let dR = desM.filter(i=>i.status==='pago').reduce((a,c)=>a+c.valor,0);
+
+                if(m === target) { res.recR = rR; res.desR = dR; }
+                p += (rP - dP); r += (rR - dR);
+                if(m === target) { res.finalR = r; res.finalP = p; }
+            });
+            return res;
+        }
+
+        function render() {
+            populateMonthFilter();
+            const isAll = state.selectedMonth === 'all';
+            const res = getChain(state.selectedMonth);
+            const hojeStr = new Date().toISOString().slice(0, 10);
+
+            // Dashboard
+            document.getElementById('dash-receita-mes').innerText = fmt(res.recR);
+            document.getElementById('dash-despesa-paga-mes').innerText = fmt(res.desR);
+            document.getElementById('dash-saldo-real-mes').innerText = fmt(res.finalR);
+            document.getElementById('dash-saldo-previsto-mes').innerText = fmt(res.finalP);
+
+            // Alerta Sutil de Vencidos
+            const vencidosGeral = state.despesas.filter(d => d.status === 'pendente' && d.venc < hojeStr);
+            document.getElementById('alerta-vencidos').classList.toggle('hidden', vencidosGeral.length === 0);
+
+            // Cálculos Investimentos
+            const invCustoRV = state.investRV.reduce((a,c) => a + (c.qtd * c.pm), 0);
+            const invAtualRV = state.investRV.reduce((a,c) => a + (c.qtd * (c.cotacao || c.pm)), 0);
+            const invRF = state.investRF.reduce((a,c) => a + c.valor, 0);
+
+            document.getElementById('dash-inv-custo').innerText = fmt(invCustoRV + invRF);
+            document.getElementById('dash-inv-atual').innerText = fmt(invAtualRV + invRF);
+            document.getElementById('inv-rv-mercado').innerText = fmt(invAtualRV);
+            document.getElementById('inv-rf-total').innerText = fmt(invRF);
+
+            // Listas
+            ['receita', 'despesa'].forEach(type => {
+                const listName = type + 's';
+                const list = state[listName].filter(i => isAll || i.venc?.startsWith(state.selectedMonth));
+                document.getElementById(`lista-${type}s-agrupadas`).innerHTML = list.sort((a,b)=>a.venc.localeCompare(b.venc)).map(i => `
+                    <div class="card p-4 flex justify-between items-center group">
+                        <div class="flex items-center gap-3">
+                            <button onclick="toggleStatus('${type}', ${i.id})" class="w-7 h-7 rounded-full border-2 ${i.status==='pago'?(type==='receita'?'bg-emerald-500':'bg-rose-500'):'border-slate-700'}">
+                                ${i.status==='pago'?'<i data-lucide="check" class="w-4 h-4 mx-auto text-white"></i>':''}
+                            </button>
+                            <div onclick="openForm('${type}', ${i.id})">
+                                <p class="text-sm font-bold ${i.status==='pago'?'strikethrough':''}">${i.descricao} ${i.parcela?`<span class="parcela-tag">${i.parcela}</span>`:''}</p>
+                                <p class="text-[10px] text-slate-500 uppercase">${i.venc?.split('-').reverse().join('/')} • ${i.categoria}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <p class="font-bold ${type==='receita'?'text-emerald-500':'text-rose-500'}">${fmt(i.valor)}</p>
+                            <button onclick="cloneItem('${listName}', ${i.id})" class="text-slate-600 hover:text-indigo-400 opacity-0 group-hover:opacity-100 transition"><i data-lucide="copy" class="w-4 h-4"></i></button>
+                            <button onclick="deleteItem('${listName}', ${i.id})" class="text-slate-600 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        </div>
+                    </div>
+                `).join('');
+            });
+
+            // Tabela Investimentos
+            document.getElementById('corpo-investimentos').innerHTML = state.investRV.map(i => {
+                const custoTotal = i.qtd * i.pm;
+                const mercadoTotal = i.qtd * (i.cotacao || i.pm);
+                const resultado = mercadoTotal - custoTotal;
+                const pct = custoTotal > 0 ? (resultado / custoTotal) * 100 : 0;
+                
+                return `
+                <tr class="border-b border-slate-800 hover:bg-slate-900/50 transition">
+                    <td class="p-4 font-bold text-indigo-400">${i.ticker}</td>
+                    <td class="p-4">${i.qtd}</td>
+                    <td class="p-4 text-slate-400">${fmt(i.pm)}</td>
+                    <td class="p-4 font-medium text-slate-300">${fmt(custoTotal)}</td>
+                    <td class="p-4 text-cyan-400">${fmt(i.cotacao || i.pm)}</td>
+                    <td class="p-4 font-bold">${fmt(mercadoTotal)}</td>
+                    <td class="p-4 font-bold ${resultado >= 0 ? 'text-emerald-500' : 'text-rose-500'}">
+                        ${fmt(resultado)}<br><span class="text-[10px] opacity-70">${pct.toFixed(2)}%</span>
+                    </td>
+                    <td class="p-4 text-right">
+                        <button onclick="deleteItem('investRV', ${i.id})" class="text-slate-600 hover:text-rose-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    </td>
+                </tr>`;
+            }).join('') + state.investRF.map(i => `
+                <tr class="border-b border-slate-800 bg-emerald-900/5 hover:bg-emerald-900/10 transition">
+                    <td class="p-4 font-bold text-emerald-400">${i.nome || i.descricao}</td>
+                    <td class="p-4">-</td>
+                    <td class="p-4">-</td>
+                    <td class="p-4 font-medium text-slate-300">${fmt(i.valor)}</td>
+                    <td class="p-4">-</td>
+                    <td class="p-4 font-bold">${fmt(i.valor)}</td>
+                    <td class="p-4 text-emerald-500 italic text-[10px]">Renda Fixa</td>
+                    <td class="p-4 text-right">
+                        <button onclick="deleteItem('investRF', ${i.id})" class="text-slate-600 hover:text-rose-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    </td>
+                </tr>`).join('');
+
+            // Pendencias (Com data e alerta)
+            document.getElementById('lista-agenda').innerHTML = state.despesas
+                .filter(d => d.status === 'pendente' && (isAll || d.venc?.startsWith(state.selectedMonth)))
+                .sort((a,b) => a.venc.localeCompare(b.venc))
+                .slice(0, 8).map(d => {
+                    const isVencida = d.venc < hojeStr;
+                    return `
+                    <div class="text-[11px] p-2 bg-slate-900 rounded-lg flex justify-between items-center border ${isVencida ? 'border-rose-500/30' : 'border-transparent'}">
+                        <div class="flex flex-col">
+                            <span class="font-bold ${isVencida ? 'text-rose-400' : 'text-slate-200'}">${d.descricao}</span>
+                            <span class="text-[9px] text-slate-500">${d.venc.split('-').reverse().slice(0,2).join('/')}</span>
+                        </div>
+                        <span class="font-bold ${isVencida ? 'text-rose-500' : 'text-rose-400/80'}">${fmt(d.valor)}</span>
+                    </div>`;
+                }).join('') || '<p class="text-xs text-slate-600 text-center py-4">Nenhuma pendência.</p>';
+
+            renderChart(res.recR, res.desR);
+            lucide.createIcons();
+        }
+
+        function toggleStatus(type, id) {
+            const list = state[type + 's'];
+            const item = list.find(i => i.id == id);
+            if(item) item.status = item.status === 'pago' ? 'pendente' : 'pago';
+            save();
+        }
+
+        function deleteItem(list, id) { if(confirm('Excluir lançamento?')) { state[list] = state[list].filter(i => i.id != id); save(); } }
+        function clearData() { if(confirm('Atenção: Isso apagará TODOS os seus dados salvos localmente. Deseja continuar?')) { localStorage.clear(); location.reload(); } }
+
+        let fChart;
+        function renderChart(r, d) {
+            const ctx = document.getElementById('chartFluxo');
+            if (fChart) fChart.destroy();
+            fChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: { datasets: [{ data: [r, d], backgroundColor: ['#10b981', '#f43f5e'], borderWidth: 0 }] },
+                options: { cutout: '80%', plugins: { tooltip: { enabled: false } } }
+            });
+        }
 
         window.onload = () => {
-            loadCurrentProfileSession();
+            document.getElementById('current-date').innerText = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'full' }).format(new Date());
+            showTab('dashboard');
         };
-
-        function saveProfilesState() {
-            localStorage.setItem('proWorkout_profiles', JSON.stringify(profilesData));
-            if (activeProfileId) {
-                localStorage.setItem('proWorkout_active_profile_id', activeProfileId);
-            } else {
-                localStorage.removeItem('proWorkout_active_profile_id');
-            }
-        }
-
-        function loadCurrentProfileSession() {
-            if (activeProfileId && profilesData[activeProfileId]) {
-                userData = profilesData[activeProfileId];
-                workoutPlan = profilesData[activeProfileId].workoutPlan;
-                document.getElementById('onboardingModal').style.display = 'none';
-                updateUI();
-                renderAll();
-            } else {
-                openProfileModal();
-            }
-        }
-
-        // --- SISTEMA DE SELEÇÃO E SAIR (LOGOUT) DE PERFIL ---
-        function openProfileModal() {
-            const hasProfiles = Object.keys(profilesData).length > 0;
-            const container = document.getElementById('profilesContainer');
-            const modalOverlay = document.getElementById('onboardingModal');
-            
-            modalOverlay.style.display = 'flex';
-
-            if (hasProfiles) {
-                document.getElementById('modalTitle').innerText = "Gerenciar Perfis";
-                document.getElementById('closeProfileModalBtn').style.display = activeProfileId ? "block" : "none";
-                document.getElementById('profilesListSection').style.display = "block";
-                document.getElementById('questionnaireSection').style.display = "none";
-
-                container.innerHTML = '';
-                Object.values(profilesData).forEach(p => {
-                    const isActive = p.id === activeProfileId;
-                    const card = document.createElement('div');
-                    card.className = `profile-card-item ${isActive ? 'active-profile' : ''}`;
-                    card.innerHTML = `
-                        <div>
-                            <div style="font-weight:700; color:#fff;">${p.name.toUpperCase()} ${isActive ? '<span style="font-size:0.68rem; color:var(--accent-primary); background:rgba(56,189,248,0.15); padding:2px 6px; border-radius:4px; margin-left:6px;">ATIVO</span>' : ''}</div>
-                            <div style="font-size:0.75rem; color:var(--text-muted);">⚖️ ${p.weight}kg | 📏 ${p.height}cm | 🎯 ${p.goal.toUpperCase()}</div>
-                        </div>
-                        <div style="display:flex; gap:6px;">
-                            ${!isActive ? `<button class="action-btn-sm" onclick="selectProfile('${p.id}')"><i class="fa-solid fa-check"></i> Entrar</button>` : ''}
-                            <button class="action-btn-sm delete" onclick="deleteProfile('${p.id}')"><i class="fa-solid fa-trash"></i></button>
-                        </div>
-                    `;
-                    container.appendChild(card);
-                });
-            } else {
-                showQuestionnaireForm();
-                document.getElementById('closeProfileModalBtn').style.display = "none";
-            }
-        }
-
-        function closeProfileModal() {
-            if (activeProfileId) {
-                document.getElementById('onboardingModal').style.display = 'none';
-            }
-        }
-
-        function showQuestionnaireForm() {
-            document.getElementById('modalTitle').innerText = "Novo Perfil / Questionário";
-            document.getElementById('profilesListSection').style.display = "none";
-            document.getElementById('questionnaireSection').style.display = "block";
-            document.getElementById('regName').value = '';
-            document.getElementById('regWeight').value = '';
-            document.getElementById('regHeight').value = '';
-        }
-
-        function selectProfile(pId) {
-            activeProfileId = pId;
-            saveProfilesState();
-            loadCurrentProfileSession();
-        }
-
-        function logoutProfile() {
-            if (confirm("Deseja sair do perfil atual para selecionar outro ou preencher o questionário?")) {
-                activeProfileId = null;
-                saveProfilesState();
-                userData = null;
-                workoutPlan = null;
-                document.getElementById('workout-container').innerHTML = '';
-                document.getElementById('badgeName').innerText = 'SEM PERFIL';
-                document.getElementById('userInfoBanner').innerHTML = '';
-                document.getElementById('progressPercent').innerText = '0%';
-                document.getElementById('progressBarFill').style.width = '0%';
-                openProfileModal();
-            }
-        }
-
-        function deleteProfile(pId) {
-            if (confirm("Tem certeza que deseja excluir este perfil permanentemente?")) {
-                delete profilesData[pId];
-                if (activeProfileId === pId) {
-                    activeProfileId = Object.keys(profilesData)[0] || null;
-                }
-                saveProfilesState();
-                loadCurrentProfileSession();
-            }
-        }
-
-        function finishOnboarding() {
-            const name = document.getElementById('regName').value;
-            if (!name) return alert("Por favor, digite seu nome");
-
-            const newId = 'prof_' + Date.now();
-            const newProfile = {
-                id: newId,
-                name: name,
-                weight: document.getElementById('regWeight').value || '70',
-                height: document.getElementById('regHeight').value || '170',
-                goal: document.getElementById('regGoal').value,
-                freq: document.getElementById('regFreq').value,
-                workoutPlan: null
-            };
-
-            profilesData[newId] = newProfile;
-            activeProfileId = newId;
-            userData = newProfile;
-
-            // Gerar treino inicial
-            generatePersonalizedWorkout(false);
-            saveProfilesState();
-            
-            document.getElementById('onboardingModal').style.display = 'none';
-            updateUI();
-            renderAll();
-        }
-
-        // --- GERAÇÃO DE TREINO PERSONALIZADO ---
-        function generatePersonalizedWorkout(alertUser = true) {
-            if (!userData) return;
-            
-            const freq = parseInt(userData.freq);
-            let newPlan = [];
-
-            if (freq === 3) {
-                for (let i = 0; i < 5; i++) {
-                    const exercises = i % 2 === 0 ? getFullBodySet() : [];
-                    newPlan.push({ day: i, label: `Treino FullBody ${i % 2 === 0 ? 'Ativo' : 'Descanso'}`, exercises: exercises });
-                }
-            } else if (freq === 4) {
-                for (let i = 0; i < 5; i++) {
-                    const label = i % 2 === 0 ? "Superior" : "Inferior";
-                    const exercises = i < 4 ? getABSet(label) : [];
-                    newPlan.push({ day: i, label: `Treino ${label}`, exercises: exercises });
-                }
-            } else {
-                const splits = ["Peito", "Costas", "Pernas", "Ombros", "Braços"];
-                for (let i = 0; i < 5; i++) {
-                    newPlan.push({ day: i, label: `Treino ${splits[i]}`, exercises: getABCDE(splits[i]) });
-                }
-            }
-
-            workoutPlan = newPlan;
-            profilesData[activeProfileId].workoutPlan = workoutPlan;
-            saveProfilesState();
-
-            updateUI();
-            renderAll();
-            if (alertUser) alert("🎯 Treino gerado com sucesso para o perfil atual!");
-        }
-
-        function getFullBodySet() {
-            return [
-                EXERCISE_LIBRARY.peito[0],
-                EXERCISE_LIBRARY.costas[0],
-                EXERCISE_LIBRARY.quadriceps[0],
-                EXERCISE_LIBRARY.ombros[0],
-                EXERCISE_LIBRARY.panturrilha_core[2]
-            ].map(ex => ({...ex, completed: false, load: "", id: Math.random()}));
-        }
-
-        function getABSet(type) {
-            if (type === "Superior") {
-                return [
-                    EXERCISE_LIBRARY.peito[0],
-                    EXERCISE_LIBRARY.costas[0],
-                    EXERCISE_LIBRARY.ombros[0],
-                    EXERCISE_LIBRARY.biceps[0]
-                ].map(ex => ({...ex, completed: false, load: "", id: Math.random()}));
-            } else {
-                return [
-                    EXERCISE_LIBRARY.quadriceps[0],
-                    EXERCISE_LIBRARY.posterior_gluteo[0],
-                    EXERCISE_LIBRARY.triceps[0],
-                    EXERCISE_LIBRARY.panturrilha_core[0]
-                ].map(ex => ({...ex, completed: false, load: "", id: Math.random()}));
-            }
-        }
-
-        function getABCDE(type) {
-            let pool = [];
-            if (type === "Peito") pool = [...EXERCISE_LIBRARY.peito];
-            else if (type === "Costas") pool = [...EXERCISE_LIBRARY.costas];
-            else if (type === "Pernas") pool = [...EXERCISE_LIBRARY.quadriceps, ...EXERCISE_LIBRARY.posterior_gluteo];
-            else if (type === "Ombros") pool = [...EXERCISE_LIBRARY.ombros];
-            else pool = [...EXERCISE_LIBRARY.biceps, ...EXERCISE_LIBRARY.triceps];
-            
-            return pool.slice(0, 4).map(ex => ({...ex, completed: false, load: "", id: Math.random()}));
-        }
-
-        // --- SISTEMA DE ADICIONAR EXERCÍCIOS ---
-        function openAddExerciseModal(dayIdx = currentDayIdx) {
-            currentDayIdx = dayIdx;
-            document.getElementById('addExerciseModal').style.display = 'flex';
-            document.getElementById('filterMuscleGroup').value = 'todos';
-            renderExerciseLibrary();
-        }
-
-        function closeAddExerciseModal() {
-            document.getElementById('addExerciseModal').style.display = 'none';
-        }
-
-        function renderExerciseLibrary() {
-            const group = document.getElementById('filterMuscleGroup').value;
-            const container = document.getElementById('libraryListContainer');
-            const customForm = document.getElementById('customExerciseForm');
-
-            if (group === 'custom') {
-                container.style.display = 'none';
-                customForm.style.display = 'block';
-                return;
-            }
-
-            container.style.display = 'block';
-            customForm.style.display = 'none';
-            container.innerHTML = '';
-
-            let list = [];
-            if (group === 'todos') {
-                Object.values(EXERCISE_LIBRARY).forEach(arr => list.push(...arr));
-            } else if (EXERCISE_LIBRARY[group]) {
-                list = EXERCISE_LIBRARY[group];
-            }
-
-            list.forEach(ex => {
-                const item = document.createElement('div');
-                item.className = 'ex-lib-card';
-                item.innerHTML = `
-                    <div class="ex-img-wrapper"><img src="${ex.img}" class="ex-img" onerror="this.src='https://placehold.co/120x120/1e293b/38bdf8?text=EXERCICIO'"></div>
-                    <div style="flex:1;">
-                        <div class="ex-title">${ex.title}</div>
-                        <div class="anatomy-info">
-                            <span class="primary-muscle">${ex.primary}</span>
-                            <span class="secondary-muscles"> | ${ex.secondary}</span>
-                        </div>
-                        <div class="why-tag">💡 ${ex.why}</div>
-                    </div>
-                    <button class="action-btn-sm" style="color:var(--accent-primary); border-color:var(--accent-primary);" onclick="addExerciseToWorkout('${encodeURIComponent(JSON.stringify(ex))}')">
-                        <i class="fa-solid fa-plus"></i> Add
-                    </button>
-                `;
-                container.appendChild(item);
-            });
-        }
-
-        function addExerciseToWorkout(jsonStr) {
-            if (!workoutPlan || !workoutPlan[currentDayIdx]) return;
-            const ex = JSON.parse(decodeURIComponent(jsonStr));
-            const newEx = { ...ex, completed: false, load: "", id: Math.random() };
-
-            workoutPlan[currentDayIdx].exercises.push(newEx);
-            profilesData[activeProfileId].workoutPlan = workoutPlan;
-            saveProfilesState();
-
-            renderAll();
-            closeAddExerciseModal();
-            alert(`✅ "${ex.title}" adicionado ao treino de ${workoutPlan[currentDayIdx].label}!`);
-        }
-
-        function addCustomExerciseSubmit() {
-            const title = document.getElementById('customExTitle').value;
-            const primary = document.getElementById('customExPrimary').value;
-            const secondary = document.getElementById('customExSecondary').value;
-            const why = document.getElementById('customExWhy').value;
-
-            if (!title) return alert("Por favor, informe o nome do exercício.");
-
-            const customEx = {
-                title: title,
-                primary: primary || "Músculos Principais",
-                secondary: secondary || "Estabilizadores",
-                img: "img/custom-exercise.png",
-                why: why || "Exercício personalizado adicionado pelo usuário."
-            };
-
-            addExerciseToWorkout(encodeURIComponent(JSON.stringify(customEx)));
-            document.getElementById('customExTitle').value = '';
-            document.getElementById('customExPrimary').value = '';
-            document.getElementById('customExSecondary').value = '';
-            document.getElementById('customExWhy').value = '';
-        }
-
-        function removeExercise(dayIdx, exId) {
-            if (confirm("Deseja remover este exercício do treino?")) {
-                workoutPlan[dayIdx].exercises = workoutPlan[dayIdx].exercises.filter(e => e.id !== exId);
-                profilesData[activeProfileId].workoutPlan = workoutPlan;
-                saveProfilesState();
-                renderAll();
-            }
-        }
-
-        // --- RENDERIZAÇÃO E INTERAÇÃO ---
-        function updateUI() {
-            if (!userData) return;
-            document.getElementById('badgeName').innerHTML = `<i class="fa-solid fa-user"></i> ${userData.name.toUpperCase()}`;
-            document.getElementById('userInfoBanner').innerHTML = `
-                <span>⚖️ ${userData.weight}kg</span>
-                <span>📏 ${userData.height}cm</span>
-                <span>🎯 ${userData.goal.toUpperCase()}</span>
-                <span>📅 ${userData.freq}X/SEM</span>
-                <div style="margin-left:auto; display:flex; gap:6px;">
-                    <button class="action-btn-sm" onclick="openProfileModal()"><i class="fa-solid fa-users"></i> Perfis</button>
-                    <button class="action-btn-sm delete" onclick="logoutProfile()"><i class="fa-solid fa-right-from-bracket"></i> Sair</button>
-                </div>
-            `;
-        }
-
-        function renderAll() {
-            const container = document.getElementById('workout-container');
-            container.innerHTML = '';
-
-            if (!workoutPlan) return;
-
-            workoutPlan.forEach((dayPlan, idx) => {
-                const section = document.createElement('section');
-                section.className = `day-section ${idx === currentDayIdx ? 'active' : ''}`;
-                
-                let exHtml = '';
-                if (dayPlan.exercises.length === 0) {
-                    exHtml = `
-                        <div style="color:var(--text-subtle); padding: 30px; text-align: center; background:rgba(22,30,46,0.4); border-radius:var(--radius-lg); border:1px dashed var(--card-border);">
-                            <i class="fa-solid fa-dumbbell" style="font-size:2rem; margin-bottom:10px; opacity:0.4;"></i>
-                            <div>Nenhum exercício neste dia.</div>
-                            <button class="action-btn-sm" style="margin-top:12px; color:var(--accent-primary); border-color:var(--accent-primary);" onclick="openAddExerciseModal(${idx})">
-                                <i class="fa-solid fa-plus"></i> Adicionar Exercício
-                            </button>
-                        </div>`;
-                } else {
-                    dayPlan.exercises.forEach(ex => {
-                        exHtml += `
-                        <div class="exercise-card ${ex.completed ? 'completed' : ''}">
-                            <div class="exercise-main-row" onclick="toggleTask(${idx}, ${ex.id})">
-                                <div class="checkbox-btn"><i class="fa-solid fa-check" style="color:${ex.completed ? '#fff' : 'transparent'}"></i></div>
-                                <div class="ex-img-wrapper"><img src="${ex.img}" class="ex-img" onerror="this.src='https://placehold.co/120x120/1e293b/38bdf8?text=TREINO'"></div>
-                                <div style="flex:1">
-                                    <div class="ex-title">${ex.title}</div>
-                                    <div class="anatomy-info">
-                                        <span class="primary-muscle">${ex.primary}</span>
-                                        <span class="secondary-muscles"> | ${ex.secondary}</span>
-                                    </div>
-                                    <div class="why-tag">💡 ${ex.why}</div>
-                                </div>
-                            </div>
-                            <div style="display:flex; justify-content: space-between; align-items:center; border-top: 1px solid var(--card-border); padding-top:10px;">
-                                <div class="load-input-group">
-                                    <label style="font-size:0.6rem">CARGA</label>
-                                    <input type="text" class="load-input" value="${ex.load}" placeholder="0kg" onchange="updateLoad(${idx}, ${ex.id}, this.value)">
-                                </div>
-                                <div style="display:flex; gap:6px;">
-                                    <button class="action-btn-sm" onclick="startTimer(60)"><i class="fa-solid fa-stopwatch"></i> 60s</button>
-                                    <button class="action-btn-sm delete" onclick="removeExercise(${idx}, ${ex.id})"><i class="fa-solid fa-trash"></i></button>
-                                </div>
-                            </div>
-                        </div>`;
-                    });
-                }
-
-                section.innerHTML = `
-                    <div class="section-header">
-                        <div class="section-title">${dayPlan.label}</div>
-                        <div style="display:flex; gap:8px; align-items:center;">
-                            <span class="today-badge">${dayPlan.exercises.length} EXERCÍCIOS</span>
-                            <button class="action-btn-sm" style="color: var(--accent-primary); border-color: rgba(56, 189, 248, 0.3); background: rgba(56, 189, 248, 0.1);" onclick="openAddExerciseModal(${idx})">
-                                <i class="fa-solid fa-plus"></i> Add
-                            </button>
-                        </div>
-                    </div>
-                    <div class="exercise-list">${exHtml}</div>
-                `;
-                container.appendChild(section);
-            });
-            updateStats();
-        }
-
-        function switchDay(idx) {
-            currentDayIdx = idx;
-            document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', i === idx));
-            document.querySelectorAll('.day-section').forEach((s, i) => s.classList.toggle('active', i === idx));
-        }
-
-        function toggleTask(dayIdx, exId) {
-            const ex = workoutPlan[dayIdx].exercises.find(e => e.id === exId);
-            if (ex) {
-                ex.completed = !ex.completed;
-                profilesData[activeProfileId].workoutPlan = workoutPlan;
-                saveProfilesState();
-                renderAll();
-            }
-        }
-
-        function updateLoad(dayIdx, exId, val) {
-            const ex = workoutPlan[dayIdx].exercises.find(e => e.id === exId);
-            if (ex) {
-                ex.load = val;
-                profilesData[activeProfileId].workoutPlan = workoutPlan;
-                saveProfilesState();
-            }
-        }
-
-        function updateStats() {
-            let total = 0, done = 0;
-            if (workoutPlan) {
-                workoutPlan.forEach(d => {
-                    d.exercises.forEach(e => {
-                        total++;
-                        if (e.completed) done++;
-                    });
-                });
-            }
-            const perc = total > 0 ? Math.round((done/total)*100) : 0;
-            document.getElementById('progressPercent').innerText = perc + '%';
-            document.getElementById('progressBarFill').style.width = perc + '%';
-        }
-
-        function startTimer(sec) {
-            if (navigator.vibrate) navigator.vibrate(50);
-            alert("Cronômetro de 60s iniciado!");
-        }
     </script>
 </body>
 </html>
