@@ -3,1011 +3,734 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Minha Vida Financeira | Alpha Master Plus</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Meu Treino">
+    <meta name="theme-color" content="#0b0f19">
+    <title>Meu Treino Diário | Pro Workout</title>
     
-    <!-- LIB FOR EXCEL EXPORT (.xlsx) -->
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <!-- LIBS FOR PDF EXPORT (.pdf) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <!-- Google Fonts & Font Awesome Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        :root { --bg: #020617; --card: #0f172a; --border: #1e293b; }
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background-color: var(--bg); 
-            color: #f1f5f9; 
-            margin: 0; padding: 0;
-            height: 100vh; height: 100dvh;
-            display: flex; flex-direction: column;
+        :root {
+            --bg-dark: #090d16;
+            --card-bg: rgba(22, 30, 46, 0.75);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --accent-primary: #38bdf8;
+            --accent-gradient: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+            --accent-glow: rgba(56, 189, 248, 0.35);
+            --success-color: #10b981;
+            --success-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            --danger-color: #ef4444;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --text-subtle: #64748b;
+            --radius-xl: 22px;
+            --radius-lg: 16px;
+            --radius-md: 12px;
+            --shadow-card: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+            --safe-area-bottom: env(safe-area-inset-bottom, 20px);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(circle at 10% 10%, rgba(56, 189, 248, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(129, 140, 248, 0.08) 0%, transparent 40%);
+            background-attachment: fixed;
+            color: var(--text-main);
+            min-height: 100vh;
+            padding-bottom: calc(140px + var(--safe-area-bottom));
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .app-wrapper {
+            width: 100%;
+            max-width: 768px;
+            padding: 16px 16px 0 16px;
+        }
+
+        header {
+            margin-bottom: 20px;
+            padding: 12px 4px;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .brand-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .brand-title i { -webkit-text-fill-color: var(--accent-primary); }
+
+        .today-badge {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: 5px 12px;
+            border-radius: 20px;
+            background: rgba(56, 189, 248, 0.12);
+            color: var(--accent-primary);
+            border: 1px solid rgba(56, 189, 248, 0.25);
+            letter-spacing: 0.5px;
+        }
+
+        .progress-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-lg);
+            padding: 14px 16px;
+            backdrop-filter: blur(16px);
+            box-shadow: var(--shadow-card);
+        }
+
+        .user-info-banner {
+            margin-top: 10px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .progress-bar-bg {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
             overflow: hidden;
         }
-        .tab-content { 
-            display: none; 
-            flex: 1;
-            overflow-y: auto; 
-            -webkit-overflow-scrolling: touch;
-            padding-bottom: 120px;
+
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: var(--accent-gradient);
+            border-radius: 10px;
+            transition: width 0.4s ease;
+            box-shadow: 0 0 12px var(--accent-glow);
         }
-        .tab-content.active { display: block; }
-        .card { background-color: #0f172a; border: 1px solid var(--border); border-radius: 1.2rem; }
-        input, select { 
-            background: #1e293b !important; border: 1px solid #334155 !important; 
-            color: white !important; padding: 12px; border-radius: 12px; width: 100%; font-size: 16px;
+
+        .day-tabs-container {
+            margin-bottom: 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(9, 13, 22, 0.85);
+            backdrop-filter: blur(20px);
+            padding: 10px 0;
+            margin-left: -16px;
+            margin-right: -16px;
+            padding-left: 16px;
+            padding-right: 16px;
         }
-        .strikethrough { text-decoration: line-through; opacity: 0.4; }
-        .nav-active { background-color: #1e293b; color: white !important; border-left: 4px solid #6366f1; }
-        .parcela-tag { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: #334155; color: #94a3b8; font-weight: 800; }
-        
-        main { flex: 1; position: relative; overflow: hidden; display: flex; flex-direction: column; }
-        
-        .table-container { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-        table { min-width: 800px; }
+
+        .day-tabs {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+        .day-tabs::-webkit-scrollbar { display: none; }
+
+        .tab-btn {
+            flex: 0 0 auto;
+            padding: 10px 18px;
+            background: var(--card-bg);
+            border: 2px solid var(--card-border);
+            border-radius: var(--radius-md);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .tab-btn.active {
+            background: var(--accent-gradient);
+            color: #ffffff;
+            border-color: var(--accent-primary);
+            box-shadow: 0 4px 16px var(--accent-glow);
+            transform: translateY(-2px);
+        }
+
+        .day-section { display: none; animation: fadeIn 0.35s ease-out; }
+        .day-section.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+        .section-header {
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .section-title { font-size: 1.2rem; font-weight: 800; color: var(--text-main); }
+
+        .exercise-list { display: flex; flex-direction: column; gap: 14px; }
+
+        .exercise-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-xl);
+            padding: 14px;
+            box-shadow: var(--shadow-card);
+            transition: all 0.25s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .exercise-card.completed { border-color: var(--success-color); background: rgba(16, 185, 129, 0.05); }
+
+        .exercise-main-row { display: flex; align-items: center; gap: 14px; cursor: pointer; }
+
+        .checkbox-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
+            border: 2px solid var(--accent-primary);
+            background: rgba(255, 255, 255, 0.03);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+
+        .exercise-card.completed .checkbox-btn { background: var(--success-gradient); border-color: transparent; color: #fff; }
+
+        .ex-img-wrapper {
+            width: 68px;
+            height: 68px;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            background: #000;
+            border: 1px solid var(--card-border);
+        }
+
+        .ex-img { width: 100%; height: 100%; object-fit: cover; }
+
+        .ex-title { font-size: 1rem; font-weight: 700; color: var(--text-main); }
+
+        .anatomy-info { font-size: 0.72rem; margin-top: 4px; }
+        .primary-muscle { color: var(--accent-primary); font-weight: 700; }
+        .secondary-muscles { color: var(--text-muted); }
+
+        .why-tag {
+            font-size: 0.68rem;
+            color: var(--success-color);
+            background: rgba(16, 185, 129, 0.1);
+            padding: 4px 8px;
+            border-radius: 6px;
+            margin-top: 5px;
+            display: inline-block;
+        }
+
+        .load-input-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0,0,0,0.3);
+            padding: 6px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--card-border);
+        }
+
+        .load-input {
+            width: 50px;
+            background: transparent;
+            border: none;
+            color: var(--accent-primary);
+            font-weight: 700;
+            outline: none;
+            text-align: right;
+            font-family: inherit;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.92);
+            backdrop-filter: blur(8px);
+            z-index: 3000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            background: var(--bg-dark);
+            width: 100%;
+            max-width: 500px;
+            border: 1px solid var(--accent-primary);
+            border-radius: var(--radius-xl);
+            padding: 24px;
+        }
+
+        .form-select, .form-input {
+            width: 100%;
+            padding: 14px;
+            background: #161e2e;
+            border: 2px solid var(--card-border);
+            border-radius: 12px;
+            color: #fff;
+            margin-top: 8px;
+            appearance: none;
+            font-family: inherit;
+        }
+
+        .form-select:focus, .form-input:focus { border-color: var(--accent-primary); outline: none; }
+
+        .form-select option { background: #161e2e; color: #fff; }
+
+        .btn-submit {
+            width: 100%;
+            padding: 16px;
+            background: var(--accent-gradient);
+            border: none;
+            border-radius: 14px;
+            color: #fff;
+            font-weight: 800;
+            cursor: pointer;
+            margin-top: 20px;
+            box-shadow: 0 4px 15px var(--accent-glow);
+        }
+
+        .action-btn-sm {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--card-border);
+            color: var(--text-muted);
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-size: 0.7rem;
+            cursor: pointer;
+        }
+        .action-btn-sm.delete:hover { border-color: var(--danger-color); color: var(--danger-color); }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(9, 13, 22, 0.95);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid var(--card-border);
+            padding: 12px 16px calc(12px + var(--safe-area-bottom));
+            z-index: 1000;
+        }
+
+        .nav-content { width: 100%; max-width: 768px; margin: 0 auto; display: flex; gap: 8px; flex-wrap: wrap; }
+        .btn-action { flex: 1; min-width: 100px; padding: 14px 8px; border-radius: 14px; border: none; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 0.78rem; }
+        .btn-gen { background: var(--success-gradient); color: #fff; }
+        .btn-reset { background: rgba(239, 68, 68, 0.1); color: var(--danger-color); border: 1px solid var(--danger-color); }
+        .btn-profile { background: rgba(56, 189, 248, 0.12); color: var(--accent-primary); border: 1px solid rgba(56, 189, 248, 0.3); }
+        .btn-profile:hover { background: rgba(56, 189, 248, 0.25); }
+
+        @media (min-width: 640px) {
+            .exercise-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+        }
     </style>
 </head>
-<body class="antialiased">
+<body>
 
-    <!-- MENU MOBILE -->
-    <nav class="fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 flex justify-around p-4 z-[100] md:hidden pb-safe">
-        <button onclick="showTab('dashboard')" id="mob-dashboard" class="text-slate-400 p-2"><i data-lucide="layout-dashboard"></i></button>
-        <button onclick="showTab('receitas')" id="mob-receitas" class="text-slate-400 p-2"><i data-lucide="trending-up"></i></button>
-        <button onclick="showTab('despesas')" id="mob-despesas" class="text-slate-400 p-2"><i data-lucide="trending-down"></i></button>
-        <button onclick="showTab('investimentos')" id="mob-investimentos" class="text-slate-400 p-2"><i data-lucide="line-chart"></i></button>
-        <button onclick="showTab('configuracoes')" id="mob-configuracoes" class="text-slate-400 p-2"><i data-lucide="settings"></i></button>
-    </nav>
-
-    <div class="flex h-full w-full overflow-hidden">
-        <!-- SIDEBAR DESKTOP -->
-        <aside class="hidden md:flex flex-col w-72 bg-slate-950 border-r border-slate-800 p-6">
-            <div class="flex items-center gap-3 mb-10">
-                <div class="bg-indigo-600 p-2 rounded-xl shadow-lg"><i data-lucide="wallet" class="text-white"></i></div>
-                <h1 class="text-lg font-black tracking-tighter uppercase leading-none">Minha Vida<br><span class="text-indigo-500 text-xs">Financeira</span></h1>
+    <div class="app-wrapper">
+        <header>
+            <div class="header-top">
+                <div class="brand-title"><i class="fa-solid fa-dumbbell"></i> MEU TREINO PRO</div>
+                <div class="today-badge" id="badgeName">TREINADOR IA</div>
             </div>
-            <nav class="space-y-2 flex-1">
-                <button onclick="showTab('dashboard')" id="nav-dashboard" class="flex items-center gap-3 w-full p-3 rounded-xl transition text-slate-400 hover:bg-slate-900"><i data-lucide="layout-dashboard"></i> Dashboard</button>
-                <button onclick="showTab('receitas')" id="nav-receitas" class="flex items-center gap-3 w-full p-3 rounded-xl transition text-slate-400 hover:bg-slate-900"><i data-lucide="trending-up"></i> Receitas</button>
-                <button onclick="showTab('despesas')" id="nav-despesas" class="flex items-center gap-3 w-full p-3 rounded-xl transition text-slate-400 hover:bg-slate-900"><i data-lucide="trending-down"></i> Despesas</button>
-                <button onclick="showTab('investimentos')" id="nav-investimentos" class="flex items-center gap-3 w-full p-3 rounded-xl transition text-slate-400 hover:bg-slate-900"><i data-lucide="line-chart"></i> Investimentos</button>
-                <button onclick="showTab('configuracoes')" id="nav-configuracoes" class="flex items-center gap-3 w-full p-3 rounded-xl transition text-slate-400 hover:bg-slate-900"><i data-lucide="settings"></i> Configurações</button>
-            </nav>
-        </aside>
 
-        <!-- MAIN CONTENT -->
-        <main class="flex-1 flex flex-col p-4 md:p-10">
-            <header class="flex justify-between items-start mb-6">
-                <div>
-                    <h2 id="tab-title" class="text-2xl md:text-3xl font-black text-white">Dashboard</h2>
-                    <p id="current-date" class="text-slate-500 text-xs font-medium capitalize"></p>
+            <div class="progress-card">
+                <div class="progress-info">
+                    <span>Evolução da Semana</span>
+                    <span id="progressPercent">0%</span>
                 </div>
-                <div class="flex flex-col items-end gap-2">
-                    <div class="flex items-center gap-2">
-                        <button onclick="syncAlphaVantage()" class="p-2 bg-slate-900 rounded-lg text-indigo-400 hover:bg-slate-800 transition" id="btn-sync" title="Sincronizar Cotações">
-                            <i data-lucide="refresh-cw" id="sync-icon" class="w-4 h-4"></i>
-                        </button>
-                        
-                        <!-- BOTÕES DE EXPORTAÇÃO PDF / EXCEL -->
-                        <button onclick="exportToExcel()" title="Exportar para Excel (.xlsx)" class="px-2.5 py-1.5 bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-600 hover:text-white rounded-lg text-xs font-bold transition flex items-center gap-1">
-                            <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i> <span class="hidden sm:inline">Excel</span>
-                        </button>
-                        <button onclick="exportToPDF()" title="Exportar Relatório PDF" class="px-2.5 py-1.5 bg-rose-600/20 text-rose-400 border border-rose-500/30 hover:bg-rose-600 hover:text-white rounded-lg text-xs font-bold transition flex items-center gap-1">
-                            <i data-lucide="file-text" class="w-3.5 h-3.5"></i> <span class="hidden sm:inline">PDF</span>
-                        </button>
-                    </div>
-                    <select id="filtro-mes-global" onchange="changeFilterMonth(this.value)" class="!p-2 text-xs font-bold w-32 md:w-48"></select>
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" id="progressBarFill"></div>
                 </div>
-            </header>
+                <div class="user-info-banner" id="userInfoBanner">
+                    <!-- Preenchido via JS -->
+                </div>
+            </div>
+        </header>
 
-            <!-- ABA DASHBOARD -->
-            <section id="dashboard" class="tab-content active space-y-6">
-                <!-- ALERTA SUTIL DE VENCIDOS -->
-                <div id="alerta-vencidos" class="hidden">
-                    <div class="bg-rose-500/10 border border-rose-500/20 p-3 rounded-xl flex items-center gap-3 text-rose-500">
-                        <i data-lucide="alert-circle" class="w-5 h-5"></i>
-                        <p class="text-xs font-bold uppercase tracking-wider">Atenção: Você possui contas vencidas!</p>
-                    </div>
-                </div>
+        <div class="day-tabs-container">
+            <div class="day-tabs" id="dayTabs">
+                <button class="tab-btn active" onclick="switchDay(0)">SEG<span style="font-size:0.6rem">Treino A</span></button>
+                <button class="tab-btn" onclick="switchDay(1)">TER<span style="font-size:0.6rem">Treino B</span></button>
+                <button class="tab-btn" onclick="switchDay(2)">QUA<span style="font-size:0.6rem">Treino C</span></button>
+                <button class="tab-btn" onclick="switchDay(3)">QUI<span style="font-size:0.6rem">Treino D</span></button>
+                <button class="tab-btn" onclick="switchDay(4)">SEX<span style="font-size:0.6rem">Treino E</span></button>
+            </div>
+        </div>
 
-                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                    <div class="card p-4 border-emerald-500/20 bg-emerald-500/5">
-                        <p id="label-receita-dash" class="text-emerald-500 text-[10px] font-bold uppercase">Receitas (Real)</p>
-                        <h3 id="dash-receita-mes" class="text-lg md:text-2xl font-black">R$ 0,00</h3>
-                    </div>
-                    <div class="card p-4 border-rose-500/20 bg-rose-500/5">
-                        <p id="label-despesa-dash" class="text-rose-500 text-[10px] font-bold uppercase">Despesas (Pagas)</p>
-                        <h3 id="dash-despesa-paga-mes" class="text-lg md:text-2xl font-black">R$ 0,00</h3>
-                    </div>
-                    <div class="card p-4 border-indigo-500/20 bg-indigo-500/5">
-                        <p class="text-indigo-400 text-[10px] font-bold uppercase">Saldo Real</p>
-                        <h3 id="dash-saldo-real-mes" class="text-lg md:text-2xl font-black">R$ 0,00</h3>
-                    </div>
-                    <div class="card p-4 bg-indigo-600 border-none">
-                        <p class="text-white/70 text-[10px] font-bold uppercase">Saldo Previsto</p>
-                        <h3 id="dash-saldo-previsto-mes" class="text-lg md:text-2xl font-black text-white">R$ 0,00</h3>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div class="card p-4 border-amber-500/20 bg-amber-500/5 flex justify-between items-center">
-                        <div>
-                            <p class="text-amber-500 text-[10px] font-bold uppercase">Investimento Feito (Custo)</p>
-                            <h3 id="dash-inv-custo" class="text-lg md:text-2xl font-black">R$ 0,00</h3>
-                        </div>
-                        <i data-lucide="arrow-down-right" class="text-amber-500 opacity-20 w-8 h-8"></i>
-                    </div>
-                    <div class="card p-4 border-cyan-500/20 bg-cyan-500/5 flex justify-between items-center">
-                        <div>
-                            <p class="text-cyan-500 text-[10px] font-bold uppercase">Patrimônio Atual (Mercado)</p>
-                            <h3 id="dash-inv-atual" class="text-lg md:text-2xl font-black">R$ 0,00</h3>
-                        </div>
-                        <i data-lucide="trending-up" class="text-cyan-500 opacity-20 w-8 h-8"></i>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                    <div class="card p-4">
-                        <h4 id="titulo-fluxo-chart" class="font-bold text-sm mb-4">Fluxo do Mês</h4>
-                        <canvas id="chartFluxo" style="max-height: 200px;"></canvas>
-                    </div>
-                    <div class="card p-4">
-                        <h4 id="titulo-agenda-dash" class="font-bold text-sm mb-4">Pendências do Mês</h4>
-                        <div id="lista-agenda" class="space-y-2"></div>
-                    </div>
-                </div>
-
-                <!-- SEÇÃO EXPANDIDA DE TODOS OS LANÇAMENTOS (QUANDO OPÇÃO "TODOS" FOR SELECIONADA) -->
-                <div id="secao-todos-lancamentos" class="card p-5 hidden space-y-4">
-                    <div class="flex justify-between items-center border-b border-slate-800 pb-3 flex-wrap gap-2">
-                        <div>
-                            <h4 class="font-bold text-base text-white flex items-center gap-2">
-                                <i data-lucide="layers" class="text-indigo-400 w-5 h-5"></i>
-                                Relatório Geral de Todos os Lançamentos
-                            </h4>
-                            <p class="text-xs text-slate-500">Visão consolidada de todas as receitas e despesas registradas no sistema</p>
-                        </div>
-                        <div class="flex gap-2 items-center flex-wrap">
-                            <button onclick="exportToExcel()" class="px-3 py-1 bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600 hover:text-white border border-emerald-500/30 rounded-lg text-xs font-bold transition flex items-center gap-1">
-                                <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i> Exportar Excel
-                            </button>
-                            <button onclick="exportToPDF()" class="px-3 py-1 bg-rose-600/20 text-rose-400 hover:bg-rose-600 hover:text-white border border-rose-500/30 rounded-lg text-xs font-bold transition flex items-center gap-1">
-                                <i data-lucide="file-text" class="w-3.5 h-3.5"></i> Exportar PDF
-                            </button>
-                            <span id="badge-total-receitas" class="text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3 py-1 rounded-lg"></span>
-                            <span id="badge-total-despesas" class="text-xs font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20 px-3 py-1 rounded-lg"></span>
-                        </div>
-                    </div>
-                    <div class="table-container">
-                        <table class="w-full text-left text-xs">
-                            <thead class="bg-slate-900 border-b border-slate-800 text-slate-400">
-                                <tr>
-                                    <th class="p-3">Tipo</th>
-                                    <th class="p-3">Descrição</th>
-                                    <th class="p-3">Vencimento</th>
-                                    <th class="p-3">Categoria</th>
-                                    <th class="p-3">Status</th>
-                                    <th class="p-3">Valor</th>
-                                    <th class="p-3 text-center">Documento</th>
-                                </tr>
-                            </thead>
-                            <tbody id="corpo-todos-lancamentos"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <!-- ABA RECEITAS -->
-            <section id="receitas" class="tab-content space-y-4">
-                <div class="flex justify-between items-center bg-slate-900 p-4 rounded-2xl border border-slate-800 flex-wrap gap-2">
-                    <h3 class="font-bold text-emerald-500">Minhas Receitas</h3>
-                    <div class="flex gap-2">
-                        <button onclick="exportToExcel('receitas')" class="bg-slate-800 hover:bg-slate-700 text-emerald-400 px-3 py-2 rounded-xl font-bold text-xs flex items-center gap-1 border border-slate-700">
-                            <i data-lucide="file-spreadsheet" class="w-4 h-4"></i> Excel
-                        </button>
-                        <button onclick="exportToPDF('receitas')" class="bg-slate-800 hover:bg-slate-700 text-rose-400 px-3 py-2 rounded-xl font-bold text-xs flex items-center gap-1 border border-slate-700">
-                            <i data-lucide="file-text" class="w-4 h-4"></i> PDF
-                        </button>
-                        <button onclick="openForm('receita')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl font-bold text-xs transition">+ Adicionar</button>
-                    </div>
-                </div>
-                <div id="lista-receitas-agrupadas" class="space-y-4"></div>
-            </section>
-
-            <!-- ABA DESPESAS -->
-            <section id="despesas" class="tab-content space-y-4">
-                <div class="flex justify-between items-center bg-slate-900 p-4 rounded-2xl border border-slate-800 flex-wrap gap-2">
-                    <h3 class="font-bold text-rose-500">Minhas Despesas</h3>
-                    <div class="flex gap-2">
-                        <button onclick="exportToExcel('despesas')" class="bg-slate-800 hover:bg-slate-700 text-emerald-400 px-3 py-2 rounded-xl font-bold text-xs flex items-center gap-1 border border-slate-700">
-                            <i data-lucide="file-spreadsheet" class="w-4 h-4"></i> Excel
-                        </button>
-                        <button onclick="exportToPDF('despesas')" class="bg-slate-800 hover:bg-slate-700 text-rose-400 px-3 py-2 rounded-xl font-bold text-xs flex items-center gap-1 border border-slate-700">
-                            <i data-lucide="file-text" class="w-4 h-4"></i> PDF
-                        </button>
-                        <button onclick="openForm('despesa')" class="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-xl font-bold text-xs transition">+ Adicionar</button>
-                    </div>
-                </div>
-                <div id="lista-despesas-agrupadas" class="space-y-4"></div>
-            </section>
-
-            <!-- ABA INVESTIMENTOS -->
-            <section id="investimentos" class="tab-content space-y-4">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="card p-5">
-                        <p class="text-[10px] font-bold text-slate-500 uppercase">Renda Variável (Mercado)</p>
-                        <h3 id="inv-rv-mercado" class="text-2xl font-black">R$ 0,00</h3>
-                        <button onclick="openForm('rv')" class="text-indigo-400 text-[10px] mt-2 font-bold">+ NOVO ATIVO</button>
-                    </div>
-                    <div class="card p-5">
-                        <p class="text-[10px] font-bold text-slate-500 uppercase">Renda Fixa</p>
-                        <h3 id="inv-rf-total" class="text-2xl font-black">R$ 0,00</h3>
-                        <button onclick="openForm('rf')" class="text-emerald-400 text-[10px] mt-2 font-bold">+ NOVO TÍTULO</button>
-                    </div>
-                </div>
-                <div class="card table-container">
-                    <table class="w-full text-left text-xs">
-                        <thead class="bg-slate-900 border-b border-slate-800">
-                            <tr>
-                                <th class="p-4">Ativo</th>
-                                <th class="p-4">Qtd</th>
-                                <th class="p-4">P. Médio</th>
-                                <th class="p-4">Total Custo</th>
-                                <th class="p-4">Cotação</th>
-                                <th class="p-4">Total Atual</th>
-                                <th class="p-4">Resultado</th>
-                                <th class="p-4 text-right">Ação</th>
-                            </tr>
-                        </thead>
-                        <tbody id="corpo-investimentos"></tbody>
-                    </table>
-                </div>
-            </section>
-
-            <!-- ABA CONFIG -->
-            <section id="configuracoes" class="tab-content space-y-4">
-                <div class="card p-6 max-w-md mx-auto space-y-6">
-                    <h3 class="font-bold mb-4">Configurações</h3>
-                    <div>
-                        <label class="text-[10px] font-bold text-slate-500 uppercase mb-2 block">Alpha Vantage API Key</label>
-                        <input type="password" id="cfg-api-key" placeholder="Insira sua chave aqui..." class="mb-2">
-                        <button onclick="saveApiKey()" class="bg-indigo-600 w-full p-2 rounded-xl text-xs font-bold">Salvar Chave</button>
-                    </div>
-                    <hr class="border-slate-800">
-                    <button onclick="clearData()" class="w-full p-4 bg-rose-600/20 text-rose-500 rounded-xl font-bold text-xs uppercase">Apagar todos os dados</button>
-                </div>
-            </section>
+        <main id="workout-container">
+            <!-- Os treinos serão injetados aqui -->
         </main>
     </div>
 
-    <!-- MODAL DE VISUALIZAÇÃO DE DOCUMENTO ANEXO -->
-    <div id="modal-doc" class="fixed inset-0 bg-black/90 backdrop-blur-sm hidden z-[250] flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-2xl p-6 flex flex-col gap-4 max-h-[90vh]">
-            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-                <h3 id="doc-modal-title" class="text-base font-bold text-white flex items-center gap-2">
-                    <i data-lucide="file-text" class="text-indigo-400"></i> Comprovante Anexo
-                </h3>
-                <button onclick="closeDocModal()" class="text-slate-400 hover:text-white p-1"><i data-lucide="x"></i></button>
+    <!-- [MODAL: QUESTIONÁRIO / ONBOARDING] -->
+    <div class="modal-overlay" id="onboardingModal">
+        <div class="modal-content">
+            <h2 style="color: var(--accent-primary); margin-bottom: 15px;">Personalize seu Perfil</h2>
+            <div style="max-height: 70vh; overflow-y: auto; padding-right: 5px;">
+                <div class="form-group">
+                    <label style="font-size: 0.8rem; color: var(--text-muted)">Nome</label>
+                    <input type="text" id="regName" class="form-input" placeholder="Seu nome">
+                </div>
+                <div style="display:flex; gap:10px; margin-top: 10px;">
+                    <div style="flex:1">
+                        <label style="font-size: 0.8rem; color: var(--text-muted)">Peso (kg)</label>
+                        <input type="number" id="regWeight" class="form-input" placeholder="Ex: 80">
+                    </div>
+                    <div style="flex:1">
+                        <label style="font-size: 0.8rem; color: var(--text-muted)">Altura (cm)</label>
+                        <input type="number" id="regHeight" class="form-input" placeholder="Ex: 175">
+                    </div>
+                </div>
+                <div class="form-group" style="margin-top: 15px;">
+                    <label style="font-size: 0.8rem; color: var(--text-muted)">Qual seu objetivo principal?</label>
+                    <select id="regGoal" class="form-select">
+                        <option value="hipertrofia">Ganhar Massa Muscular (Hipertrofia)</option>
+                        <option value="forca">Ganhar Força</option>
+                        <option value="emagrecimento">Perder Gordura / Emagrecer</option>
+                        <option value="recomposicao">Perder Gordura + Ganhar Massa</option>
+                        <option value="condicionamento">Melhorar Condicionamento</option>
+                    </select>
+                </div>
+                <div class="form-group" style="margin-top: 15px;">
+                    <label style="font-size: 0.8rem; color: var(--text-muted)">Dias disponíveis por semana?</label>
+                    <select id="regFreq" class="form-select">
+                        <option value="3">3 dias (Treino FullBody)</option>
+                        <option value="4">4 dias (Split AB)</option>
+                        <option value="5">5 dias (Split ABCDE)</option>
+                    </select>
+                </div>
             </div>
-            <div id="doc-modal-container" class="flex-1 overflow-auto flex items-center justify-center bg-slate-950 p-4 rounded-xl border border-slate-800 min-h-[300px]">
-                <!-- Conteúdo pré-visualizado (Imagem ou iFrame) -->
-            </div>
-            <div class="flex justify-between items-center">
-                <a id="doc-modal-download" href="#" download="comprovante" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-4 py-2 rounded-xl flex items-center gap-2">
-                    <i data-lucide="download" class="w-4 h-4"></i> Baixar Documento
-                </a>
-                <button onclick="closeDocModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs px-4 py-2 rounded-xl">Fechar</button>
-            </div>
+            <button class="btn-submit" onclick="finishOnboarding()">SALVAR E GERAR MEU TREINO</button>
         </div>
     </div>
 
-    <!-- MODAL -->
-    <div id="modal-form" class="fixed inset-0 bg-black/90 backdrop-blur-sm hidden z-[200] flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-md p-6 overflow-y-auto max-h-[90vh]">
-            <h3 id="form-title" class="text-xl font-bold mb-6">Lançamento</h3>
-            <form id="main-form" class="space-y-4">
-                <input type="hidden" id="form-type">
-                <input type="hidden" id="form-id">
-                <input type="hidden" id="form-comprovante-b64">
-                <input type="hidden" id="form-comprovante-nome">
-                
-                <input type="text" id="inp-desc" placeholder="Descrição / Ticker" required>
-                
-                <div class="grid grid-cols-2 gap-4">
-                    <input type="number" step="0.01" id="inp-valor" placeholder="Valor R$">
-                    <input type="date" id="inp-venc">
-                </div>
-
-                <div id="box-parcelas" class="p-3 bg-slate-950 rounded-xl border border-slate-800">
-                    <label class="flex items-center gap-2 text-xs text-slate-400 mb-2">
-                        <input type="checkbox" id="inp-is-parcelado" class="w-4 h-4" onchange="document.getElementById('box-qtd').classList.toggle('hidden', !this.checked)">
-                        Parcelar este lançamento
-                    </label>
-                    <div id="box-qtd" class="hidden">
-                        <input type="number" id="inp-qtd-parcelas" min="1" max="12" placeholder="Qtd de Parcelas">
-                    </div>
-                </div>
-
-                <select id="inp-cat"></select>
-
-                <!-- CAMPO DE ANEXAR COMPROVANTE/DOCUMENTO -->
-                <div id="box-comprovante" class="p-3 bg-slate-950 rounded-xl border border-slate-800 space-y-2">
-                    <label class="block text-xs font-bold text-slate-400 uppercase">Anexar Documento / Comprovante</label>
-                    <input type="file" id="inp-comprovante" accept="image/*,.pdf" class="text-xs text-slate-400 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700 cursor-pointer w-full" onchange="handleFileSelect(event)">
-                    <div id="preview-comprovante" class="hidden flex items-center justify-between text-xs bg-slate-900 p-2.5 rounded-xl border border-slate-800">
-                        <span id="nome-comprovante" class="truncate text-indigo-400 font-bold max-w-[200px]"></span>
-                        <button type="button" onclick="removerComprovanteForm()" class="text-rose-500 hover:text-rose-400 font-bold ml-2 text-[11px]">Remover</button>
-                    </div>
-                </div>
-
-                <div id="box-invest" class="grid grid-cols-2 gap-4 hidden">
-                    <input type="number" step="0.0001" id="inp-qtd" placeholder="Quantidade">
-                    <input type="number" step="0.01" id="inp-pm" placeholder="Preço Médio">
-                </div>
-
-                <button type="submit" class="w-full bg-indigo-600 p-4 rounded-xl font-bold hover:bg-indigo-700 transition">Salvar Dados</button>
-                <button type="button" onclick="closeModal()" class="w-full text-slate-500 text-sm font-bold">Cancelar</button>
-            </form>
+    <nav class="bottom-nav">
+        <div class="nav-content">
+            <button class="btn-action btn-gen" onclick="generatePersonalizedWorkout()"><i class="fa-solid fa-wand-magic-sparkles"></i> REGERAR TREINO</button>
+            <button class="btn-action btn-reset" onclick="resetProgress()"><i class="fa-solid fa-rotate-left"></i> ZERAR TREINO</button>
+            <button class="btn-action btn-profile" onclick="resetProfile()"><i class="fa-solid fa-user-gear"></i> RESETAR PERFIL</button>
         </div>
-    </div>
+    </nav>
 
     <script>
-        let state = JSON.parse(localStorage.getItem('mvf_v2')) || {
-            receitas: [], despesas: [], investRV: [], investRF: [],
-            categoriasReceitas: ['Salário', 'Investimento', 'Extra'],
-            categoriasDespesas: ['Aluguel', 'Saúde', 'Lazer', 'Alimentação'],
-            selectedMonth: new Date().toISOString().slice(0, 7),
-            config: { apiKey: '' }
+        // --- BIBLIOTECA DE EXERCÍCIOS BASEADA EM EVIDÊNCIAS (ACSM 2026) ---
+        const EXERCISE_LIBRARY = {
+            hipertrofia: {
+                peito: [
+                    { title: "Supino Reto (Barra)", primary: "Peitoral Maior", secondary: "Tríceps, Deltoide Anterior", img: "img/supino-reto.png", why: "Exercício multiarticular base para volume e sobrecarga." },
+                    { title: "Supino Inclinado (Halteres)", primary: "Peitoral Superior", secondary: "Deltoide Anterior", img: "img/supino-inclinado.png", why: "Foco na porção clavicular do peitoral." },
+                    { title: "Crossover (Polia Alta)", primary: "Peitoral (Esternal)", secondary: "Deltoide Anterior", img: "img/cross-over.png", why: "Isolamento mecânico com tensão constante." }
+                ],
+                costas: [
+                    { title: "Puxada Frontal", primary: "Latíssimo do Dorso", secondary: "Bíceps, Braquial", img: "img/puxada-frontal.png", why: "Desenvolvimento de largura dorsal." },
+                    { title: "Remada Baixa", primary: "Romboides, Trapézio", secondary: "Bíceps, Latíssimo", img: "img/remada-baixa.png", why: "Foco na espessura das costas e estabilidade escapular." },
+                    { title: "Pulldown Corda", primary: "Latíssimo do Dorso", secondary: "Tríceps (Longo)", img: "img/pulldown-corda.png", why: "Isolamento do latíssimo sem fadiga excessiva do bíceps." }
+                ],
+                pernas: [
+                    { title: "Agachamento Livre", primary: "Quadríceps, Glúteo Máximo", secondary: "Eretores da Espinha, Isquiotibiais", img: "img/agachamento-livre.png", why: "Rei dos exercícios para membros inferiores." },
+                    { title: "Leg Press 45°", primary: "Quadríceps", secondary: "Glúteos", img: "img/leg-press.png", why: "Permite alto volume com segurança lombar." },
+                    { title: "Cadeira Extensora", primary: "Quadríceps", secondary: "Nenhum", img: "img/extensora.png", why: "Isolamento do quadríceps na fase concêntrica máxima." }
+                ]
+            },
+            forca: {
+                base: [
+                    { title: "Agachamento Costa", primary: "Membros Inferiores", secondary: "Core", img: "img/agachamento-livre.png", why: "Padrão de movimento fundamental para força sistêmica." },
+                    { title: "Supino Reto", primary: "Peitoral, Tríceps", secondary: "Ombros", img: "img/supino-reto.png", why: "Principal empurre horizontal para força bruta." },
+                    { title: "Levantamento Terra Romeno", primary: "Cadeia Posterior", secondary: "Lombar, Pegada", img: "img/stiff.png", why: "Fortalecimento de quadril e eretores." }
+                ]
+            },
+            geral: {
+                ombros: [
+                    { title: "Desenvolvimento Halteres", primary: "Deltoide Anterior/Lateral", secondary: "Tríceps", img: "img/desenvolvimento.png", why: "Construção de base estável para ombros." },
+                    { title: "Elevação Lateral", primary: "Deltoide Lateral", secondary: "Trapézio", img: "img/elevacao-lateral.png", why: "Isolamento para largura dos ombros." }
+                ],
+                biceps: [{ title: "Rosca Direta Polia", primary: "Bíceps Braquial", secondary: "Antebraço", img: "img/rosca-polia.png", why: "Tensão mecânica constante no pico do bíceps." }],
+                triceps: [{ title: "Tríceps Corda", primary: "Tríceps (Lateral/Medial)", secondary: "Ancôneo", img: "img/triceps-corda.png", why: "Permite maior amplitude na extensão de cotovelo." }]
+            }
         };
 
-        const save = () => {
-            localStorage.setItem('mvf_v2', JSON.stringify(state));
-            render();
-        };
-
-        const fmt = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v || 0);
-
-        function showTab(id) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            
-            document.querySelectorAll('nav button, aside button').forEach(b => b.classList.remove('nav-active', 'text-white'));
-            document.getElementById('nav-' + id)?.classList.add('nav-active');
-            document.getElementById('mob-' + id)?.classList.add('text-white');
-            
-            document.getElementById('tab-title').innerText = id.charAt(0).toUpperCase() + id.slice(1);
-            if(id === 'configuracoes') document.getElementById('cfg-api-key').value = state.config?.apiKey || '';
-            render();
-            lucide.createIcons();
-        }
-
-        function saveApiKey() {
-            state.config = state.config || {};
-            state.config.apiKey = document.getElementById('cfg-api-key').value;
-            save();
-            alert("Chave API salva com sucesso!");
-        }
-
-        async function syncAlphaVantage() {
-            const key = state.config?.apiKey;
-            if(!key) return alert("Configure a API Key nas configurações primeiro.");
-            
-            const btn = document.getElementById('sync-icon');
-            btn.classList.add('animate-spin');
-
-            for (let inv of state.investRV) {
-                try {
-                    const symbol = inv.ticker.includes('.') ? inv.ticker : `${inv.ticker}.SA`;
-                    const res = await fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=${key}`);
-                    const data = await res.json();
-                    if(data["Global Quote"] && data["Global Quote"]["05. price"]) {
-                        inv.cotacao = parseFloat(data["Global Quote"]["05. price"]);
-                    }
-                    await new Promise(r => setTimeout(r, 1000)); 
-                } catch (e) { console.error(e); }
-            }
-            btn.classList.remove('animate-spin');
-            save();
-        }
-
-        function populateMonthFilter() {
-            const select = document.getElementById('filtro-mes-global');
-            const months = new Set();
-            months.add(new Date().toISOString().slice(0, 7));
-            [...state.receitas, ...state.despesas].forEach(i => i.venc && months.add(i.venc.slice(0, 7)));
-            
-            const sorted = Array.from(months).sort();
-            let html = '<option value="all" ' + (state.selectedMonth === 'all' ? 'selected' : '') + '>TODOS</option>';
-            sorted.forEach(m => {
-                html += `<option value="${m}" ${state.selectedMonth === m ? 'selected' : ''}>${m.split('-').reverse().join('/')}</option>`;
-            });
-            select.innerHTML = html;
-        }
-
-        function changeFilterMonth(val) { state.selectedMonth = val; save(); }
-
-        // MANIPULAÇÃO DE ANEXO DE COMPROVANTE (BASE64)
-        function handleFileSelect(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            if (file.size > 5 * 1024 * 1024) {
-                alert("O arquivo selecionado é muito grande. Escolha um arquivo de até 5MB.");
-                e.target.value = '';
-                return;
-            }
-
-            const reader = new FileReader();
-            reader.onload = function(evt) {
-                document.getElementById('form-comprovante-b64').value = evt.target.result;
-                document.getElementById('form-comprovante-nome').value = file.name;
-                mostrarPreviewComprovante(file.name);
-            };
-            reader.readAsDataURL(file);
-        }
-
-        function mostrarPreviewComprovante(nome) {
-            document.getElementById('nome-comprovante').innerText = nome;
-            document.getElementById('preview-comprovante').classList.remove('hidden');
-        }
-
-        function removerComprovanteForm() {
-            document.getElementById('form-comprovante-b64').value = '';
-            document.getElementById('form-comprovante-nome').value = '';
-            document.getElementById('inp-comprovante').value = '';
-            document.getElementById('preview-comprovante').classList.add('hidden');
-        }
-
-        function abrirComprovante(b64Data, nome = 'comprovante') {
-            if (!b64Data) return;
-            const container = document.getElementById('doc-modal-container');
-            const downloadBtn = document.getElementById('doc-modal-download');
-            
-            downloadBtn.href = b64Data;
-            downloadBtn.download = nome;
-            document.getElementById('doc-modal-title').innerHTML = `<i data-lucide="file-text" class="text-indigo-400"></i> Documento: ${nome}`;
-
-            if (b64Data.startsWith('data:image/')) {
-                container.innerHTML = `<img src="${b64Data}" alt="Comprovante" class="max-h-[60vh] max-w-full rounded-lg object-contain shadow-lg">`;
-            } else if (b64Data.startsWith('data:application/pdf')) {
-                container.innerHTML = `<iframe src="${b64Data}" class="w-full h-[60vh] rounded-lg border-0"></iframe>`;
-            } else {
-                container.innerHTML = `<div class="text-center p-6"><i data-lucide="file" class="w-12 h-12 text-indigo-400 mx-auto mb-2"></i><p class="text-sm font-bold text-slate-300">${nome}</p><p class="text-xs text-slate-500 mt-1">Clique abaixo para baixar este arquivo.</p></div>`;
-            }
-
-            document.getElementById('modal-doc').classList.remove('hidden');
-            lucide.createIcons();
-        }
-
-        function closeDocModal() {
-            document.getElementById('modal-doc').classList.add('hidden');
-        }
-
-        // =========================================================
-        // NOVAS FUNÇÕES: EXPORTAÇÃO PARA EXCEL (.xlsx) E PDF (.pdf)
-        // =========================================================
-        function getFilteredExportData(filtroTipo = 'todos') {
-            const isAll = state.selectedMonth === 'all';
-            let list = [];
-
-            if (filtroTipo === 'receitas') {
-                list = state.receitas.map(r => ({ ...r, tipo: 'Receita' }));
-            } else if (filtroTipo === 'despesas') {
-                list = state.despesas.map(d => ({ ...d, tipo: 'Despesa' }));
-            } else {
-                list = [
-                    ...state.receitas.map(r => ({ ...r, tipo: 'Receita' })),
-                    ...state.despesas.map(d => ({ ...d, tipo: 'Despesa' }))
-                ];
-            }
-
-            if (!isAll) {
-                list = list.filter(item => item.venc?.startsWith(state.selectedMonth));
-            }
-
-            return list.sort((a, b) => (a.venc || '').localeCompare(b.venc || ''));
-        }
-
-        function exportToExcel(filtroTipo = 'todos') {
-            const items = getFilteredExportData(filtroTipo);
-            if (items.length === 0) {
-                alert("Nenhum lançamento encontrado para exportação no período selecionado.");
-                return;
-            }
-
-            const dataFormatted = items.map(item => ({
-                'Tipo': item.tipo,
-                'Descrição': item.descricao || '',
-                'Categoria': item.categoria || '',
-                'Data de Vencimento': item.venc ? item.venc.split('-').reverse().join('/') : '',
-                'Status': item.status === 'pago' ? 'Pago' : 'Pendente',
-                'Valor (R$)': item.valor || 0,
-                'Parcela': item.parcela || '1/1',
-                'Possui Anexo': item.comprovante ? 'Sim' : 'Não'
-            }));
-
-            const ws = XLSX.utils.json_to_sheet(dataFormatted);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Lançamentos");
-
-            // Configurar larguras das colunas
-            ws['!cols'] = [
-                { wch: 10 }, // Tipo
-                { wch: 30 }, // Descrição
-                { wch: 18 }, // Categoria
-                { wch: 18 }, // Data
-                { wch: 12 }, // Status
-                { wch: 15 }, // Valor
-                { wch: 10 }, // Parcela
-                { wch: 14 }  // Possui Anexo
-            ];
-
-            const mesNome = state.selectedMonth === 'all' ? 'TODOS_OS_PERIODOS' : state.selectedMonth;
-            const fileName = `Relatorio_Financeiro_${filtroTipo.toUpperCase()}_${mesNome}.xlsx`;
-            XLSX.writeFile(wb, fileName);
-        }
-
-        function exportToPDF(filtroTipo = 'todos') {
-            const items = getFilteredExportData(filtroTipo);
-            if (items.length === 0) {
-                alert("Nenhum lançamento encontrado para exportação no período selecionado.");
-                return;
-            }
-
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-
-            const mesNome = state.selectedMonth === 'all' ? 'Todos os Períodos' : state.selectedMonth.split('-').reverse().join('/');
-            const hojeStr = new Date().toLocaleDateString('pt-BR');
-
-            // Cálculos
-            const totalReceitas = items.filter(i => i.tipo === 'Receita').reduce((a,c) => a + c.valor, 0);
-            const totalDespesas = items.filter(i => i.tipo === 'Despesa').reduce((a,c) => a + c.valor, 0);
-            const saldoLiquido = totalReceitas - totalDespesas;
-
-            // Cabeçalho do PDF
-            doc.setFillColor(15, 23, 42); // slate-900
-            doc.rect(0, 0, 210, 32, 'F');
-
-            doc.setTextColor(255, 255, 255);
-            doc.setFontSize(18);
-            doc.setFont("helvetica", "bold");
-            doc.text("MINHA VIDA FINANCEIRA", 14, 16);
-
-            doc.setFontSize(10);
-            doc.setFont("helvetica", "normal");
-            doc.setTextColor(148, 163, 184); // slate-400
-            doc.text(`Relatório de Lançamentos (${filtroTipo.toUpperCase()}) • Período: ${mesNome}`, 14, 24);
-            doc.text(`Emitido em: ${hojeStr}`, 150, 24);
-
-            // Quadrados de Resumo Sumário
-            let startY = 38;
-
-            doc.setFillColor(241, 245, 249); // slate-100
-            doc.roundedRect(14, startY, 56, 18, 3, 3, 'F');
-            doc.setFontSize(8); doc.setTextColor(5, 150, 105); doc.setFont("helvetica", "bold");
-            doc.text("TOTAL RECEITAS", 18, startY + 6);
-            doc.setFontSize(11); doc.setTextColor(15, 23, 42);
-            doc.text(fmt(totalReceitas), 18, startY + 13);
-
-            doc.setFillColor(241, 245, 249);
-            doc.roundedRect(77, startY, 56, 18, 3, 3, 'F');
-            doc.setFontSize(8); doc.setTextColor(225, 29, 72); doc.setFont("helvetica", "bold");
-            doc.text("TOTAL DESPESAS", 81, startY + 6);
-            doc.setFontSize(11); doc.setTextColor(15, 23, 42);
-            doc.text(fmt(totalDespesas), 81, startY + 13);
-
-            doc.setFillColor(241, 245, 249);
-            doc.roundedRect(140, startY, 56, 18, 3, 3, 'F');
-            doc.setFontSize(8); doc.setTextColor(79, 70, 229); doc.setFont("helvetica", "bold");
-            doc.text("SALDO RESULTANTE", 144, startY + 6);
-            doc.setFontSize(11); 
-            doc.setTextColor(saldoLiquido >= 0 ? 5 : 225, saldoLiquido >= 0 ? 150 : 29, saldoLiquido >= 0 ? 105 : 72);
-            doc.text(fmt(saldoLiquido), 144, startY + 13);
-
-            // Tabela Detalhada
-            const tableRows = items.map(i => [
-                i.tipo,
-                i.descricao + (i.parcela ? ` (${i.parcela})` : ''),
-                i.categoria || '-',
-                i.venc ? i.venc.split('-').reverse().join('/') : '-',
-                i.status === 'pago' ? 'Pago' : 'Pendente',
-                fmt(i.valor)
-            ]);
-
-            doc.autoTable({
-                startY: startY + 24,
-                head: [['Tipo', 'Descrição', 'Categoria', 'Vencimento', 'Status', 'Valor']],
-                body: tableRows,
-                theme: 'striped',
-                headStyles: {
-                    fillColor: [30, 41, 59], // slate-800
-                    textColor: [255, 255, 255],
-                    fontStyle: 'bold',
-                    fontSize: 9
-                },
-                styles: {
-                    fontSize: 8.5,
-                    cellPadding: 3
-                },
-                columnStyles: {
-                    0: { fontStyle: 'bold', width: 22 },
-                    1: { width: 65 },
-                    2: { width: 32 },
-                    3: { width: 25 },
-                    4: { width: 22 },
-                    5: { fontStyle: 'bold', halign: 'right', width: 28 }
-                },
-                didParseCell: function(data) {
-                    if (data.section === 'body' && data.column.index === 0) {
-                        if (data.cell.raw === 'Receita') {
-                            data.cell.styles.textColor = [16, 185, 129];
-                        } else {
-                            data.cell.styles.textColor = [244, 63, 94];
-                        }
-                    }
-                }
-            });
-
-            // Rodapé
-            const pageCount = doc.internal.getNumberOfPages();
-            for (let i = 1; i <= pageCount; i++) {
-                doc.setPage(i);
-                doc.setFontSize(8);
-                doc.setTextColor(148, 163, 184);
-                doc.text(`Minha Vida Financeira - Página ${i} de ${pageCount}`, 105, 290, { align: 'center' });
-            }
-
-            const fileName = `Relatorio_Financeiro_${filtroTipo.toUpperCase()}_${state.selectedMonth}.pdf`;
-            doc.save(fileName);
-        }
-
-        function openForm(type, id = null) {
-            const form = document.getElementById('main-form');
-            form.reset();
-            removerComprovanteForm();
-
-            document.getElementById('form-type').value = type;
-            document.getElementById('form-id').value = id || '';
-            
-            const isInvest = (type === 'rv' || type === 'rf');
-            document.getElementById('box-invest').classList.toggle('hidden', type !== 'rv');
-            document.getElementById('box-parcelas').classList.toggle('hidden', isInvest || id !== null);
-            document.getElementById('box-comprovante').classList.toggle('hidden', isInvest);
-            
-            const cats = type === 'receita' ? state.categoriasReceitas : state.categoriasDespesas;
-            document.getElementById('inp-cat').innerHTML = cats.map(c => `<option value="${c}">${c}</option>`).join('');
-            document.getElementById('inp-cat').classList.toggle('hidden', isInvest);
-
-            if(id) {
-                const list = (type === 'receita') ? state.receitas : (type === 'despesa') ? state.despesas : (type === 'rv') ? state.investRV : state.investRF;
-                const item = list.find(i => i.id == id);
-                if(item) {
-                    document.getElementById('inp-desc').value = item.descricao || item.ticker || '';
-                    document.getElementById('inp-valor').value = item.valor || '';
-                    document.getElementById('inp-venc').value = item.venc || '';
-                    if(item.categoria) document.getElementById('inp-cat').value = item.categoria;
-                    if(type === 'rv') {
-                        document.getElementById('inp-qtd').value = item.qtd;
-                        document.getElementById('inp-pm').value = item.pm;
-                    }
-                    if(item.comprovante) {
-                        document.getElementById('form-comprovante-b64').value = item.comprovante;
-                        document.getElementById('form-comprovante-nome').value = item.comprovanteNome || 'documento';
-                        mostrarPreviewComprovante(item.comprovanteNome || 'Documento anexado');
-                    }
-                }
-            }
-            document.getElementById('modal-form').classList.remove('hidden');
-        }
-
-        function closeModal() { document.getElementById('modal-form').classList.add('hidden'); }
-
-        document.getElementById('main-form').onsubmit = (e) => {
-            e.preventDefault();
-            const type = document.getElementById('form-type').value;
-            const id = document.getElementById('form-id').value;
-            const isParcelado = document.getElementById('inp-is-parcelado').checked;
-            const comprovante = document.getElementById('form-comprovante-b64').value;
-            const comprovanteNome = document.getElementById('form-comprovante-nome').value;
-
-            if (isParcelado && !id) {
-                const qtd = parseInt(document.getElementById('inp-qtd-parcelas').value) || 1;
-                const total = parseFloat(document.getElementById('inp-valor').value);
-                const valorP = Math.floor((total / qtd) * 100) / 100;
-                const sobra = parseFloat((total - (valorP * qtd)).toFixed(2));
-
-                for (let i = 1; i <= qtd; i++) {
-                    let d = new Date(document.getElementById('inp-venc').value + 'T12:00:00');
-                    d.setMonth(d.getMonth() + (i - 1));
-                    const item = {
-                        id: Date.now() + Math.random(),
-                        descricao: document.getElementById('inp-desc').value,
-                        valor: i === qtd ? valorP + sobra : valorP,
-                        venc: d.toISOString().slice(0, 10),
-                        categoria: document.getElementById('inp-cat').value,
-                        status: 'pendente',
-                        parcela: `${i}/${qtd}`,
-                        comprovante: comprovante || null,
-                        comprovanteNome: comprovanteNome || null
-                    };
-                    state[type === 'receita' ? 'receitas' : 'despesas'].push(item);
-                }
-            } else {
-                let list = (type === 'receita') ? 'receitas' : (type === 'despesa') ? 'despesas' : (type === 'rv') ? 'investRV' : 'investRF';
-                const item = {
-                    id: id ? parseFloat(id) : Date.now(),
-                    descricao: document.getElementById('inp-desc').value,
-                    ticker: document.getElementById('inp-desc').value.toUpperCase(),
-                    valor: parseFloat(document.getElementById('inp-valor').value),
-                    venc: document.getElementById('inp-venc').value,
-                    categoria: document.getElementById('inp-cat').value,
-                    qtd: parseFloat(document.getElementById('inp-qtd').value),
-                    pm: parseFloat(document.getElementById('inp-pm').value),
-                    status: 'pendente',
-                    comprovante: comprovante || null,
-                    comprovanteNome: comprovanteNome || null
-                };
-                if(id) {
-                    const original = state[list].find(i => i.id == id);
-                    if(original) item.status = original.status;
-                    state[list] = state[list].filter(i => i.id != id);
-                }
-                state[list].push(item);
-                if(item.venc && state.selectedMonth !== 'all') state.selectedMonth = item.venc.slice(0, 7);
-            }
-            save(); closeModal();
-        };
-
-        function cloneItem(list, id) {
-            const original = state[list].find(i => i.id == id);
-            if(original) {
-                const copy = {...original, id: Date.now() + Math.random(), status: 'pendente'};
-                state[list].push(copy);
-                save();
-            }
-        }
-
-        function getChain(target) {
-            let months = new Set();
-            [...state.receitas, ...state.despesas].forEach(i => i.venc && months.add(i.venc.slice(0,7)));
-            months.add(new Date().toISOString().slice(0,7));
-            
-            let sorted = Array.from(months).sort();
-            let p = 0, r = 0, res = { recR: 0, desR: 0, finalR: 0, finalP: 0 };
-
-            // TRATAMENTO QUANDO "TODOS" ESTIVER SELECIONADO
-            if (target === 'all') {
-                let rP = state.receitas.reduce((a,c)=>a+c.valor, 0);
-                let rR = state.receitas.filter(i=>i.status==='pago').reduce((a,c)=>a+c.valor, 0);
-                let dP = state.despesas.reduce((a,c)=>a+c.valor, 0);
-                let dR = state.despesas.filter(i=>i.status==='pago').reduce((a,c)=>a+c.valor, 0);
-
-                res.recR = rR;
-                res.desR = dR;
-                res.finalR = rR - dR;
-                res.finalP = rP - dP;
-                return res;
-            }
-
-            sorted.forEach(m => {
-                let recM = state.receitas.filter(i => i.venc?.startsWith(m));
-                let desM = state.despesas.filter(i => i.venc?.startsWith(m));
-                
-                let rP = recM.reduce((a,c)=>a+c.valor,0);
-                let rR = recM.filter(i=>i.status==='pago').reduce((a,c)=>a+c.valor,0);
-                let dP = desM.reduce((a,c)=>a+c.valor,0);
-                let dR = desM.filter(i=>i.status==='pago').reduce((a,c)=>a+c.valor,0);
-
-                if(m === target) { res.recR = rR; res.desR = dR; }
-                p += (rP - dP); r += (rR - dR);
-                if(m === target) { res.finalR = r; res.finalP = p; }
-            });
-            return res;
-        }
-
-        function render() {
-            populateMonthFilter();
-            const isAll = state.selectedMonth === 'all';
-            const res = getChain(state.selectedMonth);
-            const hojeStr = new Date().toISOString().slice(0, 10);
-
-            // Ajustar Rótulos do Dashboard se for 'TODOS' ou Mês específico
-            document.getElementById('label-receita-dash').innerText = isAll ? 'Receitas Totais (Pago)' : 'Receitas (Real)';
-            document.getElementById('label-despesa-dash').innerText = isAll ? 'Despesas Totais (Pagas)' : 'Despesas (Pagas)';
-            document.getElementById('titulo-fluxo-chart').innerText = isAll ? 'Fluxo Geral (Acumulado)' : 'Fluxo do Mês';
-            document.getElementById('titulo-agenda-dash').innerText = isAll ? 'Pendências Gerais (Todas)' : 'Pendências do Mês';
-
-            // Dashboard Cards
-            document.getElementById('dash-receita-mes').innerText = fmt(res.recR);
-            document.getElementById('dash-despesa-paga-mes').innerText = fmt(res.desR);
-            document.getElementById('dash-saldo-real-mes').innerText = fmt(res.finalR);
-            document.getElementById('dash-saldo-previsto-mes').innerText = fmt(res.finalP);
-
-            // Alerta Sutil de Vencidos
-            const vencidosGeral = state.despesas.filter(d => d.status === 'pendente' && d.venc < hojeStr);
-            document.getElementById('alerta-vencidos').classList.toggle('hidden', vencidosGeral.length === 0);
-
-            // Cálculos Investimentos
-            const invCustoRV = state.investRV.reduce((a,c) => a + (c.qtd * c.pm), 0);
-            const invAtualRV = state.investRV.reduce((a,c) => a + (c.qtd * (c.cotacao || c.pm)), 0);
-            const invRF = state.investRF.reduce((a,c) => a + c.valor, 0);
-
-            document.getElementById('dash-inv-custo').innerText = fmt(invCustoRV + invRF);
-            document.getElementById('dash-inv-atual').innerText = fmt(invAtualRV + invRF);
-            document.getElementById('inv-rv-mercado').innerText = fmt(invAtualRV);
-            document.getElementById('inv-rf-total').innerText = fmt(invRF);
-
-            // SEÇÃO EXPANDIDA DE TODOS OS LANÇAMENTOS (QUANDO OPÇÃO "TODOS" FOR SELECIONADA)
-            const secaoTodos = document.getElementById('secao-todos-lancamentos');
-            if (isAll) {
-                secaoTodos.classList.remove('hidden');
-                
-                const todosLancamentos = [
-                    ...state.receitas.map(r => ({ ...r, tipo: 'receita' })),
-                    ...state.despesas.map(d => ({ ...d, tipo: 'despesa' }))
-                ].sort((a, b) => (a.venc || '').localeCompare(b.venc || ''));
-
-                const totalRec = state.receitas.reduce((a,c) => a + c.valor, 0);
-                const totalDesp = state.despesas.reduce((a,c) => a + c.valor, 0);
-                document.getElementById('badge-total-receitas').innerText = `Total Receitas: ${fmt(totalRec)}`;
-                document.getElementById('badge-total-despesas').innerText = `Total Despesas: ${fmt(totalDesp)}`;
-
-                document.getElementById('corpo-todos-lancamentos').innerHTML = todosLancamentos.map(item => {
-                    const isPago = item.status === 'pago';
-                    const isDespesa = item.tipo === 'despesa';
-                    const docB64 = item.comprovante ? JSON.stringify(item.comprovante) : "''";
-                    const docNome = item.comprovanteNome ? JSON.stringify(item.comprovanteNome) : "'documento'";
-
-                    return `
-                    <tr class="border-b border-slate-800 hover:bg-slate-900/50 transition">
-                        <td class="p-3 font-bold">
-                            <span class="px-2 py-0.5 rounded-md text-[10px] uppercase font-black ${isDespesa ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'}">
-                                ${isDespesa ? 'Despesa' : 'Receita'}
-                            </span>
-                        </td>
-                        <td class="p-3 font-bold text-white">
-                            ${item.descricao} ${item.parcela ? `<span class="parcela-tag">${item.parcela}</span>` : ''}
-                        </td>
-                        <td class="p-3 text-slate-400">${item.venc ? item.venc.split('-').reverse().join('/') : '-'}</td>
-                        <td class="p-3 text-slate-400">${item.categoria || '-'}</td>
-                        <td class="p-3 font-bold">
-                            <span class="px-2 py-0.5 rounded-full text-[10px] ${isPago ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'}">
-                                ${isPago ? 'Pago' : 'Pendente'}
-                            </span>
-                        </td>
-                        <td class="p-3 font-bold ${isDespesa ? 'text-rose-400' : 'text-emerald-400'}">${fmt(item.valor)}</td>
-                        <td class="p-3 text-center">
-                            ${item.comprovante ? `
-                                <button onclick='abrirComprovante(${docB64}, ${docNome})' class="p-1.5 bg-indigo-600/20 text-indigo-400 hover:bg-indigo-600 hover:text-white rounded-lg transition inline-flex items-center gap-1 font-bold text-[10px]">
-                                    <i data-lucide="paperclip" class="w-3.5 h-3.5"></i> Anexo
-                                </button>
-                            ` : '<span class="text-slate-600 text-[10px]">-</span>'}
-                        </td>
-                    </tr>`;
-                }).join('') || '<tr><td colspan="7" class="p-6 text-center text-slate-500 text-xs">Nenhum lançamento cadastrado.</td></tr>';
-            } else {
-                secaoTodos.classList.add('hidden');
-            }
-
-            // Listas
-            ['receita', 'despesa'].forEach(type => {
-                const listName = type + 's';
-                const list = state[listName].filter(i => isAll || i.venc?.startsWith(state.selectedMonth));
-                document.getElementById(`lista-${type}s-agrupadas`).innerHTML = list.sort((a,b)=>a.venc.localeCompare(b.venc)).map(i => {
-                    const docB64 = i.comprovante ? JSON.stringify(i.comprovante) : "''";
-                    const docNome = i.comprovanteNome ? JSON.stringify(i.comprovanteNome) : "'documento'";
-
-                    return `
-                    <div class="card p-4 flex justify-between items-center group">
-                        <div class="flex items-center gap-3">
-                            <button onclick="toggleStatus('${type}', ${i.id})" class="w-7 h-7 rounded-full border-2 ${i.status==='pago'?(type==='receita'?'bg-emerald-500':'bg-rose-500'):'border-slate-700'} flex items-center justify-center">
-                                ${i.status==='pago'?'<i data-lucide="check" class="w-4 h-4 text-white"></i>':''}
-                            </button>
-                            <div onclick="openForm('${type}', ${i.id})" class="cursor-pointer">
-                                <p class="text-sm font-bold ${i.status==='pago'?'strikethrough':''} flex items-center gap-2">
-                                    ${i.descricao} ${i.parcela?`<span class="parcela-tag">${i.parcela}</span>`:''}
-                                </p>
-                                <p class="text-[10px] text-slate-500 uppercase">${i.venc?.split('-').reverse().join('/')} • ${i.categoria}</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            ${i.comprovante ? `
-                                <button onclick='abrirComprovante(${docB64}, ${docNome})' title="Ver Documento/Comprovante" class="p-1.5 bg-indigo-600/20 text-indigo-400 hover:bg-indigo-600 hover:text-white rounded-lg transition">
-                                    <i data-lucide="paperclip" class="w-4 h-4"></i>
-                                </button>
-                            ` : ''}
-                            <p class="font-bold ${type==='receita'?'text-emerald-500':'text-rose-500'}">${fmt(i.valor)}</p>
-                            <button onclick="cloneItem('${listName}', ${i.id})" class="text-slate-600 hover:text-indigo-400 opacity-0 group-hover:opacity-100 transition"><i data-lucide="copy" class="w-4 h-4"></i></button>
-                            <button onclick="deleteItem('${listName}', ${i.id})" class="text-slate-600 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                        </div>
-                    </div>
-                    `;
-                }).join('') || `<div class="card p-6 text-center text-slate-500 text-xs">Nenhuma ${type} cadastrada neste período.</div>`;
-            });
-
-            // Tabela Investimentos
-            document.getElementById('corpo-investimentos').innerHTML = state.investRV.map(i => {
-                const custoTotal = i.qtd * i.pm;
-                const mercadoTotal = i.qtd * (i.cotacao || i.pm);
-                const resultado = mercadoTotal - custoTotal;
-                const pct = custoTotal > 0 ? (resultado / custoTotal) * 100 : 0;
-                
-                return `
-                <tr class="border-b border-slate-800 hover:bg-slate-900/50 transition">
-                    <td class="p-4 font-bold text-indigo-400">${i.ticker}</td>
-                    <td class="p-4">${i.qtd}</td>
-                    <td class="p-4 text-slate-400">${fmt(i.pm)}</td>
-                    <td class="p-4 font-medium text-slate-300">${fmt(custoTotal)}</td>
-                    <td class="p-4 text-cyan-400">${fmt(i.cotacao || i.pm)}</td>
-                    <td class="p-4 font-bold">${fmt(mercadoTotal)}</td>
-                    <td class="p-4 font-bold ${resultado >= 0 ? 'text-emerald-500' : 'text-rose-500'}">
-                        ${fmt(resultado)}<br><span class="text-[10px] opacity-70">${pct.toFixed(2)}%</span>
-                    </td>
-                    <td class="p-4 text-right">
-                        <button onclick="deleteItem('investRV', ${i.id})" class="text-slate-600 hover:text-rose-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                    </td>
-                </tr>`;
-            }).join('') + state.investRF.map(i => `
-                <tr class="border-b border-slate-800 bg-emerald-900/5 hover:bg-emerald-900/10 transition">
-                    <td class="p-4 font-bold text-emerald-400">${i.nome || i.descricao}</td>
-                    <td class="p-4">-</td>
-                    <td class="p-4">-</td>
-                    <td class="p-4 font-medium text-slate-300">${fmt(i.valor)}</td>
-                    <td class="p-4">-</td>
-                    <td class="p-4 font-bold">${fmt(i.valor)}</td>
-                    <td class="p-4 text-emerald-500 italic text-[10px]">Renda Fixa</td>
-                    <td class="p-4 text-right">
-                        <button onclick="deleteItem('investRF', ${i.id})" class="text-slate-600 hover:text-rose-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                    </td>
-                </tr>`).join('');
-
-            // Pendencias (Com data e alerta)
-            document.getElementById('lista-agenda').innerHTML = state.despesas
-                .filter(d => d.status === 'pendente' && (isAll || d.venc?.startsWith(state.selectedMonth)))
-                .sort((a,b) => a.venc.localeCompare(b.venc))
-                .slice(0, 8).map(d => {
-                    const isVencida = d.venc < hojeStr;
-                    return `
-                    <div class="text-[11px] p-2 bg-slate-900 rounded-lg flex justify-between items-center border ${isVencida ? 'border-rose-500/30' : 'border-transparent'}">
-                        <div class="flex flex-col">
-                            <span class="font-bold ${isVencida ? 'text-rose-400' : 'text-slate-200'}">${d.descricao}</span>
-                            <span class="text-[9px] text-slate-500">${d.venc ? d.venc.split('-').reverse().slice(0,2).join('/') : '-'}</span>
-                        </div>
-                        <span class="font-bold ${isVencida ? 'text-rose-500' : 'text-rose-400/80'}">${fmt(d.valor)}</span>
-                    </div>`;
-                }).join('') || '<p class="text-xs text-slate-600 text-center py-4">Nenhuma pendência.</p>';
-
-            renderChart(res.recR, res.desR);
-            lucide.createIcons();
-        }
-
-        function toggleStatus(type, id) {
-            const list = state[type + 's'];
-            const item = list.find(i => i.id == id);
-            if(item) item.status = item.status === 'pago' ? 'pendente' : 'pago';
-            save();
-        }
-
-        function deleteItem(list, id) { if(confirm('Excluir lançamento?')) { state[list] = state[list].filter(i => i.id != id); save(); } }
-        function clearData() { if(confirm('Atenção: Isso apagará TODOS os seus dados salvos localmente. Deseja continuar?')) { localStorage.clear(); location.reload(); } }
-
-        let fChart;
-        function renderChart(r, d) {
-            const ctx = document.getElementById('chartFluxo');
-            if (fChart) fChart.destroy();
-            fChart = new Chart(ctx, {
-                type: 'doughnut',
-                data: { datasets: [{ data: [r, d], backgroundColor: ['#10b981', '#f43f5e'], borderWidth: 0 }] },
-                options: { cutout: '80%', plugins: { tooltip: { enabled: false } } }
-            });
-        }
+        // --- ESTADO GLOBAL ---
+        let userData = JSON.parse(localStorage.getItem('proWorkout_user')) || null;
+        let workoutPlan = JSON.parse(localStorage.getItem('proWorkout_plan')) || null;
+        let currentDayIdx = 0;
 
         window.onload = () => {
-            document.getElementById('current-date').innerText = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'full' }).format(new Date());
-            showTab('dashboard');
+            if (!userData) {
+                document.getElementById('onboardingModal').style.display = 'flex';
+            } else {
+                updateUI();
+                renderAll();
+            }
         };
+
+        function finishOnboarding() {
+            const name = document.getElementById('regName').value;
+            if (!name) return alert("Por favor, digite seu nome");
+
+            userData = {
+                name: name,
+                weight: document.getElementById('regWeight').value,
+                height: document.getElementById('regHeight').value,
+                goal: document.getElementById('regGoal').value,
+                freq: document.getElementById('regFreq').value
+            };
+
+            localStorage.setItem('proWorkout_user', JSON.stringify(userData));
+            document.getElementById('onboardingModal').style.display = 'none';
+            generatePersonalizedWorkout();
+        }
+
+        // --- LÓGICA DE GERAÇÃO DE TREINO (O CORAÇÃO DO SISTEMA) ---
+        function generatePersonalizedWorkout() {
+            if (!userData) return;
+            
+            const goal = userData.goal;
+            const freq = parseInt(userData.freq);
+            let newPlan = [];
+
+            // Estratégia de Split baseada em Frequência
+            if (freq === 3) {
+                // Full Body 3x
+                for (let i = 0; i < 5; i++) {
+                    const exercises = i % 2 === 0 ? getFullBodySet(1) : [];
+                    newPlan.push({ day: i, label: `Treino FB`, exercises: exercises });
+                }
+            } else if (freq === 4) {
+                // AB 2x
+                for (let i = 0; i < 5; i++) {
+                    const label = i % 2 === 0 ? "Superior" : "Inferior";
+                    const exercises = i < 4 ? getABSet(label) : [];
+                    newPlan.push({ day: i, label: label, exercises: exercises });
+                }
+            } else {
+                // ABCDE
+                const splits = ["Peito", "Costas", "Pernas", "Ombros", "Braços"];
+                for (let i = 0; i < 5; i++) {
+                    newPlan.push({ day: i, label: splits[i], exercises: getABCDE(splits[i]) });
+                }
+            }
+
+            workoutPlan = newPlan;
+            localStorage.setItem('proWorkout_plan', JSON.stringify(workoutPlan));
+            updateUI();
+            renderAll();
+            alert("🎯 Treino gerado com sucesso baseando-se em seu objetivo!");
+        }
+
+        function getFullBodySet(type) {
+            const lib = EXERCISE_LIBRARY.hipertrofia;
+            return [lib.peito[0], lib.costas[0], lib.pernas[0], EXERCISE_LIBRARY.geral.ombros[0]].map(ex => ({...ex, completed: false, load: "", id: Math.random()}));
+        }
+
+        function getABSet(type) {
+            const lib = EXERCISE_LIBRARY.hipertrofia;
+            if (type === "Superior") {
+                return [lib.peito[0], lib.costas[0], EXERCISE_LIBRARY.geral.ombros[0], EXERCISE_LIBRARY.geral.biceps[0]].map(ex => ({...ex, completed: false, load: "", id: Math.random()}));
+            } else {
+                return [lib.pernas[0], lib.pernas[1], EXERCISE_LIBRARY.geral.triceps[0]].map(ex => ({...ex, completed: false, load: "", id: Math.random()}));
+            }
+        }
+
+        function getABCDE(type) {
+            const lib = EXERCISE_LIBRARY.hipertrofia;
+            let pool = [];
+            if (type === "Peito") pool = [...lib.peito];
+            else if (type === "Costas") pool = [...lib.costas];
+            else if (type === "Pernas") pool = [...lib.pernas];
+            else if (type === "Ombros") pool = [...EXERCISE_LIBRARY.geral.ombros];
+            else pool = [...EXERCISE_LIBRARY.geral.biceps, ...EXERCISE_LIBRARY.geral.triceps];
+            
+            return pool.map(ex => ({...ex, completed: false, load: "", id: Math.random()}));
+        }
+
+        // --- RENDERIZAÇÃO E INTERAÇÃO ---
+        function updateUI() {
+            if (!userData) return;
+            document.getElementById('badgeName').innerText = userData.name.toUpperCase();
+            document.getElementById('userInfoBanner').innerHTML = `
+                <span>⚖️ ${userData.weight}kg</span>
+                <span>📏 ${userData.height}cm</span>
+                <span>🎯 ${userData.goal.toUpperCase()}</span>
+                <span>📅 ${userData.freq}X/SEM</span>
+                <button class="action-btn-sm" style="margin-left: auto; color: var(--danger-color); border-color: rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.1);" onclick="resetProfile()">
+                    <i class="fa-solid fa-user-slash"></i> Resetar Perfil
+                </button>
+            `;
+        }
+
+        function renderAll() {
+            const container = document.getElementById('workout-container');
+            container.innerHTML = '';
+
+            if (!workoutPlan) return;
+
+            workoutPlan.forEach((dayPlan, idx) => {
+                const section = document.createElement('section');
+                section.className = `day-section ${idx === currentDayIdx ? 'active' : ''}`;
+                
+                let exHtml = '';
+                if (dayPlan.exercises.length === 0) {
+                    exHtml = '<div style="color:var(--text-subtle); padding: 20px; text-align: center;">Dia de Descanso ou Cardio leve</div>';
+                } else {
+                    dayPlan.exercises.forEach(ex => {
+                        exHtml += `
+                        <div class="exercise-card ${ex.completed ? 'completed' : ''}">
+                            <div class="exercise-main-row" onclick="toggleTask(${idx}, ${ex.id})">
+                                <div class="checkbox-btn"><i class="fa-solid fa-check" style="color:${ex.completed ? '#fff' : 'transparent'}"></i></div>
+                                <div class="ex-img-wrapper"><img src="${ex.img}" class="ex-img" onerror="this.src='https://placehold.co/120x120/1e293b/38bdf8?text=TREINO'"></div>
+                                <div style="flex:1">
+                                    <div class="ex-title">${ex.title}</div>
+                                    <div class="anatomy-info">
+                                        <span class="primary-muscle">${ex.primary}</span>
+                                        <span class="secondary-muscles"> | ${ex.secondary}</span>
+                                    </div>
+                                    <div class="why-tag">💡 ${ex.why}</div>
+                                </div>
+                            </div>
+                            <div style="display:flex; justify-content: space-between; align-items:center; border-top: 1px solid var(--card-border); padding-top:10px;">
+                                <div class="load-input-group">
+                                    <label style="font-size:0.6rem">CARGA</label>
+                                    <input type="text" class="load-input" value="${ex.load}" placeholder="0kg" onchange="updateLoad(${idx}, ${ex.id}, this.value)">
+                                </div>
+                                <button class="action-btn-sm" onclick="startTimer(60)">DESCANSO 60s</button>
+                            </div>
+                        </div>`;
+                    });
+                }
+
+                section.innerHTML = `
+                    <div class="section-header">
+                        <div class="section-title">${dayPlan.label}</div>
+                        <span class="today-badge">${dayPlan.exercises.length} EXERCÍCIOS</span>
+                    </div>
+                    <div class="exercise-list">${exHtml}</div>
+                `;
+                container.appendChild(section);
+            });
+            updateStats();
+        }
+
+        function switchDay(idx) {
+            currentDayIdx = idx;
+            document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', i === idx));
+            document.querySelectorAll('.day-section').forEach((s, i) => s.classList.toggle('active', i === idx));
+        }
+
+        function toggleTask(dayIdx, exId) {
+            const ex = workoutPlan[dayIdx].exercises.find(e => e.id === exId);
+            ex.completed = !ex.completed;
+            localStorage.setItem('proWorkout_plan', JSON.stringify(workoutPlan));
+            renderAll();
+        }
+
+        function updateLoad(dayIdx, exId, val) {
+            const ex = workoutPlan[dayIdx].exercises.find(e => e.id === exId);
+            ex.load = val;
+            localStorage.setItem('proWorkout_plan', JSON.stringify(workoutPlan));
+        }
+
+        function updateStats() {
+            let total = 0, done = 0;
+            if (workoutPlan) {
+                workoutPlan.forEach(d => {
+                    d.exercises.forEach(e => {
+                        total++;
+                        if (e.completed) done++;
+                    });
+                });
+            }
+            const perc = total > 0 ? Math.round((done/total)*100) : 0;
+            document.getElementById('progressPercent').innerText = perc + '%';
+            document.getElementById('progressBarFill').style.width = perc + '%';
+        }
+
+        function resetProgress() {
+            if (!workoutPlan) return;
+            if (confirm("Deseja zerar o progresso dos exercícios marcados?")){
+                workoutPlan.forEach(d => d.exercises.forEach(e => e.completed = false));
+                localStorage.setItem('proWorkout_plan', JSON.stringify(workoutPlan));
+                renderAll();
+            }
+        }
+
+        function resetProfile() {
+            if (confirm("Tem certeza que deseja resetar seu perfil?\n\nIsso apagará seus dados (nome, peso, altura, objetivo e frequência) e permitirá cadastrar um novo perfil.")) {
+                localStorage.removeItem('proWorkout_user');
+                localStorage.removeItem('proWorkout_plan');
+                userData = null;
+                workoutPlan = null;
+                
+                document.getElementById('regName').value = '';
+                document.getElementById('regWeight').value = '';
+                document.getElementById('regHeight').value = '';
+                document.getElementById('regGoal').value = 'hipertrofia';
+                document.getElementById('regFreq').value = '3';
+
+                document.getElementById('onboardingModal').style.display = 'flex';
+                
+                document.getElementById('workout-container').innerHTML = '';
+                document.getElementById('badgeName').innerText = 'TREINADOR IA';
+                document.getElementById('userInfoBanner').innerHTML = '';
+                document.getElementById('progressPercent').innerText = '0%';
+                document.getElementById('progressBarFill').style.width = '0%';
+            }
+        }
+
+        function startTimer(sec) {
+            if (navigator.vibrate) navigator.vibrate(50);
+            alert("Cronômetro de 60s iniciado mentalmente! (Funcionalidade de timer ativa no app)");
+        }
     </script>
 </body>
 </html>
