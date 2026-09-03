@@ -1,14 +1,7 @@
+--- START OF FILE text/html ---
+
 <!DOCTYPE html>
 <html lang="pt-br">
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#020617">
-    <script>
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js')
-                .then(() => console.log("Service Worker registrado com sucesso!"))
-                .catch(err => console.log("Erro ao registrar Service Worker:", err));
-        }
-    </script>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -181,7 +174,7 @@
                             <button onclick="exportToExcel()" class="px-3 py-1 bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600 hover:text-white border border-emerald-500/30 rounded-lg text-xs font-bold transition flex items-center gap-1">
                                 <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i> Exportar Excel
                             </button>
-                            <button onclick="exportToPDF()" class="px-3 py-1 bg-rose-600/20 text-rose-400 hover:bg-rose-600 hover:text-white border border-rose-500/30 rounded-lg text-xs font-bold transition flex items-center gap-1">
+                            <button onclick="exportToPDF()" class="px-3 py-1 bg-rose-600/20 text-rose-400 border border-rose-500/30 rounded-lg text-xs font-bold transition flex items-center gap-1">
                                 <i data-lucide="file-text" class="w-3.5 h-3.5"></i> Exportar PDF
                             </button>
                             <span id="badge-total-receitas" class="text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3 py-1 rounded-lg"></span>
