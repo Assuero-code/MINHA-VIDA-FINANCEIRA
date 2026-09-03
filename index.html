@@ -399,6 +399,12 @@
         }
 
         async function syncAlphaVantage() {
+                // NOVA CHECAGEM:
+    if (!navigator.onLine) {
+        alert("Você está offline. Conecte-se à internet para atualizar as cotações.");
+        return;
+    }
+
             const key = state.config?.apiKey;
             if(!key) return alert("Configure a API Key nas configurações primeiro.");
             
