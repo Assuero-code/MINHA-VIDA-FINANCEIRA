@@ -1021,7 +1021,13 @@
 
         window.onload = () => {
             document.getElementById('current-date').innerText = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'full' }).format(new Date());
-            showTab('dashboard');
+               showTab('dashboard');
+    
+    // Forçar renderização de ícones 3 vezes para garantir
+    setTimeout(() => lucide.createIcons(), 100);
+    setTimeout(() => lucide.createIcons(), 1000);
+    setTimeout(() => lucide.createIcons(), 3000);
+};
         };
     </script>
 </body>
