@@ -35,10 +35,11 @@
         }
         .tab-content.active { display: block; }
         .card { background-color: #0f172a; border: 1px solid var(--border); border-radius: 1.2rem; }
-        input, select { 
+        input, select, textarea { 
             background: #1e293b !important; border: 1px solid #334155 !important; 
             color: white !important; padding: 12px; border-radius: 12px; width: 100%; font-size: 16px;
         }
+        textarea { resize: none; min-height: 80px; }
         .strikethrough { text-decoration: line-through; opacity: 0.4; }
         .nav-active { background-color: #1e293b; color: white !important; border-left: 4px solid #6366f1; }
         .parcela-tag { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: #334155; color: #94a3b8; font-weight: 800; }
@@ -89,7 +90,6 @@
                             <i data-lucide="refresh-cw" id="sync-icon" class="w-4 h-4"></i>
                         </button>
                         
-                        <!-- BOTÕES DE EXPORTAÇÃO PDF / EXCEL -->
                         <button onclick="exportToExcel()" title="Exportar para Excel (.xlsx)" class="px-2.5 py-1.5 bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-600 hover:text-white rounded-lg text-xs font-bold transition flex items-center gap-1">
                             <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i> <span class="hidden sm:inline">Excel</span>
                         </button>
@@ -103,7 +103,6 @@
 
             <!-- ABA DASHBOARD -->
             <section id="dashboard" class="tab-content active space-y-6">
-                <!-- ALERTA SUTIL DE VENCIDOS -->
                 <div id="alerta-vencidos" class="hidden">
                     <div class="bg-rose-500/10 border border-rose-500/20 p-3 rounded-xl flex items-center gap-3 text-rose-500">
                         <i data-lucide="alert-circle" class="w-5 h-5"></i>
@@ -158,7 +157,6 @@
                     </div>
                 </div>
 
-                <!-- SEÇÃO EXPANDIDA DE TODOS OS LANÇAMENTOS (QUANDO OPÇÃO "TODOS" FOR SELECIONADA) -->
                 <div id="secao-todos-lancamentos" class="card p-5 hidden space-y-4">
                     <div class="flex justify-between items-center border-b border-slate-800 pb-3 flex-wrap gap-2">
                         <div>
@@ -169,12 +167,6 @@
                             <p class="text-xs text-slate-500">Visão consolidada de todas as receitas e despesas registradas no sistema</p>
                         </div>
                         <div class="flex gap-2 items-center flex-wrap">
-                            <button onclick="exportToExcel()" class="px-3 py-1 bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600 hover:text-white border border-emerald-500/30 rounded-lg text-xs font-bold transition flex items-center gap-1">
-                                <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i> Exportar Excel
-                            </button>
-                            <button onclick="exportToPDF()" class="px-3 py-1 bg-rose-600/20 text-rose-400 hover:bg-rose-600 hover:text-white border border-rose-500/30 rounded-lg text-xs font-bold transition flex items-center gap-1">
-                                <i data-lucide="file-text" class="w-3.5 h-3.5"></i> Exportar PDF
-                            </button>
                             <span id="badge-total-receitas" class="text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3 py-1 rounded-lg"></span>
                             <span id="badge-total-despesas" class="text-xs font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20 px-3 py-1 rounded-lg"></span>
                         </div>
@@ -203,12 +195,6 @@
                 <div class="flex justify-between items-center bg-slate-900 p-4 rounded-2xl border border-slate-800 flex-wrap gap-2">
                     <h3 class="font-bold text-emerald-500">Minhas Receitas</h3>
                     <div class="flex gap-2">
-                        <button onclick="exportToExcel('receitas')" class="bg-slate-800 hover:bg-slate-700 text-emerald-400 px-3 py-2 rounded-xl font-bold text-xs flex items-center gap-1 border border-slate-700">
-                            <i data-lucide="file-spreadsheet" class="w-4 h-4"></i> Excel
-                        </button>
-                        <button onclick="exportToPDF('receitas')" class="bg-slate-800 hover:bg-slate-700 text-rose-400 px-3 py-2 rounded-xl font-bold text-xs flex items-center gap-1 border border-slate-700">
-                            <i data-lucide="file-text" class="w-4 h-4"></i> PDF
-                        </button>
                         <button onclick="openForm('receita')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl font-bold text-xs transition">+ Adicionar</button>
                     </div>
                 </div>
@@ -220,12 +206,6 @@
                 <div class="flex justify-between items-center bg-slate-900 p-4 rounded-2xl border border-slate-800 flex-wrap gap-2">
                     <h3 class="font-bold text-rose-500">Minhas Despesas</h3>
                     <div class="flex gap-2">
-                        <button onclick="exportToExcel('despesas')" class="bg-slate-800 hover:bg-slate-700 text-emerald-400 px-3 py-2 rounded-xl font-bold text-xs flex items-center gap-1 border border-slate-700">
-                            <i data-lucide="file-spreadsheet" class="w-4 h-4"></i> Excel
-                        </button>
-                        <button onclick="exportToPDF('despesas')" class="bg-slate-800 hover:bg-slate-700 text-rose-400 px-3 py-2 rounded-xl font-bold text-xs flex items-center gap-1 border border-slate-700">
-                            <i data-lucide="file-text" class="w-4 h-4"></i> PDF
-                        </button>
                         <button onclick="openForm('despesa')" class="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-xl font-bold text-xs transition">+ Adicionar</button>
                     </div>
                 </div>
@@ -281,28 +261,22 @@
         </main>
     </div>
 
-    <!-- MODAL DE VISUALIZAÇÃO DE DOCUMENTO ANEXO -->
+    <!-- MODAL DE VISUALIZAÇÃO DE DOCUMENTO -->
     <div id="modal-doc" class="fixed inset-0 bg-black/90 backdrop-blur-sm hidden z-[250] flex items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-2xl p-6 flex flex-col gap-4 max-h-[90vh]">
             <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-                <h3 id="doc-modal-title" class="text-base font-bold text-white flex items-center gap-2">
-                    <i data-lucide="file-text" class="text-indigo-400"></i> Comprovante Anexo
-                </h3>
+                <h3 id="doc-modal-title" class="text-base font-bold text-white flex items-center gap-2"><i data-lucide="file-text" class="text-indigo-400"></i> Comprovante Anexo</h3>
                 <button onclick="closeDocModal()" class="text-slate-400 hover:text-white p-1"><i data-lucide="x"></i></button>
             </div>
-            <div id="doc-modal-container" class="flex-1 overflow-auto flex items-center justify-center bg-slate-950 p-4 rounded-xl border border-slate-800 min-h-[300px]">
-                <!-- Conteúdo pré-visualizado (Imagem ou iFrame) -->
-            </div>
+            <div id="doc-modal-container" class="flex-1 overflow-auto flex items-center justify-center bg-slate-950 p-4 rounded-xl border border-slate-800 min-h-[300px]"></div>
             <div class="flex justify-between items-center">
-                <a id="doc-modal-download" href="#" download="comprovante" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-4 py-2 rounded-xl flex items-center gap-2">
-                    <i data-lucide="download" class="w-4 h-4"></i> Baixar Documento
-                </a>
+                <a id="doc-modal-download" href="#" download="comprovante" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-4 py-2 rounded-xl flex items-center gap-2"><i data-lucide="download" class="w-4 h-4"></i> Baixar</a>
                 <button onclick="closeDocModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs px-4 py-2 rounded-xl">Fechar</button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL -->
+    <!-- MODAL PRINCIPAL -->
     <div id="modal-form" class="fixed inset-0 bg-black/90 backdrop-blur-sm hidden z-[200] flex items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-md p-6 overflow-y-auto max-h-[90vh]">
             <h3 id="form-title" class="text-xl font-bold mb-6">Lançamento</h3>
@@ -329,11 +303,26 @@
                     </div>
                 </div>
 
-                <select id="inp-cat"></select>
+                <!-- CATEGORIA + ADD CATEGORIA -->
+                <div id="container-categoria" class="space-y-2">
+                    <div class="flex gap-2">
+                        <select id="inp-cat"></select>
+                        <button type="button" onclick="toggleAddCat()" class="bg-indigo-600/20 text-indigo-400 px-3 rounded-xl border border-indigo-500/30 font-bold text-xs" title="Adicionar Categoria">+</button>
+                    </div>
+                    <div id="box-nova-cat" class="hidden flex gap-2 p-2 bg-indigo-500/5 border border-indigo-500/20 rounded-xl animate-in slide-in-from-top-1">
+                        <input type="text" id="inp-nova-cat-nome" placeholder="Nova categoria..." class="!py-1 !text-xs">
+                        <button type="button" onclick="adicionarNovaCategoria()" class="bg-indigo-600 text-white px-3 py-1 rounded-lg font-bold text-[10px]">Salvar</button>
+                    </div>
+                </div>
 
-                <!-- CAMPO DE ANEXAR COMPROVANTE/DOCUMENTO -->
+                <!-- CAMPO OBSERVAÇÕES -->
+                <div id="box-observacoes">
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1 px-1">Observações (Opcional)</label>
+                    <textarea id="inp-obs" placeholder="Detalhes adicionais sobre este lançamento..."></textarea>
+                </div>
+
                 <div id="box-comprovante" class="p-3 bg-slate-950 rounded-xl border border-slate-800 space-y-2">
-                    <label class="block text-xs font-bold text-slate-400 uppercase">Anexar Documento / Comprovante</label>
+                    <label class="block text-xs font-bold text-slate-400 uppercase">Documento / Comprovante</label>
                     <input type="file" id="inp-comprovante" accept="image/*,.pdf" class="text-xs text-slate-400 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700 cursor-pointer w-full" onchange="handleFileSelect(event)">
                     <div id="preview-comprovante" class="hidden flex items-center justify-between text-xs bg-slate-900 p-2.5 rounded-xl border border-slate-800">
                         <span id="nome-comprovante" class="truncate text-indigo-400 font-bold max-w-[200px]"></span>
@@ -371,11 +360,9 @@
         function showTab(id) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.getElementById(id).classList.add('active');
-            
             document.querySelectorAll('nav button, aside button').forEach(b => b.classList.remove('nav-active', 'text-white'));
             document.getElementById('nav-' + id)?.classList.add('nav-active');
             document.getElementById('mob-' + id)?.classList.add('text-white');
-            
             document.getElementById('tab-title').innerText = id.charAt(0).toUpperCase() + id.slice(1);
             if(id === 'configuracoes') document.getElementById('cfg-api-key').value = state.config?.apiKey || '';
             render();
@@ -392,18 +379,14 @@
         async function syncAlphaVantage() {
             const key = state.config?.apiKey;
             if(!key) return alert("Configure a API Key nas configurações primeiro.");
-            
             const btn = document.getElementById('sync-icon');
             btn.classList.add('animate-spin');
-
             for (let inv of state.investRV) {
                 try {
                     const symbol = inv.ticker.includes('.') ? inv.ticker : `${inv.ticker}.SA`;
                     const res = await fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=${key}`);
                     const data = await res.json();
-                    if(data["Global Quote"] && data["Global Quote"]["05. price"]) {
-                        inv.cotacao = parseFloat(data["Global Quote"]["05. price"]);
-                    }
+                    if(data["Global Quote"] && data["Global Quote"]["05. price"]) inv.cotacao = parseFloat(data["Global Quote"]["05. price"]);
                     await new Promise(r => setTimeout(r, 1000)); 
                 } catch (e) { console.error(e); }
             }
@@ -416,28 +399,18 @@
             const months = new Set();
             months.add(new Date().toISOString().slice(0, 7));
             [...state.receitas, ...state.despesas].forEach(i => i.venc && months.add(i.venc.slice(0, 7)));
-            
             const sorted = Array.from(months).sort();
             let html = '<option value="all" ' + (state.selectedMonth === 'all' ? 'selected' : '') + '>TODOS</option>';
-            sorted.forEach(m => {
-                html += `<option value="${m}" ${state.selectedMonth === m ? 'selected' : ''}>${m.split('-').reverse().join('/')}</option>`;
-            });
+            sorted.forEach(m => { html += `<option value="${m}" ${state.selectedMonth === m ? 'selected' : ''}>${m.split('-').reverse().join('/')}</option>`; });
             select.innerHTML = html;
         }
 
         function changeFilterMonth(val) { state.selectedMonth = val; save(); }
 
-        // MANIPULAÇÃO DE ANEXO DE COMPROVANTE (BASE64)
         function handleFileSelect(e) {
             const file = e.target.files[0];
             if (!file) return;
-
-            if (file.size > 5 * 1024 * 1024) {
-                alert("O arquivo selecionado é muito grande. Escolha um arquivo de até 5MB.");
-                e.target.value = '';
-                return;
-            }
-
+            if (file.size > 5 * 1024 * 1024) { alert("Arquivo muito grande (máx 5MB)."); e.target.value = ''; return; }
             const reader = new FileReader();
             reader.onload = function(evt) {
                 document.getElementById('form-comprovante-b64').value = evt.target.result;
@@ -463,222 +436,104 @@
             if (!b64Data) return;
             const container = document.getElementById('doc-modal-container');
             const downloadBtn = document.getElementById('doc-modal-download');
-            
-            downloadBtn.href = b64Data;
-            downloadBtn.download = nome;
+            downloadBtn.href = b64Data; downloadBtn.download = nome;
             document.getElementById('doc-modal-title').innerHTML = `<i data-lucide="file-text" class="text-indigo-400"></i> Documento: ${nome}`;
-
-            if (b64Data.startsWith('data:image/')) {
-                container.innerHTML = `<img src="${b64Data}" alt="Comprovante" class="max-h-[60vh] max-w-full rounded-lg object-contain shadow-lg">`;
-            } else if (b64Data.startsWith('data:application/pdf')) {
-                container.innerHTML = `<iframe src="${b64Data}" class="w-full h-[60vh] rounded-lg border-0"></iframe>`;
-            } else {
-                container.innerHTML = `<div class="text-center p-6"><i data-lucide="file" class="w-12 h-12 text-indigo-400 mx-auto mb-2"></i><p class="text-sm font-bold text-slate-300">${nome}</p><p class="text-xs text-slate-500 mt-1">Clique abaixo para baixar este arquivo.</p></div>`;
-            }
-
-            document.getElementById('modal-doc').classList.remove('hidden');
-            lucide.createIcons();
+            if (b64Data.startsWith('data:image/')) container.innerHTML = `<img src="${b64Data}" class="max-h-[60vh] max-w-full rounded-lg object-contain shadow-lg">`;
+            else if (b64Data.startsWith('data:application/pdf')) container.innerHTML = `<iframe src="${b64Data}" class="w-full h-[60vh] rounded-lg border-0"></iframe>`;
+            else container.innerHTML = `<div class="text-center p-6"><i data-lucide="file" class="w-12 h-12 text-indigo-400 mx-auto mb-2"></i><p class="text-sm font-bold text-slate-300">${nome}</p></div>`;
+            document.getElementById('modal-doc').classList.remove('hidden'); lucide.createIcons();
         }
 
-        function closeDocModal() {
-            document.getElementById('modal-doc').classList.add('hidden');
+        function closeDocModal() { document.getElementById('modal-doc').classList.add('hidden'); }
+
+        function toggleAddCat() { document.getElementById('box-nova-cat').classList.toggle('hidden'); document.getElementById('inp-nova-cat-nome').focus(); }
+
+        function adicionarNovaCategoria() {
+            const nome = document.getElementById('inp-nova-cat-nome').value.trim();
+            const type = document.getElementById('form-type').value;
+            if (!nome) return;
+            const listKey = type === 'receita' ? 'categoriasReceitas' : 'categoriasDespesas';
+            const existe = state[listKey].some(c => c.toLowerCase() === nome.toLowerCase());
+            if (existe) { alert("Esta categoria já existe."); return; }
+            state[listKey].push(nome);
+            state[listKey].sort();
+            document.getElementById('inp-nova-cat-nome').value = '';
+            document.getElementById('box-nova-cat').classList.add('hidden');
+            const sel = document.getElementById('inp-cat');
+            sel.innerHTML = state[listKey].map(c => `<option value="${c}">${c}</option>`).join('');
+            sel.value = nome;
+            save();
         }
 
-        // =========================================================
-        // NOVAS FUNÇÕES: EXPORTAÇÃO PARA EXCEL (.xlsx) E PDF (.pdf)
-        // =========================================================
         function getFilteredExportData(filtroTipo = 'todos') {
             const isAll = state.selectedMonth === 'all';
-            let list = [];
-
-            if (filtroTipo === 'receitas') {
-                list = state.receitas.map(r => ({ ...r, tipo: 'Receita' }));
-            } else if (filtroTipo === 'despesas') {
-                list = state.despesas.map(d => ({ ...d, tipo: 'Despesa' }));
-            } else {
-                list = [
-                    ...state.receitas.map(r => ({ ...r, tipo: 'Receita' })),
-                    ...state.despesas.map(d => ({ ...d, tipo: 'Despesa' }))
-                ];
-            }
-
-            if (!isAll) {
-                list = list.filter(item => item.venc?.startsWith(state.selectedMonth));
-            }
-
+            let list = filtroTipo === 'receitas' ? state.receitas.map(r => ({ ...r, tipo: 'Receita' })) : 
+                       filtroTipo === 'despesas' ? state.despesas.map(d => ({ ...d, tipo: 'Despesa' })) :
+                       [...state.receitas.map(r => ({ ...r, tipo: 'Receita' })), ...state.despesas.map(d => ({ ...d, tipo: 'Despesa' }))];
+            if (!isAll) list = list.filter(item => item.venc?.startsWith(state.selectedMonth));
             return list.sort((a, b) => (a.venc || '').localeCompare(b.venc || ''));
         }
 
         function exportToExcel(filtroTipo = 'todos') {
             const items = getFilteredExportData(filtroTipo);
-            if (items.length === 0) {
-                alert("Nenhum lançamento encontrado para exportação no período selecionado.");
-                return;
-            }
-
+            if (items.length === 0) return alert("Nenhum lançamento.");
             const dataFormatted = items.map(item => ({
                 'Tipo': item.tipo,
                 'Descrição': item.descricao || '',
                 'Categoria': item.categoria || '',
-                'Data de Vencimento': item.venc ? item.venc.split('-').reverse().join('/') : '',
+                'Vencimento': item.venc ? item.venc.split('-').reverse().join('/') : '',
                 'Status': item.status === 'pago' ? 'Pago' : 'Pendente',
                 'Valor (R$)': item.valor || 0,
-                'Parcela': item.parcela || '1/1',
-                'Possui Anexo': item.comprovante ? 'Sim' : 'Não'
+                'Observações': item.observacoes || ''
             }));
-
             const ws = XLSX.utils.json_to_sheet(dataFormatted);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Lançamentos");
-
-            // Configurar larguras das colunas
-            ws['!cols'] = [
-                { wch: 10 }, // Tipo
-                { wch: 30 }, // Descrição
-                { wch: 18 }, // Categoria
-                { wch: 18 }, // Data
-                { wch: 12 }, // Status
-                { wch: 15 }, // Valor
-                { wch: 10 }, // Parcela
-                { wch: 14 }  // Possui Anexo
-            ];
-
-            const mesNome = state.selectedMonth === 'all' ? 'TODOS_OS_PERIODOS' : state.selectedMonth;
-            const fileName = `Relatorio_Financeiro_${filtroTipo.toUpperCase()}_${mesNome}.xlsx`;
-            XLSX.writeFile(wb, fileName);
+            ws['!cols'] = [{ wch: 10 }, { wch: 30 }, { wch: 18 }, { wch: 18 }, { wch: 12 }, { wch: 15 }, { wch: 40 }];
+            XLSX.writeFile(wb, `Financeiro_${state.selectedMonth}.xlsx`);
         }
 
         function exportToPDF(filtroTipo = 'todos') {
             const items = getFilteredExportData(filtroTipo);
-            if (items.length === 0) {
-                alert("Nenhum lançamento encontrado para exportação no período selecionado.");
-                return;
-            }
-
+            if (items.length === 0) return alert("Nenhum lançamento.");
             const { jsPDF } = window.jspdf;
-            const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-
-            const mesNome = state.selectedMonth === 'all' ? 'Todos os Períodos' : state.selectedMonth.split('-').reverse().join('/');
-            const hojeStr = new Date().toLocaleDateString('pt-BR');
-
-            // Cálculos
-            const totalReceitas = items.filter(i => i.tipo === 'Receita').reduce((a,c) => a + c.valor, 0);
-            const totalDespesas = items.filter(i => i.tipo === 'Despesa').reduce((a,c) => a + c.valor, 0);
-            const saldoLiquido = totalReceitas - totalDespesas;
-
-            // Cabeçalho do PDF
-            doc.setFillColor(15, 23, 42); // slate-900
-            doc.rect(0, 0, 210, 32, 'F');
-
-            doc.setTextColor(255, 255, 255);
-            doc.setFontSize(18);
-            doc.setFont("helvetica", "bold");
-            doc.text("MINHA VIDA FINANCEIRA", 14, 16);
-
-            doc.setFontSize(10);
-            doc.setFont("helvetica", "normal");
-            doc.setTextColor(148, 163, 184); // slate-400
-            doc.text(`Relatório de Lançamentos (${filtroTipo.toUpperCase()}) • Período: ${mesNome}`, 14, 24);
-            doc.text(`Emitido em: ${hojeStr}`, 150, 24);
-
-            // Quadrados de Resumo Sumário
-            let startY = 38;
-
-            doc.setFillColor(241, 245, 249); // slate-100
-            doc.roundedRect(14, startY, 56, 18, 3, 3, 'F');
-            doc.setFontSize(8); doc.setTextColor(5, 150, 105); doc.setFont("helvetica", "bold");
-            doc.text("TOTAL RECEITAS", 18, startY + 6);
-            doc.setFontSize(11); doc.setTextColor(15, 23, 42);
-            doc.text(fmt(totalReceitas), 18, startY + 13);
-
-            doc.setFillColor(241, 245, 249);
-            doc.roundedRect(77, startY, 56, 18, 3, 3, 'F');
-            doc.setFontSize(8); doc.setTextColor(225, 29, 72); doc.setFont("helvetica", "bold");
-            doc.text("TOTAL DESPESAS", 81, startY + 6);
-            doc.setFontSize(11); doc.setTextColor(15, 23, 42);
-            doc.text(fmt(totalDespesas), 81, startY + 13);
-
-            doc.setFillColor(241, 245, 249);
-            doc.roundedRect(140, startY, 56, 18, 3, 3, 'F');
-            doc.setFontSize(8); doc.setTextColor(79, 70, 229); doc.setFont("helvetica", "bold");
-            doc.text("SALDO RESULTANTE", 144, startY + 6);
-            doc.setFontSize(11); 
-            doc.setTextColor(saldoLiquido >= 0 ? 5 : 225, saldoLiquido >= 0 ? 150 : 29, saldoLiquido >= 0 ? 105 : 72);
-            doc.text(fmt(saldoLiquido), 144, startY + 13);
-
-            // Tabela Detalhada
+            const doc = new jsPDF();
+            doc.setFontSize(16); doc.text("Relatório Financeiro", 14, 15);
+            doc.setFontSize(10); doc.text(`Período: ${state.selectedMonth}`, 14, 22);
+            
             const tableRows = items.map(i => [
-                i.tipo,
-                i.descricao + (i.parcela ? ` (${i.parcela})` : ''),
-                i.categoria || '-',
-                i.venc ? i.venc.split('-').reverse().join('/') : '-',
-                i.status === 'pago' ? 'Pago' : 'Pendente',
-                fmt(i.valor)
+                i.tipo, i.descricao, i.categoria, i.venc ? i.venc.split('-').reverse().join('/') : '-', 
+                i.status === 'pago' ? 'Pago' : 'Pendente', fmt(i.valor), i.observacoes || '-'
             ]);
 
             doc.autoTable({
-                startY: startY + 24,
-                head: [['Tipo', 'Descrição', 'Categoria', 'Vencimento', 'Status', 'Valor']],
+                startY: 30,
+                head: [['Tipo', 'Desc', 'Cat', 'Data', 'Status', 'Valor', 'Obs']],
                 body: tableRows,
                 theme: 'striped',
-                headStyles: {
-                    fillColor: [30, 41, 59], // slate-800
-                    textColor: [255, 255, 255],
-                    fontStyle: 'bold',
-                    fontSize: 9
-                },
-                styles: {
-                    fontSize: 8.5,
-                    cellPadding: 3
-                },
-                columnStyles: {
-                    0: { fontStyle: 'bold', width: 22 },
-                    1: { width: 65 },
-                    2: { width: 32 },
-                    3: { width: 25 },
-                    4: { width: 22 },
-                    5: { fontStyle: 'bold', halign: 'right', width: 28 }
-                },
-                didParseCell: function(data) {
-                    if (data.section === 'body' && data.column.index === 0) {
-                        if (data.cell.raw === 'Receita') {
-                            data.cell.styles.textColor = [16, 185, 129];
-                        } else {
-                            data.cell.styles.textColor = [244, 63, 94];
-                        }
-                    }
-                }
+                headStyles: { fillColor: [30, 41, 59] },
+                styles: { fontSize: 7, cellPadding: 2 },
+                columnStyles: { 6: { cellWidth: 40 } }
             });
-
-            // Rodapé
-            const pageCount = doc.internal.getNumberOfPages();
-            for (let i = 1; i <= pageCount; i++) {
-                doc.setPage(i);
-                doc.setFontSize(8);
-                doc.setTextColor(148, 163, 184);
-                doc.text(`Minha Vida Financeira - Página ${i} de ${pageCount}`, 105, 290, { align: 'center' });
-            }
-
-            const fileName = `Relatorio_Financeiro_${filtroTipo.toUpperCase()}_${state.selectedMonth}.pdf`;
-            doc.save(fileName);
+            doc.save(`Financeiro_${state.selectedMonth}.pdf`);
         }
 
         function openForm(type, id = null) {
             const form = document.getElementById('main-form');
-            form.reset();
-            removerComprovanteForm();
-
+            form.reset(); removerComprovanteForm();
             document.getElementById('form-type').value = type;
             document.getElementById('form-id').value = id || '';
+            document.getElementById('box-nova-cat').classList.add('hidden');
             
             const isInvest = (type === 'rv' || type === 'rf');
             document.getElementById('box-invest').classList.toggle('hidden', type !== 'rv');
             document.getElementById('box-parcelas').classList.toggle('hidden', isInvest || id !== null);
             document.getElementById('box-comprovante').classList.toggle('hidden', isInvest);
-            
+            document.getElementById('box-observacoes').classList.toggle('hidden', isInvest);
+            document.getElementById('container-categoria').classList.toggle('hidden', isInvest);
+
             const cats = type === 'receita' ? state.categoriasReceitas : state.categoriasDespesas;
             document.getElementById('inp-cat').innerHTML = cats.map(c => `<option value="${c}">${c}</option>`).join('');
-            document.getElementById('inp-cat').classList.toggle('hidden', isInvest);
 
             if(id) {
                 const list = (type === 'receita') ? state.receitas : (type === 'despesa') ? state.despesas : (type === 'rv') ? state.investRV : state.investRF;
@@ -687,11 +542,9 @@
                     document.getElementById('inp-desc').value = item.descricao || item.ticker || '';
                     document.getElementById('inp-valor').value = item.valor || '';
                     document.getElementById('inp-venc').value = item.venc || '';
+                    document.getElementById('inp-obs').value = item.observacoes || '';
                     if(item.categoria) document.getElementById('inp-cat').value = item.categoria;
-                    if(type === 'rv') {
-                        document.getElementById('inp-qtd').value = item.qtd;
-                        document.getElementById('inp-pm').value = item.pm;
-                    }
+                    if(type === 'rv') { document.getElementById('inp-qtd').value = item.qtd; document.getElementById('inp-pm').value = item.pm; }
                     if(item.comprovante) {
                         document.getElementById('form-comprovante-b64').value = item.comprovante;
                         document.getElementById('form-comprovante-nome').value = item.comprovanteNome || 'documento';
@@ -709,30 +562,27 @@
             const type = document.getElementById('form-type').value;
             const id = document.getElementById('form-id').value;
             const isParcelado = document.getElementById('inp-is-parcelado').checked;
+            const obs = document.getElementById('inp-obs').value;
             const comprovante = document.getElementById('form-comprovante-b64').value;
-            const comprovanteNome = document.getElementById('form-comprovante-nome').value;
+            const compNome = document.getElementById('form-comprovante-nome').value;
 
             if (isParcelado && !id) {
                 const qtd = parseInt(document.getElementById('inp-qtd-parcelas').value) || 1;
                 const total = parseFloat(document.getElementById('inp-valor').value);
                 const valorP = Math.floor((total / qtd) * 100) / 100;
                 const sobra = parseFloat((total - (valorP * qtd)).toFixed(2));
-
                 for (let i = 1; i <= qtd; i++) {
                     let d = new Date(document.getElementById('inp-venc').value + 'T12:00:00');
                     d.setMonth(d.getMonth() + (i - 1));
-                    const item = {
+                    state[type === 'receita' ? 'receitas' : 'despesas'].push({
                         id: Date.now() + Math.random(),
                         descricao: document.getElementById('inp-desc').value,
                         valor: i === qtd ? valorP + sobra : valorP,
                         venc: d.toISOString().slice(0, 10),
                         categoria: document.getElementById('inp-cat').value,
-                        status: 'pendente',
-                        parcela: `${i}/${qtd}`,
-                        comprovante: comprovante || null,
-                        comprovanteNome: comprovanteNome || null
-                    };
-                    state[type === 'receita' ? 'receitas' : 'despesas'].push(item);
+                        status: 'pendente', parcela: `${i}/${qtd}`, observacoes: obs,
+                        comprovante: comprovante || null, comprovanteNome: compNome || null
+                    });
                 }
             } else {
                 let list = (type === 'receita') ? 'receitas' : (type === 'despesa') ? 'despesas' : (type === 'rv') ? 'investRV' : 'investRF';
@@ -743,63 +593,42 @@
                     valor: parseFloat(document.getElementById('inp-valor').value),
                     venc: document.getElementById('inp-venc').value,
                     categoria: document.getElementById('inp-cat').value,
+                    observacoes: obs,
                     qtd: parseFloat(document.getElementById('inp-qtd').value),
                     pm: parseFloat(document.getElementById('inp-pm').value),
                     status: 'pendente',
-                    comprovante: comprovante || null,
-                    comprovanteNome: comprovanteNome || null
+                    comprovante: comprovante || null, comprovanteNome: compNome || null
                 };
                 if(id) {
                     const original = state[list].find(i => i.id == id);
-                    if(original) item.status = original.status;
+                    if(original) { item.status = original.status; item.parcela = original.parcela; }
                     state[list] = state[list].filter(i => i.id != id);
                 }
                 state[list].push(item);
-                if(item.venc && state.selectedMonth !== 'all') state.selectedMonth = item.venc.slice(0, 7);
             }
             save(); closeModal();
         };
 
         function cloneItem(list, id) {
             const original = state[list].find(i => i.id == id);
-            if(original) {
-                const copy = {...original, id: Date.now() + Math.random(), status: 'pendente'};
-                state[list].push(copy);
-                save();
-            }
+            if(original) { state[list].push({...original, id: Date.now() + Math.random(), status: 'pendente'}); save(); }
         }
 
         function getChain(target) {
             let months = new Set();
             [...state.receitas, ...state.despesas].forEach(i => i.venc && months.add(i.venc.slice(0,7)));
             months.add(new Date().toISOString().slice(0,7));
-            
             let sorted = Array.from(months).sort();
             let p = 0, r = 0, res = { recR: 0, desR: 0, finalR: 0, finalP: 0 };
-
-            // TRATAMENTO QUANDO "TODOS" ESTIVER SELECIONADO
             if (target === 'all') {
-                let rP = state.receitas.reduce((a,c)=>a+c.valor, 0);
-                let rR = state.receitas.filter(i=>i.status==='pago').reduce((a,c)=>a+c.valor, 0);
-                let dP = state.despesas.reduce((a,c)=>a+c.valor, 0);
-                let dR = state.despesas.filter(i=>i.status==='pago').reduce((a,c)=>a+c.valor, 0);
-
-                res.recR = rR;
-                res.desR = dR;
-                res.finalR = rR - dR;
-                res.finalP = rP - dP;
-                return res;
+                let rP = state.receitas.reduce((a,c)=>a+c.valor, 0), rR = state.receitas.filter(i=>i.status==='pago').reduce((a,c)=>a+c.valor, 0);
+                let dP = state.despesas.reduce((a,c)=>a+c.valor, 0), dR = state.despesas.filter(i=>i.status==='pago').reduce((a,c)=>a+c.valor, 0);
+                return { recR: rR, desR: dR, finalR: rR - dR, finalP: rP - dP };
             }
-
             sorted.forEach(m => {
-                let recM = state.receitas.filter(i => i.venc?.startsWith(m));
-                let desM = state.despesas.filter(i => i.venc?.startsWith(m));
-                
-                let rP = recM.reduce((a,c)=>a+c.valor,0);
-                let rR = recM.filter(i=>i.status==='pago').reduce((a,c)=>a+c.valor,0);
-                let dP = desM.reduce((a,c)=>a+c.valor,0);
-                let dR = desM.filter(i=>i.status==='pago').reduce((a,c)=>a+c.valor,0);
-
+                let recM = state.receitas.filter(i => i.venc?.startsWith(m)), desM = state.despesas.filter(i => i.venc?.startsWith(m));
+                let rP = recM.reduce((a,c)=>a+c.valor,0), rR = recM.filter(i=>i.status==='pago').reduce((a,c)=>a+c.valor,0);
+                let dP = desM.reduce((a,c)=>a+c.valor,0), dR = desM.filter(i=>i.status==='pago').reduce((a,c)=>a+c.valor,0);
                 if(m === target) { res.recR = rR; res.desR = dR; }
                 p += (rP - dP); r += (rR - dR);
                 if(m === target) { res.finalR = r; res.finalP = p; }
@@ -813,195 +642,91 @@
             const res = getChain(state.selectedMonth);
             const hojeStr = new Date().toISOString().slice(0, 10);
 
-            // Ajustar Rótulos do Dashboard se for 'TODOS' ou Mês específico
-            document.getElementById('label-receita-dash').innerText = isAll ? 'Receitas Totais (Pago)' : 'Receitas (Real)';
-            document.getElementById('label-despesa-dash').innerText = isAll ? 'Despesas Totais (Pagas)' : 'Despesas (Pagas)';
-            document.getElementById('titulo-fluxo-chart').innerText = isAll ? 'Fluxo Geral (Acumulado)' : 'Fluxo do Mês';
-            document.getElementById('titulo-agenda-dash').innerText = isAll ? 'Pendências Gerais (Todas)' : 'Pendências do Mês';
-
-            // Dashboard Cards
             document.getElementById('dash-receita-mes').innerText = fmt(res.recR);
             document.getElementById('dash-despesa-paga-mes').innerText = fmt(res.desR);
             document.getElementById('dash-saldo-real-mes').innerText = fmt(res.finalR);
             document.getElementById('dash-saldo-previsto-mes').innerText = fmt(res.finalP);
 
-            // Alerta Sutil de Vencidos
-            const vencidosGeral = state.despesas.filter(d => d.status === 'pendente' && d.venc < hojeStr);
-            document.getElementById('alerta-vencidos').classList.toggle('hidden', vencidosGeral.length === 0);
+            document.getElementById('alerta-vencidos').classList.toggle('hidden', state.despesas.filter(d => d.status === 'pendente' && d.venc < hojeStr).length === 0);
 
-            // Cálculos Investimentos
             const invCustoRV = state.investRV.reduce((a,c) => a + (c.qtd * c.pm), 0);
             const invAtualRV = state.investRV.reduce((a,c) => a + (c.qtd * (c.cotacao || c.pm)), 0);
             const invRF = state.investRF.reduce((a,c) => a + c.valor, 0);
-
             document.getElementById('dash-inv-custo').innerText = fmt(invCustoRV + invRF);
             document.getElementById('dash-inv-atual').innerText = fmt(invAtualRV + invRF);
             document.getElementById('inv-rv-mercado').innerText = fmt(invAtualRV);
             document.getElementById('inv-rf-total').innerText = fmt(invRF);
 
-            // SEÇÃO EXPANDIDA DE TODOS OS LANÇAMENTOS (QUANDO OPÇÃO "TODOS" FOR SELECIONADA)
-            const secaoTodos = document.getElementById('secao-todos-lancamentos');
             if (isAll) {
-                secaoTodos.classList.remove('hidden');
-                
-                const todosLancamentos = [
-                    ...state.receitas.map(r => ({ ...r, tipo: 'receita' })),
-                    ...state.despesas.map(d => ({ ...d, tipo: 'despesa' }))
-                ].sort((a, b) => (a.venc || '').localeCompare(b.venc || ''));
-
-                const totalRec = state.receitas.reduce((a,c) => a + c.valor, 0);
-                const totalDesp = state.despesas.reduce((a,c) => a + c.valor, 0);
-                document.getElementById('badge-total-receitas').innerText = `Total Receitas: ${fmt(totalRec)}`;
-                document.getElementById('badge-total-despesas').innerText = `Total Despesas: ${fmt(totalDesp)}`;
-
-                document.getElementById('corpo-todos-lancamentos').innerHTML = todosLancamentos.map(item => {
-                    const isPago = item.status === 'pago';
-                    const isDespesa = item.tipo === 'despesa';
-                    const docB64 = item.comprovante ? JSON.stringify(item.comprovante) : "''";
-                    const docNome = item.comprovanteNome ? JSON.stringify(item.comprovanteNome) : "'documento'";
-
-                    return `
+                document.getElementById('secao-todos-lancamentos').classList.remove('hidden');
+                const todos = [...state.receitas.map(r=>({...r,tipo:'receita'})), ...state.despesas.map(d=>({...d,tipo:'despesa'}))].sort((a,b)=>(a.venc||'').localeCompare(b.venc||''));
+                document.getElementById('badge-total-receitas').innerText = `Total Rec: ${fmt(state.receitas.reduce((a,c)=>a+c.valor,0))}`;
+                document.getElementById('badge-total-despesas').innerText = `Total Desp: ${fmt(state.despesas.reduce((a,c)=>a+c.valor,0))}`;
+                document.getElementById('corpo-todos-lancamentos').innerHTML = todos.map(item => `
                     <tr class="border-b border-slate-800 hover:bg-slate-900/50 transition">
-                        <td class="p-3 font-bold">
-                            <span class="px-2 py-0.5 rounded-md text-[10px] uppercase font-black ${isDespesa ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'}">
-                                ${isDespesa ? 'Despesa' : 'Receita'}
-                            </span>
-                        </td>
-                        <td class="p-3 font-bold text-white">
-                            ${item.descricao} ${item.parcela ? `<span class="parcela-tag">${item.parcela}</span>` : ''}
-                        </td>
-                        <td class="p-3 text-slate-400">${item.venc ? item.venc.split('-').reverse().join('/') : '-'}</td>
+                        <td class="p-3 font-bold"><span class="px-2 py-0.5 rounded-md text-[10px] uppercase ${item.tipo==='despesa'?'bg-rose-500/10 text-rose-400':'bg-emerald-500/10 text-emerald-400'}">${item.tipo}</span></td>
+                        <td class="p-3 font-bold text-white">${item.descricao} ${item.parcela?`<span class="parcela-tag">${item.parcela}</span>`:''}</td>
+                        <td class="p-3 text-slate-400">${item.venc?item.venc.split('-').reverse().join('/'):'-'}</td>
                         <td class="p-3 text-slate-400">${item.categoria || '-'}</td>
-                        <td class="p-3 font-bold">
-                            <span class="px-2 py-0.5 rounded-full text-[10px] ${isPago ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'}">
-                                ${isPago ? 'Pago' : 'Pendente'}
-                            </span>
-                        </td>
-                        <td class="p-3 font-bold ${isDespesa ? 'text-rose-400' : 'text-emerald-400'}">${fmt(item.valor)}</td>
-                        <td class="p-3 text-center">
-                            ${item.comprovante ? `
-                                <button onclick='abrirComprovante(${docB64}, ${docNome})' class="p-1.5 bg-indigo-600/20 text-indigo-400 hover:bg-indigo-600 hover:text-white rounded-lg transition inline-flex items-center gap-1 font-bold text-[10px]">
-                                    <i data-lucide="paperclip" class="w-3.5 h-3.5"></i> Anexo
-                                </button>
-                            ` : '<span class="text-slate-600 text-[10px]">-</span>'}
-                        </td>
-                    </tr>`;
-                }).join('') || '<tr><td colspan="7" class="p-6 text-center text-slate-500 text-xs">Nenhum lançamento cadastrado.</td></tr>';
-            } else {
-                secaoTodos.classList.add('hidden');
-            }
+                        <td class="p-3 font-bold"><span class="px-2 py-0.5 rounded-full text-[10px] ${item.status==='pago'?'bg-emerald-500/20 text-emerald-400':'bg-amber-500/20 text-amber-400'}">${item.status}</span></td>
+                        <td class="p-3 font-bold ${item.tipo==='despesa'?'text-rose-400':'text-emerald-400'}">${fmt(item.valor)}</td>
+                        <td class="p-3 text-center">${item.comprovante?`<button onclick='abrirComprovante("${item.comprovante}", "${item.comprovanteNome}")' class="p-1.5 bg-indigo-600/20 text-indigo-400 rounded-lg"><i data-lucide="paperclip" class="w-3.5 h-3.5"></i></button>`:'-'}</td>
+                    </tr>`).join('');
+            } else document.getElementById('secao-todos-lancamentos').classList.add('hidden');
 
-            // Listas
             ['receita', 'despesa'].forEach(type => {
-                const listName = type + 's';
-                const list = state[listName].filter(i => isAll || i.venc?.startsWith(state.selectedMonth));
-                document.getElementById(`lista-${type}s-agrupadas`).innerHTML = list.sort((a,b)=>a.venc.localeCompare(b.venc)).map(i => {
-                    const docB64 = i.comprovante ? JSON.stringify(i.comprovante) : "''";
-                    const docNome = i.comprovanteNome ? JSON.stringify(i.comprovanteNome) : "'documento'";
-
-                    return `
+                const list = state[type + 's'].filter(i => isAll || i.venc?.startsWith(state.selectedMonth));
+                document.getElementById(`lista-${type}s-agrupadas`).innerHTML = list.sort((a,b)=>a.venc.localeCompare(b.venc)).map(i => `
                     <div class="card p-4 flex justify-between items-center group">
                         <div class="flex items-center gap-3">
                             <button onclick="toggleStatus('${type}', ${i.id})" class="w-7 h-7 rounded-full border-2 ${i.status==='pago'?(type==='receita'?'bg-emerald-500':'bg-rose-500'):'border-slate-700'} flex items-center justify-center">
                                 ${i.status==='pago'?'<i data-lucide="check" class="w-4 h-4 text-white"></i>':''}
                             </button>
                             <div onclick="openForm('${type}', ${i.id})" class="cursor-pointer">
-                                <p class="text-sm font-bold ${i.status==='pago'?'strikethrough':''} flex items-center gap-2">
-                                    ${i.descricao} ${i.parcela?`<span class="parcela-tag">${i.parcela}</span>`:''}
-                                </p>
+                                <p class="text-sm font-bold ${i.status==='pago'?'strikethrough':''}">${i.descricao} ${i.parcela?`<span class="parcela-tag">${i.parcela}</span>`:''}</p>
                                 <p class="text-[10px] text-slate-500 uppercase">${i.venc?.split('-').reverse().join('/')} • ${i.categoria}</p>
+                                ${i.observacoes ? `<p class="text-[10px] text-indigo-400 italic mt-1 leading-tight">"${i.observacoes}"</p>` : ''}
                             </div>
                         </div>
                         <div class="flex items-center gap-2">
-                            ${i.comprovante ? `
-                                <button onclick='abrirComprovante(${docB64}, ${docNome})' title="Ver Documento/Comprovante" class="p-1.5 bg-indigo-600/20 text-indigo-400 hover:bg-indigo-600 hover:text-white rounded-lg transition">
-                                    <i data-lucide="paperclip" class="w-4 h-4"></i>
-                                </button>
-                            ` : ''}
+                            ${i.comprovante ? `<button onclick='abrirComprovante("${i.comprovante}", "${i.comprovanteNome}")' class="p-1.5 bg-indigo-600/20 text-indigo-400 rounded-lg"><i data-lucide="paperclip" class="w-4 h-4"></i></button>` : ''}
                             <p class="font-bold ${type==='receita'?'text-emerald-500':'text-rose-500'}">${fmt(i.valor)}</p>
-                            <button onclick="cloneItem('${listName}', ${i.id})" class="text-slate-600 hover:text-indigo-400 opacity-0 group-hover:opacity-100 transition"><i data-lucide="copy" class="w-4 h-4"></i></button>
-                            <button onclick="deleteItem('${listName}', ${i.id})" class="text-slate-600 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                            <button onclick="cloneItem('${type}s', ${i.id})" class="text-slate-600 hover:text-indigo-400 opacity-0 group-hover:opacity-100 transition"><i data-lucide="copy" class="w-4 h-4"></i></button>
+                            <button onclick="deleteItem('${type}s', ${i.id})" class="text-slate-600 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                         </div>
-                    </div>
-                    `;
-                }).join('') || `<div class="card p-6 text-center text-slate-500 text-xs">Nenhuma ${type} cadastrada neste período.</div>`;
+                    </div>`).join('') || `<div class="p-6 text-center text-slate-600 text-xs">Nenhum registro.</div>`;
             });
 
-            // Tabela Investimentos
-            document.getElementById('corpo-investimentos').innerHTML = state.investRV.map(i => {
-                const custoTotal = i.qtd * i.pm;
-                const mercadoTotal = i.qtd * (i.cotacao || i.pm);
-                const resultado = mercadoTotal - custoTotal;
-                const pct = custoTotal > 0 ? (resultado / custoTotal) * 100 : 0;
-                
-                return `
+            document.getElementById('corpo-investimentos').innerHTML = state.investRV.map(i => `
                 <tr class="border-b border-slate-800 hover:bg-slate-900/50 transition">
-                    <td class="p-4 font-bold text-indigo-400">${i.ticker}</td>
-                    <td class="p-4">${i.qtd}</td>
-                    <td class="p-4 text-slate-400">${fmt(i.pm)}</td>
-                    <td class="p-4 font-medium text-slate-300">${fmt(custoTotal)}</td>
-                    <td class="p-4 text-cyan-400">${fmt(i.cotacao || i.pm)}</td>
-                    <td class="p-4 font-bold">${fmt(mercadoTotal)}</td>
-                    <td class="p-4 font-bold ${resultado >= 0 ? 'text-emerald-500' : 'text-rose-500'}">
-                        ${fmt(resultado)}<br><span class="text-[10px] opacity-70">${pct.toFixed(2)}%</span>
-                    </td>
-                    <td class="p-4 text-right">
-                        <button onclick="deleteItem('investRV', ${i.id})" class="text-slate-600 hover:text-rose-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                    </td>
-                </tr>`;
-            }).join('') + state.investRF.map(i => `
-                <tr class="border-b border-slate-800 bg-emerald-900/5 hover:bg-emerald-900/10 transition">
-                    <td class="p-4 font-bold text-emerald-400">${i.nome || i.descricao}</td>
-                    <td class="p-4">-</td>
-                    <td class="p-4">-</td>
-                    <td class="p-4 font-medium text-slate-300">${fmt(i.valor)}</td>
-                    <td class="p-4">-</td>
-                    <td class="p-4 font-bold">${fmt(i.valor)}</td>
-                    <td class="p-4 text-emerald-500 italic text-[10px]">Renda Fixa</td>
-                    <td class="p-4 text-right">
-                        <button onclick="deleteItem('investRF', ${i.id})" class="text-slate-600 hover:text-rose-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                    </td>
+                    <td class="p-4 font-bold text-indigo-400">${i.ticker}</td><td class="p-4">${i.qtd}</td><td class="p-4 text-slate-400">${fmt(i.pm)}</td><td class="p-4">${fmt(i.qtd*i.pm)}</td>
+                    <td class="p-4 text-cyan-400">${fmt(i.cotacao||i.pm)}</td><td class="p-4 font-bold">${fmt(i.qtd*(i.cotacao||i.pm))}</td>
+                    <td class="p-4 font-bold ${(i.qtd*(i.cotacao||i.pm))-(i.qtd*i.pm)>=0?'text-emerald-500':'text-rose-500'}">${fmt((i.qtd*(i.cotacao||i.pm))-(i.qtd*i.pm))}</td>
+                    <td class="p-4 text-right"><button onclick="deleteItem('investRV', ${i.id})" class="text-slate-600"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td>
+                </tr>`).join('') + state.investRF.map(i => `
+                <tr class="border-b border-slate-800 bg-emerald-900/5 transition">
+                    <td class="p-4 font-bold text-emerald-400">${i.nome||i.descricao}</td><td class="p-4">-</td><td class="p-4">-</td><td class="p-4">${fmt(i.valor)}</td><td class="p-4">-</td><td class="p-4 font-bold">${fmt(i.valor)}</td><td class="p-4 text-emerald-500 text-[10px]">Renda Fixa</td>
+                    <td class="p-4 text-right"><button onclick="deleteItem('investRF', ${i.id})" class="text-slate-600"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td>
                 </tr>`).join('');
 
-            // Pendencias (Com data e alerta)
-            document.getElementById('lista-agenda').innerHTML = state.despesas
-                .filter(d => d.status === 'pendente' && (isAll || d.venc?.startsWith(state.selectedMonth)))
-                .sort((a,b) => a.venc.localeCompare(b.venc))
-                .slice(0, 8).map(d => {
-                    const isVencida = d.venc < hojeStr;
-                    return `
-                    <div class="text-[11px] p-2 bg-slate-900 rounded-lg flex justify-between items-center border ${isVencida ? 'border-rose-500/30' : 'border-transparent'}">
-                        <div class="flex flex-col">
-                            <span class="font-bold ${isVencida ? 'text-rose-400' : 'text-slate-200'}">${d.descricao}</span>
-                            <span class="text-[9px] text-slate-500">${d.venc ? d.venc.split('-').reverse().slice(0,2).join('/') : '-'}</span>
-                        </div>
-                        <span class="font-bold ${isVencida ? 'text-rose-500' : 'text-rose-400/80'}">${fmt(d.valor)}</span>
-                    </div>`;
-                }).join('') || '<p class="text-xs text-slate-600 text-center py-4">Nenhuma pendência.</p>';
+            document.getElementById('lista-agenda').innerHTML = state.despesas.filter(d=>d.status==='pendente'&&(isAll||d.venc?.startsWith(state.selectedMonth))).sort((a,b)=>a.venc.localeCompare(b.venc)).slice(0,8).map(d=>`
+                <div class="text-[11px] p-2 bg-slate-900 rounded-lg flex justify-between items-center border ${d.venc<hojeStr?'border-rose-500/30':'border-transparent'}">
+                    <div class="flex flex-col"><span class="font-bold ${d.venc<hojeStr?'text-rose-400':'text-slate-200'}">${d.descricao}</span><span class="text-[9px] text-slate-500">${d.venc?d.venc.split('-').reverse().slice(0,2).join('/'):'-'}</span></div>
+                    <span class="font-bold ${d.venc<hojeStr?'text-rose-500':'text-rose-400/80'}">${fmt(d.valor)}</span>
+                </div>`).join('') || '<p class="text-xs text-slate-600 text-center py-4">Sem pendências.</p>';
 
-            renderChart(res.recR, res.desR);
-            lucide.createIcons();
+            renderChart(res.recR, res.desR); lucide.createIcons();
         }
 
-        function toggleStatus(type, id) {
-            const list = state[type + 's'];
-            const item = list.find(i => i.id == id);
-            if(item) item.status = item.status === 'pago' ? 'pendente' : 'pago';
-            save();
-        }
-
+        function toggleStatus(type, id) { const list = state[type + 's']; const item = list.find(i => i.id == id); if(item) item.status = item.status === 'pago' ? 'pendente' : 'pago'; save(); }
         function deleteItem(list, id) { if(confirm('Excluir lançamento?')) { state[list] = state[list].filter(i => i.id != id); save(); } }
-        function clearData() { if(confirm('Atenção: Isso apagará TODOS os seus dados salvos localmente. Deseja continuar?')) { localStorage.clear(); location.reload(); } }
+        function clearData() { if(confirm('Apagar TUDO?')) { localStorage.clear(); location.reload(); } }
 
         let fChart;
         function renderChart(r, d) {
             const ctx = document.getElementById('chartFluxo');
             if (fChart) fChart.destroy();
-            fChart = new Chart(ctx, {
-                type: 'doughnut',
-                data: { datasets: [{ data: [r, d], backgroundColor: ['#10b981', '#f43f5e'], borderWidth: 0 }] },
-                options: { cutout: '80%', plugins: { tooltip: { enabled: false } } }
-            });
+            fChart = new Chart(ctx, { type: 'doughnut', data: { datasets: [{ data: [r, d], backgroundColor: ['#10b981', '#f43f5e'], borderWidth: 0 }] }, options: { cutout: '80%', plugins: { tooltip: { enabled: false } } } });
         }
 
         window.onload = () => {
