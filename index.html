@@ -735,16 +735,17 @@
 
         window.onload = () => {
             document.getElementById('current-date').innerText = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'full' }).format(new Date());
-            showTab('dashboard');
+            showTab('dashboard'); // Isso faz os menus aparecerem
         };
-   <script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js')
-        .then(reg => console.log('Service Worker registrado!', reg))
-        .catch(err => console.err('Erro ao registrar SW:', err));
-    });
-  }
-</script>
+    </script> <!-- Fecha o script do seu app -->
+
+    <!-- SCRIPT DO SERVICE WORKER (SEPARADO) -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./sw.js').catch(err => console.log('Erro:', err));
+        });
+      }
+    </script>
 </body>
 </html>
