@@ -619,25 +619,18 @@
         }
 
         function getChain(target) {
-            let months = new Set();
-            [...state.receitas, ...state.despesas].forEach(i => i.venc && months.add(i.venc.slice(0,7)));
-            months.add(new Date().toISOString().slice(0,7));
-            let sorted = Array.from(months).sort();
-            let p = 0, r = 0, res = { recR: 0, desR: 0, finalR: 0, finalP: 0 };
             if (target === 'all') {
                 let rP = state.receitas.reduce((a,c)=>a+c.valor, 0), rR = state.receitas.filter(i=>i.status==='pago').reduce((a,c)=>a+c.valor, 0);
                 let dP = state.despesas.reduce((a,c)=>a+c.valor, 0), dR = state.despesas.filter(i=>i.status==='pago').reduce((a,c)=>a+c.valor, 0);
                 return { recR: rR, desR: dR, finalR: rR - dR, finalP: rP - dP };
             }
-            sorted.forEach(m => {
-                let recM = state.receitas.filter(i => i.venc?.startsWith(m)), desM = state.despesas.filter(i => i.venc?.startsWith(m));
-                let rP = recM.reduce((a,c)=>a+c.valor,0), rR = recM.filter(i=>i.status==='pago').reduce((a,c)=>a+c.valor,0);
-                let dP = desM.reduce((a,c)=>a+c.valor,0), dR = desM.filter(i=>i.status==='pago').reduce((a,c)=>a+c.valor,0);
-                if(m === target) { res.recR = rR; res.desR = dR; }
-                p += (rP - dP); r += (rR - dR);
-                if(m === target) { res.finalR = r; res.finalP = p; }
-            });
-            return res;
+            // Mes especifico: calculo isolado, SEM acumular meses anteriores.
+            let recM = state.receitas.filter(i => i.venc?.startsWith(target)), desM = state.despesas.filter(i => i.venc?.startsWith(target));
+            let rP = recM.reduce((a,c)=>a+c.valor,0), rR = recM.filter(i=>i.status==='pago').reduce((a,c)=>a+c.valor,0);
+            let dP = desM.reduce((a,c)=>a+c.valor,0), dR = desM.filter(i=>i.status==='pago').reduce((a,c)=>a+c.valor,0);
+            // finalP = todas as receitas do mes - todas as despesas do mes (independe do status)
+            // finalR = somente lancamentos com status 'pago'
+            return { recR: rR, desR: dR, finalR: rR - dR, finalP: rP - dP };
         }
 
         function render() {
