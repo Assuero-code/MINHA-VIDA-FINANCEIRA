@@ -299,11 +299,22 @@
 
                 <div id="box-parcelas" class="p-3 bg-slate-950 rounded-xl border border-slate-800">
                     <label class="flex items-center gap-2 text-xs text-slate-400 mb-2">
-                        <input type="checkbox" id="inp-is-parcelado" class="w-4 h-4" onchange="document.getElementById('box-qtd').classList.toggle('hidden', !this.checked)">
+                        <input type="checkbox" id="inp-is-parcelado" class="w-4 h-4" onchange="document.getElementById('box-qtd').classList.toggle('hidden', !this.checked); if(this.checked) toggleClonarMeses(false);">
                         Parcelar este lançamento
                     </label>
                     <div id="box-qtd" class="hidden">
                         <input type="number" id="inp-qtd-parcelas" min="1" max="12" placeholder="Qtd de Parcelas">
+                    </div>
+                </div>
+
+                <div id="box-clonar" class="p-3 bg-slate-950 rounded-xl border border-slate-800">
+                    <label class="flex items-center gap-2 text-xs text-slate-400 mb-2">
+                        <input type="checkbox" id="inp-is-clonar" class="w-4 h-4" onchange="toggleClonarMeses(this.checked)">
+                        Clonar este lançamento para os próximos meses
+                    </label>
+                    <div id="box-qtd-clonar" class="hidden">
+                        <input type="number" id="inp-qtd-clonar" min="1" max="60" placeholder="Clonar para quantos meses?">
+                        <p class="text-[10px] text-slate-500 mt-1">Mesmo valor e descrição, com vencimento nos meses seguintes.</p>
                     </div>
                 </div>
 
@@ -522,6 +533,24 @@
             doc.save(`Financeiro_${state.selectedMonth}.pdf`);
         }
 
+        function toggleClonarMeses(on) {
+            document.getElementById('inp-is-clonar').checked = on;
+            document.getElementById('box-qtd-clonar').classList.toggle('hidden', !on);
+            if (on) {
+                document.getElementById('inp-is-parcelado').checked = false;
+                document.getElementById('box-qtd').classList.add('hidden');
+            }
+        }
+
+        // Soma N meses a uma data 'YYYY-MM-DD' mantendo o dia (ou o último dia do mês, se não existir)
+        function addMonthsStr(dateStr, n) {
+            const [y, m, d] = dateStr.split('-').map(Number);
+            const total = (m - 1) + n;
+            const ny = y + Math.floor(total / 12), nm = ((total % 12) + 12) % 12;
+            const ultimo = new Date(ny, nm + 1, 0).getDate();
+            return `${ny}-${String(nm + 1).padStart(2, '0')}-${String(Math.min(d, ultimo)).padStart(2, '0')}`;
+        }
+
         function openForm(type, id = null) {
             const form = document.getElementById('main-form');
             form.reset(); removerComprovanteForm();
@@ -532,6 +561,8 @@
             const isInvest = (type === 'rv' || type === 'rf');
             document.getElementById('box-invest').classList.toggle('hidden', type !== 'rv');
             document.getElementById('box-parcelas').classList.toggle('hidden', isInvest || id !== null);
+            document.getElementById('box-clonar').classList.toggle('hidden', isInvest || id !== null);
+            document.getElementById('box-qtd-clonar').classList.add('hidden');
             document.getElementById('box-comprovante').classList.toggle('hidden', isInvest);
             document.getElementById('box-observacoes').classList.toggle('hidden', isInvest);
             document.getElementById('container-categoria').classList.toggle('hidden', isInvest);
@@ -570,7 +601,22 @@
             const comprovante = document.getElementById('form-comprovante-b64').value;
             const compNome = document.getElementById('form-comprovante-nome').value;
 
-            if (isParcelado && !id) {
+            const isClonar = document.getElementById('inp-is-clonar').checked;
+            if (isClonar && !isParcelado && !id && (type === 'receita' || type === 'despesa')) {
+                const meses = Math.max(1, Math.min(60, parseInt(document.getElementById('inp-qtd-clonar').value) || 1));
+                const vencBase = document.getElementById('inp-venc').value;
+                for (let i = 0; i <= meses; i++) {
+                    state[type === 'receita' ? 'receitas' : 'despesas'].push({
+                        id: Date.now() + Math.random(),
+                        descricao: document.getElementById('inp-desc').value,
+                        valor: parseFloat(document.getElementById('inp-valor').value),
+                        venc: addMonthsStr(vencBase, i),
+                        categoria: document.getElementById('inp-cat').value,
+                        status: 'pendente', observacoes: obs,
+                        comprovante: comprovante || null, comprovanteNome: compNome || null
+                    });
+                }
+            } else if (isParcelado && !id) {
                 const qtd = parseInt(document.getElementById('inp-qtd-parcelas').value) || 1;
                 const total = parseFloat(document.getElementById('inp-valor').value);
                 const valorP = Math.floor((total / qtd) * 100) / 100;
