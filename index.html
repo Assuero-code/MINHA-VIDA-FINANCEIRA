@@ -1,13 +1,751 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>My Google AI Studio App</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
-</html>
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <!-- Link para o Manifesto -->
+<link rel="manifest" href="manifest.json">
+<!-- Cor da barra de status no mobile -->
+<meta name="theme-color" content="#020617">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Minha Vida Financeira | Alpha Master Plus</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- LIB FOR EXCEL EXPORT (.xlsx) -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <!-- LIBS FOR PDF EXPORT (.pdf) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg: #020617; --card: #0f172a; --border: #1e293b; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--bg); 
+            color: #f1f5f9; 
+            margin: 0; padding: 0;
+            height: 100vh; height: 100dvh;
+            display: flex; flex-direction: column;
+            overflow: hidden;
+        }
+        .tab-content { 
+            display: none; 
+            flex: 1;
+            overflow-y: auto; 
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 120px;
+        }
+        .tab-content.active { display: block; }
+        .card { background-color: #0f172a; border: 1px solid var(--border); border-radius: 1.2rem; }
+        input, select, textarea { 
+            background: #1e293b !important; border: 1px solid #334155 !important; 
+            color: white !important; padding: 12px; border-radius: 12px; width: 100%; font-size: 16px;
+        }
+        textarea { resize: none; min-height: 80px; }
+        .strikethrough { text-decoration: line-through; opacity: 0.4; }
+        .nav-active { background-color: #1e293b; color: white !important; border-left: 4px solid #6366f1; }
+        .parcela-tag { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: #334155; color: #94a3b8; font-weight: 800; }
+        
+        main { flex: 1; position: relative; overflow: hidden; display: flex; flex-direction: column; }
+        
+        .table-container { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        table { min-width: 800px; }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- MENU MOBILE -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 flex justify-around p-4 z-[100] md:hidden pb-safe">
+        <button onclick="showTab('dashboard')" id="mob-dashboard" class="text-slate-400 p-2"><i data-lucide="layout-dashboard"></i></button>
+        <button onclick="showTab('receitas')" id="mob-receitas" class="text-slate-400 p-2"><i data-lucide="trending-up"></i></button>
+        <button onclick="showTab('despesas')" id="mob-despesas" class="text-slate-400 p-2"><i data-lucide="trending-down"></i></button>
+        <button onclick="showTab('investimentos')" id="mob-investimentos" class="text-slate-400 p-2"><i data-lucide="line-chart"></i></button>
+        <button onclick="showTab('configuracoes')" id="mob-configuracoes" class="text-slate-400 p-2"><i data-lucide="settings"></i></button>
+    </nav>
+
+    <div class="flex h-full w-full overflow-hidden">
+        <!-- SIDEBAR DESKTOP -->
+        <aside class="hidden md:flex flex-col w-72 bg-slate-950 border-r border-slate-800 p-6">
+            <div class="flex items-center gap-3 mb-10">
+                <div class="bg-indigo-600 p-2 rounded-xl shadow-lg"><i data-lucide="wallet" class="text-white"></i></div>
+                <h1 class="text-lg font-black tracking-tighter uppercase leading-none">Minha Vida<br><span class="text-indigo-500 text-xs">Financeira</span></h1>
+            </div>
+            <nav class="space-y-2 flex-1">
+                <button onclick="showTab('dashboard')" id="nav-dashboard" class="flex items-center gap-3 w-full p-3 rounded-xl transition text-slate-400 hover:bg-slate-900"><i data-lucide="layout-dashboard"></i> Dashboard</button>
+                <button onclick="showTab('receitas')" id="nav-receitas" class="flex items-center gap-3 w-full p-3 rounded-xl transition text-slate-400 hover:bg-slate-900"><i data-lucide="trending-up"></i> Receitas</button>
+                <button onclick="showTab('despesas')" id="nav-despesas" class="flex items-center gap-3 w-full p-3 rounded-xl transition text-slate-400 hover:bg-slate-900"><i data-lucide="trending-down"></i> Despesas</button>
+                <button onclick="showTab('investimentos')" id="nav-investimentos" class="flex items-center gap-3 w-full p-3 rounded-xl transition text-slate-400 hover:bg-slate-900"><i data-lucide="line-chart"></i> Investimentos</button>
+                <button onclick="showTab('configuracoes')" id="nav-configuracoes" class="flex items-center gap-3 w-full p-3 rounded-xl transition text-slate-400 hover:bg-slate-900"><i data-lucide="settings"></i> Configurações</button>
+            </nav>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="flex-1 flex flex-col p-4 md:p-10">
+            <header class="flex justify-between items-start mb-6">
+                <div>
+                    <h2 id="tab-title" class="text-2xl md:text-3xl font-black text-white">Dashboard</h2>
+                    <p id="current-date" class="text-slate-500 text-xs font-medium capitalize"></p>
+                </div>
+                <div class="flex flex-col items-end gap-2">
+                    <div class="flex items-center gap-2">
+                        <button onclick="syncAlphaVantage()" class="p-2 bg-slate-900 rounded-lg text-indigo-400 hover:bg-slate-800 transition" id="btn-sync" title="Sincronizar Cotações">
+                            <i data-lucide="refresh-cw" id="sync-icon" class="w-4 h-4"></i>
+                        </button>
+                        
+                        <button onclick="exportToExcel()" title="Exportar para Excel (.xlsx)" class="px-2.5 py-1.5 bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-600 hover:text-white rounded-lg text-xs font-bold transition flex items-center gap-1">
+                            <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i> <span class="hidden sm:inline">Excel</span>
+                        </button>
+                        <button onclick="exportToPDF()" title="Exportar Relatório PDF" class="px-2.5 py-1.5 bg-rose-600/20 text-rose-400 border border-rose-500/30 hover:bg-rose-600 hover:text-white rounded-lg text-xs font-bold transition flex items-center gap-1">
+                            <i data-lucide="file-text" class="w-3.5 h-3.5"></i> <span class="hidden sm:inline">PDF</span>
+                        </button>
+                    </div>
+                    <select id="filtro-mes-global" onchange="changeFilterMonth(this.value)" class="!p-2 text-xs font-bold w-32 md:w-48"></select>
+                </div>
+            </header>
+
+            <!-- ABA DASHBOARD -->
+            <section id="dashboard" class="tab-content active space-y-6">
+                <div id="alerta-vencidos" class="hidden">
+                    <div class="bg-rose-500/10 border border-rose-500/20 p-3 rounded-xl flex items-center gap-3 text-rose-500">
+                        <i data-lucide="alert-circle" class="w-5 h-5"></i>
+                        <p class="text-xs font-bold uppercase tracking-wider">Atenção: Você possui contas vencidas!</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                    <div class="card p-4 border-emerald-500/20 bg-emerald-500/5">
+                        <p id="label-receita-dash" class="text-emerald-500 text-[10px] font-bold uppercase">Receitas (Real)</p>
+                        <h3 id="dash-receita-mes" class="text-lg md:text-2xl font-black">R$ 0,00</h3>
+                    </div>
+                    <div class="card p-4 border-rose-500/20 bg-rose-500/5">
+                        <p id="label-despesa-dash" class="text-rose-500 text-[10px] font-bold uppercase">Despesas (Pagas)</p>
+                        <h3 id="dash-despesa-paga-mes" class="text-lg md:text-2xl font-black">R$ 0,00</h3>
+                    </div>
+                    <div class="card p-4 border-indigo-500/20 bg-indigo-500/5">
+                        <p class="text-indigo-400 text-[10px] font-bold uppercase">Saldo Real</p>
+                        <h3 id="dash-saldo-real-mes" class="text-lg md:text-2xl font-black">R$ 0,00</h3>
+                    </div>
+                    <div class="card p-4 bg-indigo-600 border-none">
+                        <p class="text-white/70 text-[10px] font-bold uppercase">Saldo Previsto</p>
+                        <h3 id="dash-saldo-previsto-mes" class="text-lg md:text-2xl font-black text-white">R$ 0,00</h3>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div class="card p-4 border-amber-500/20 bg-amber-500/5 flex justify-between items-center">
+                        <div>
+                            <p class="text-amber-500 text-[10px] font-bold uppercase">Investimento Feito (Custo)</p>
+                            <h3 id="dash-inv-custo" class="text-lg md:text-2xl font-black">R$ 0,00</h3>
+                        </div>
+                        <i data-lucide="arrow-down-right" class="text-amber-500 opacity-20 w-8 h-8"></i>
+                    </div>
+                    <div class="card p-4 border-cyan-500/20 bg-cyan-500/5 flex justify-between items-center">
+                        <div>
+                            <p class="text-cyan-500 text-[10px] font-bold uppercase">Patrimônio Atual (Mercado)</p>
+                            <h3 id="dash-inv-atual" class="text-lg md:text-2xl font-black">R$ 0,00</h3>
+                        </div>
+                        <i data-lucide="trending-up" class="text-cyan-500 opacity-20 w-8 h-8"></i>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div class="card p-4">
+                        <h4 id="titulo-fluxo-chart" class="font-bold text-sm mb-4">Fluxo do Mês</h4>
+                        <canvas id="chartFluxo" style="max-height: 200px;"></canvas>
+                    </div>
+                    <div class="card p-4">
+                        <h4 id="titulo-agenda-dash" class="font-bold text-sm mb-4">Pendências do Mês</h4>
+                        <div id="lista-agenda" class="space-y-2"></div>
+                    </div>
+                </div>
+
+                <div id="secao-todos-lancamentos" class="card p-5 hidden space-y-4">
+                    <div class="flex justify-between items-center border-b border-slate-800 pb-3 flex-wrap gap-2">
+                        <div>
+                            <h4 class="font-bold text-base text-white flex items-center gap-2">
+                                <i data-lucide="layers" class="text-indigo-400 w-5 h-5"></i>
+                                Relatório Geral de Todos os Lançamentos
+                            </h4>
+                            <p class="text-xs text-slate-500">Visão consolidada de todas as receitas e despesas registradas no sistema</p>
+                        </div>
+                        <div class="flex gap-2 items-center flex-wrap">
+                            <span id="badge-total-receitas" class="text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3 py-1 rounded-lg"></span>
+                            <span id="badge-total-despesas" class="text-xs font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20 px-3 py-1 rounded-lg"></span>
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-slate-900 border-b border-slate-800 text-slate-400">
+                                <tr>
+                                    <th class="p-3">Tipo</th>
+                                    <th class="p-3">Descrição</th>
+                                    <th class="p-3">Vencimento</th>
+                                    <th class="p-3">Categoria</th>
+                                    <th class="p-3">Status</th>
+                                    <th class="p-3">Valor</th>
+                                    <th class="p-3 text-center">Documento</th>
+                                </tr>
+                            </thead>
+                            <tbody id="corpo-todos-lancamentos"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ABA RECEITAS -->
+            <section id="receitas" class="tab-content space-y-4">
+                <div class="flex justify-between items-center bg-slate-900 p-4 rounded-2xl border border-slate-800 flex-wrap gap-2">
+                    <h3 class="font-bold text-emerald-500">Minhas Receitas</h3>
+                    <div class="flex gap-2">
+                        <button onclick="openForm('receita')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl font-bold text-xs transition">+ Adicionar</button>
+                    </div>
+                </div>
+                <div id="lista-receitas-agrupadas" class="space-y-4"></div>
+            </section>
+
+            <!-- ABA DESPESAS -->
+            <section id="despesas" class="tab-content space-y-4">
+                <div class="flex justify-between items-center bg-slate-900 p-4 rounded-2xl border border-slate-800 flex-wrap gap-2">
+                    <h3 class="font-bold text-rose-500">Minhas Despesas</h3>
+                    <div class="flex gap-2">
+                        <button onclick="openForm('despesa')" class="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-xl font-bold text-xs transition">+ Adicionar</button>
+                    </div>
+                </div>
+                <div id="lista-despesas-agrupadas" class="space-y-4"></div>
+            </section>
+
+            <!-- ABA INVESTIMENTOS -->
+            <section id="investimentos" class="tab-content space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="card p-5">
+                        <p class="text-[10px] font-bold text-slate-500 uppercase">Renda Variável (Mercado)</p>
+                        <h3 id="inv-rv-mercado" class="text-2xl font-black">R$ 0,00</h3>
+                        <button onclick="openForm('rv')" class="text-indigo-400 text-[10px] mt-2 font-bold">+ NOVO ATIVO</button>
+                    </div>
+                    <div class="card p-5">
+                        <p class="text-[10px] font-bold text-slate-500 uppercase">Renda Fixa</p>
+                        <h3 id="inv-rf-total" class="text-2xl font-black">R$ 0,00</h3>
+                        <button onclick="openForm('rf')" class="text-emerald-400 text-[10px] mt-2 font-bold">+ NOVO TÍTULO</button>
+                    </div>
+                </div>
+                <div class="card table-container">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-900 border-b border-slate-800">
+                            <tr>
+                                <th class="p-4">Ativo</th>
+                                <th class="p-4">Qtd</th>
+                                <th class="p-4">P. Médio</th>
+                                <th class="p-4">Total Custo</th>
+                                <th class="p-4">Cotação</th>
+                                <th class="p-4">Total Atual</th>
+                                <th class="p-4">Resultado</th>
+                                <th class="p-4 text-right">Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody id="corpo-investimentos"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ABA CONFIG -->
+            <section id="configuracoes" class="tab-content space-y-4">
+                <div class="card p-6 max-w-md mx-auto space-y-6">
+                    <h3 class="font-bold mb-4">Configurações</h3>
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-500 uppercase mb-2 block">Alpha Vantage API Key</label>
+                        <input type="password" id="cfg-api-key" placeholder="Insira sua chave aqui..." class="mb-2">
+                        <button onclick="saveApiKey()" class="bg-indigo-600 w-full p-2 rounded-xl text-xs font-bold">Salvar Chave</button>
+                    </div>
+                    <hr class="border-slate-800">
+                    <button onclick="clearData()" class="w-full p-4 bg-rose-600/20 text-rose-500 rounded-xl font-bold text-xs uppercase">Apagar todos os dados</button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- MODAL DE VISUALIZAÇÃO DE DOCUMENTO -->
+    <div id="modal-doc" class="fixed inset-0 bg-black/90 backdrop-blur-sm hidden z-[250] flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-2xl p-6 flex flex-col gap-4 max-h-[90vh]">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 id="doc-modal-title" class="text-base font-bold text-white flex items-center gap-2"><i data-lucide="file-text" class="text-indigo-400"></i> Comprovante Anexo</h3>
+                <button onclick="closeDocModal()" class="text-slate-400 hover:text-white p-1"><i data-lucide="x"></i></button>
+            </div>
+            <div id="doc-modal-container" class="flex-1 overflow-auto flex items-center justify-center bg-slate-950 p-4 rounded-xl border border-slate-800 min-h-[300px]"></div>
+            <div class="flex justify-between items-center">
+                <a id="doc-modal-download" href="#" download="comprovante" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-4 py-2 rounded-xl flex items-center gap-2"><i data-lucide="download" class="w-4 h-4"></i> Baixar</a>
+                <button onclick="closeDocModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs px-4 py-2 rounded-xl">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL PRINCIPAL -->
+    <div id="modal-form" class="fixed inset-0 bg-black/90 backdrop-blur-sm hidden z-[200] flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-md p-6 overflow-y-auto max-h-[90vh]">
+            <h3 id="form-title" class="text-xl font-bold mb-6">Lançamento</h3>
+            <form id="main-form" class="space-y-4">
+                <input type="hidden" id="form-type">
+                <input type="hidden" id="form-id">
+                <input type="hidden" id="form-comprovante-b64">
+                <input type="hidden" id="form-comprovante-nome">
+                
+                <input type="text" id="inp-desc" placeholder="Descrição / Ticker" required>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <input type="number" step="0.01" id="inp-valor" placeholder="Valor R$">
+                    <input type="date" id="inp-venc">
+                </div>
+
+                <div id="box-parcelas" class="p-3 bg-slate-950 rounded-xl border border-slate-800">
+                    <label class="flex items-center gap-2 text-xs text-slate-400 mb-2">
+                        <input type="checkbox" id="inp-is-parcelado" class="w-4 h-4" onchange="document.getElementById('box-qtd').classList.toggle('hidden', !this.checked)">
+                        Parcelar este lançamento
+                    </label>
+                    <div id="box-qtd" class="hidden">
+                        <input type="number" id="inp-qtd-parcelas" min="1" max="12" placeholder="Qtd de Parcelas">
+                    </div>
+                </div>
+
+                <!-- CATEGORIA + ADD CATEGORIA -->
+                <div id="container-categoria" class="space-y-2">
+                    <div class="flex gap-2">
+                        <select id="inp-cat"></select>
+                        <button type="button" onclick="toggleAddCat()" class="bg-indigo-600/20 text-indigo-400 px-3 rounded-xl border border-indigo-500/30 font-bold text-xs" title="Adicionar Categoria">+</button>
+                    </div>
+                    <div id="box-nova-cat" class="hidden flex gap-2 p-2 bg-indigo-500/5 border border-indigo-500/20 rounded-xl animate-in slide-in-from-top-1">
+                        <input type="text" id="inp-nova-cat-nome" placeholder="Nova categoria..." class="!py-1 !text-xs">
+                        <button type="button" onclick="adicionarNovaCategoria()" class="bg-indigo-600 text-white px-3 py-1 rounded-lg font-bold text-[10px]">Salvar</button>
+                    </div>
+                </div>
+
+                <!-- CAMPO OBSERVAÇÕES -->
+                <div id="box-observacoes">
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1 px-1">Observações (Opcional)</label>
+                    <textarea id="inp-obs" placeholder="Detalhes adicionais sobre este lançamento..."></textarea>
+                </div>
+
+                <div id="box-comprovante" class="p-3 bg-slate-950 rounded-xl border border-slate-800 space-y-2">
+                    <label class="block text-xs font-bold text-slate-400 uppercase">Documento / Comprovante</label>
+                    <input type="file" id="inp-comprovante" accept="image/*,.pdf" class="text-xs text-slate-400 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700 cursor-pointer w-full" onchange="handleFileSelect(event)">
+                    <div id="preview-comprovante" class="hidden flex items-center justify-between text-xs bg-slate-900 p-2.5 rounded-xl border border-slate-800">
+                        <span id="nome-comprovante" class="truncate text-indigo-400 font-bold max-w-[200px]"></span>
+                        <button type="button" onclick="removerComprovanteForm()" class="text-rose-500 hover:text-rose-400 font-bold ml-2 text-[11px]">Remover</button>
+                    </div>
+                </div>
+
+                <div id="box-invest" class="grid grid-cols-2 gap-4 hidden">
+                    <input type="number" step="0.0001" id="inp-qtd" placeholder="Quantidade">
+                    <input type="number" step="0.01" id="inp-pm" placeholder="Preço Médio">
+                </div>
+
+                <button type="submit" class="w-full bg-indigo-600 p-4 rounded-xl font-bold hover:bg-indigo-700 transition">Salvar Dados</button>
+                <button type="button" onclick="closeModal()" class="w-full text-slate-500 text-sm font-bold">Cancelar</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let state = JSON.parse(localStorage.getItem('mvf_v2')) || {
+            receitas: [], despesas: [], investRV: [], investRF: [],
+            categoriasReceitas: ['Salário', 'Investimento', 'Extra'],
+            categoriasDespesas: ['Aluguel', 'Saúde', 'Lazer', 'Alimentação'],
+            selectedMonth: new Date().toISOString().slice(0, 7),
+            config: { apiKey: '' }
+        };
+
+        const save = () => {
+            localStorage.setItem('mvf_v2', JSON.stringify(state));
+            render();
+        };
+
+        const fmt = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v || 0);
+
+        function showTab(id) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.querySelectorAll('nav button, aside button').forEach(b => b.classList.remove('nav-active', 'text-white'));
+            document.getElementById('nav-' + id)?.classList.add('nav-active');
+            document.getElementById('mob-' + id)?.classList.add('text-white');
+            document.getElementById('tab-title').innerText = id.charAt(0).toUpperCase() + id.slice(1);
+            if(id === 'configuracoes') document.getElementById('cfg-api-key').value = state.config?.apiKey || '';
+            render();
+            lucide.createIcons();
+        }
+
+        function saveApiKey() {
+            state.config = state.config || {};
+            state.config.apiKey = document.getElementById('cfg-api-key').value;
+            save();
+            alert("Chave API salva com sucesso!");
+        }
+
+        async function syncAlphaVantage() {
+            const key = state.config?.apiKey;
+            if(!key) return alert("Configure a API Key nas configurações primeiro.");
+            const btn = document.getElementById('sync-icon');
+            btn.classList.add('animate-spin');
+            for (let inv of state.investRV) {
+                try {
+                    const symbol = inv.ticker.includes('.') ? inv.ticker : `${inv.ticker}.SA`;
+                    const res = await fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=${key}`);
+                    const data = await res.json();
+                    if(data["Global Quote"] && data["Global Quote"]["05. price"]) inv.cotacao = parseFloat(data["Global Quote"]["05. price"]);
+                    await new Promise(r => setTimeout(r, 1000)); 
+                } catch (e) { console.error(e); }
+            }
+            btn.classList.remove('animate-spin');
+            save();
+        }
+
+        function populateMonthFilter() {
+            const select = document.getElementById('filtro-mes-global');
+            const months = new Set();
+            months.add(new Date().toISOString().slice(0, 7));
+            [...state.receitas, ...state.despesas].forEach(i => i.venc && months.add(i.venc.slice(0, 7)));
+            const sorted = Array.from(months).sort();
+            let html = '<option value="all" ' + (state.selectedMonth === 'all' ? 'selected' : '') + '>TODOS</option>';
+            sorted.forEach(m => { html += `<option value="${m}" ${state.selectedMonth === m ? 'selected' : ''}>${m.split('-').reverse().join('/')}</option>`; });
+            select.innerHTML = html;
+        }
+
+        function changeFilterMonth(val) { state.selectedMonth = val; save(); }
+
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            if (file.size > 5 * 1024 * 1024) { alert("Arquivo muito grande (máx 5MB)."); e.target.value = ''; return; }
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                document.getElementById('form-comprovante-b64').value = evt.target.result;
+                document.getElementById('form-comprovante-nome').value = file.name;
+                mostrarPreviewComprovante(file.name);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function mostrarPreviewComprovante(nome) {
+            document.getElementById('nome-comprovante').innerText = nome;
+            document.getElementById('preview-comprovante').classList.remove('hidden');
+        }
+
+        function removerComprovanteForm() {
+            document.getElementById('form-comprovante-b64').value = '';
+            document.getElementById('form-comprovante-nome').value = '';
+            document.getElementById('inp-comprovante').value = '';
+            document.getElementById('preview-comprovante').classList.add('hidden');
+        }
+
+        function abrirComprovante(b64Data, nome = 'comprovante') {
+            if (!b64Data) return;
+            const container = document.getElementById('doc-modal-container');
+            const downloadBtn = document.getElementById('doc-modal-download');
+            downloadBtn.href = b64Data; downloadBtn.download = nome;
+            document.getElementById('doc-modal-title').innerHTML = `<i data-lucide="file-text" class="text-indigo-400"></i> Documento: ${nome}`;
+            if (b64Data.startsWith('data:image/')) container.innerHTML = `<img src="${b64Data}" class="max-h-[60vh] max-w-full rounded-lg object-contain shadow-lg">`;
+            else if (b64Data.startsWith('data:application/pdf')) container.innerHTML = `<iframe src="${b64Data}" class="w-full h-[60vh] rounded-lg border-0"></iframe>`;
+            else container.innerHTML = `<div class="text-center p-6"><i data-lucide="file" class="w-12 h-12 text-indigo-400 mx-auto mb-2"></i><p class="text-sm font-bold text-slate-300">${nome}</p></div>`;
+            document.getElementById('modal-doc').classList.remove('hidden'); lucide.createIcons();
+        }
+
+        function closeDocModal() { document.getElementById('modal-doc').classList.add('hidden'); }
+
+        function toggleAddCat() { document.getElementById('box-nova-cat').classList.toggle('hidden'); document.getElementById('inp-nova-cat-nome').focus(); }
+
+        function adicionarNovaCategoria() {
+            const nome = document.getElementById('inp-nova-cat-nome').value.trim();
+            const type = document.getElementById('form-type').value;
+            if (!nome) return;
+            const listKey = type === 'receita' ? 'categoriasReceitas' : 'categoriasDespesas';
+            const existe = state[listKey].some(c => c.toLowerCase() === nome.toLowerCase());
+            if (existe) { alert("Esta categoria já existe."); return; }
+            state[listKey].push(nome);
+            state[listKey].sort();
+            document.getElementById('inp-nova-cat-nome').value = '';
+            document.getElementById('box-nova-cat').classList.add('hidden');
+            const sel = document.getElementById('inp-cat');
+            sel.innerHTML = state[listKey].map(c => `<option value="${c}">${c}</option>`).join('');
+            sel.value = nome;
+            save();
+        }
+
+        function getFilteredExportData(filtroTipo = 'todos') {
+            const isAll = state.selectedMonth === 'all';
+            let list = filtroTipo === 'receitas' ? state.receitas.map(r => ({ ...r, tipo: 'Receita' })) : 
+                       filtroTipo === 'despesas' ? state.despesas.map(d => ({ ...d, tipo: 'Despesa' })) :
+                       [...state.receitas.map(r => ({ ...r, tipo: 'Receita' })), ...state.despesas.map(d => ({ ...d, tipo: 'Despesa' }))];
+            if (!isAll) list = list.filter(item => item.venc?.startsWith(state.selectedMonth));
+            return list.sort((a, b) => (a.venc || '').localeCompare(b.venc || ''));
+        }
+
+        function exportToExcel(filtroTipo = 'todos') {
+            const items = getFilteredExportData(filtroTipo);
+            if (items.length === 0) return alert("Nenhum lançamento.");
+            const dataFormatted = items.map(item => ({
+                'Tipo': item.tipo,
+                'Descrição': item.descricao || '',
+                'Categoria': item.categoria || '',
+                'Vencimento': item.venc ? item.venc.split('-').reverse().join('/') : '',
+                'Status': item.status === 'pago' ? 'Pago' : 'Pendente',
+                'Valor (R$)': item.valor || 0,
+                'Observações': item.observacoes || ''
+            }));
+            const ws = XLSX.utils.json_to_sheet(dataFormatted);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Lançamentos");
+            ws['!cols'] = [{ wch: 10 }, { wch: 30 }, { wch: 18 }, { wch: 18 }, { wch: 12 }, { wch: 15 }, { wch: 40 }];
+            XLSX.writeFile(wb, `Financeiro_${state.selectedMonth}.xlsx`);
+        }
+
+        function exportToPDF(filtroTipo = 'todos') {
+            const items = getFilteredExportData(filtroTipo);
+            if (items.length === 0) return alert("Nenhum lançamento.");
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.setFontSize(16); doc.text("Relatório Financeiro", 14, 15);
+            doc.setFontSize(10); doc.text(`Período: ${state.selectedMonth}`, 14, 22);
+            
+            const tableRows = items.map(i => [
+                i.tipo, i.descricao, i.categoria, i.venc ? i.venc.split('-').reverse().join('/') : '-', 
+                i.status === 'pago' ? 'Pago' : 'Pendente', fmt(i.valor), i.observacoes || '-'
+            ]);
+
+            doc.autoTable({
+                startY: 30,
+                head: [['Tipo', 'Desc', 'Cat', 'Data', 'Status', 'Valor', 'Obs']],
+                body: tableRows,
+                theme: 'striped',
+                headStyles: { fillColor: [30, 41, 59] },
+                styles: { fontSize: 7, cellPadding: 2 },
+                columnStyles: { 6: { cellWidth: 40 } }
+            });
+            doc.save(`Financeiro_${state.selectedMonth}.pdf`);
+        }
+
+        function openForm(type, id = null) {
+            const form = document.getElementById('main-form');
+            form.reset(); removerComprovanteForm();
+            document.getElementById('form-type').value = type;
+            document.getElementById('form-id').value = id || '';
+            document.getElementById('box-nova-cat').classList.add('hidden');
+            
+            const isInvest = (type === 'rv' || type === 'rf');
+            document.getElementById('box-invest').classList.toggle('hidden', type !== 'rv');
+            document.getElementById('box-parcelas').classList.toggle('hidden', isInvest || id !== null);
+            document.getElementById('box-comprovante').classList.toggle('hidden', isInvest);
+            document.getElementById('box-observacoes').classList.toggle('hidden', isInvest);
+            document.getElementById('container-categoria').classList.toggle('hidden', isInvest);
+
+            const cats = type === 'receita' ? state.categoriasReceitas : state.categoriasDespesas;
+            document.getElementById('inp-cat').innerHTML = cats.map(c => `<option value="${c}">${c}</option>`).join('');
+
+            if(id) {
+                const list = (type === 'receita') ? state.receitas : (type === 'despesa') ? state.despesas : (type === 'rv') ? state.investRV : state.investRF;
+                const item = list.find(i => i.id == id);
+                if(item) {
+                    document.getElementById('inp-desc').value = item.descricao || item.ticker || '';
+                    document.getElementById('inp-valor').value = item.valor || '';
+                    document.getElementById('inp-venc').value = item.venc || '';
+                    document.getElementById('inp-obs').value = item.observacoes || '';
+                    if(item.categoria) document.getElementById('inp-cat').value = item.categoria;
+                    if(type === 'rv') { document.getElementById('inp-qtd').value = item.qtd; document.getElementById('inp-pm').value = item.pm; }
+                    if(item.comprovante) {
+                        document.getElementById('form-comprovante-b64').value = item.comprovante;
+                        document.getElementById('form-comprovante-nome').value = item.comprovanteNome || 'documento';
+                        mostrarPreviewComprovante(item.comprovanteNome || 'Documento anexado');
+                    }
+                }
+            }
+            document.getElementById('modal-form').classList.remove('hidden');
+        }
+
+        function closeModal() { document.getElementById('modal-form').classList.add('hidden'); }
+
+        document.getElementById('main-form').onsubmit = (e) => {
+            e.preventDefault();
+            const type = document.getElementById('form-type').value;
+            const id = document.getElementById('form-id').value;
+            const isParcelado = document.getElementById('inp-is-parcelado').checked;
+            const obs = document.getElementById('inp-obs').value;
+            const comprovante = document.getElementById('form-comprovante-b64').value;
+            const compNome = document.getElementById('form-comprovante-nome').value;
+
+            if (isParcelado && !id) {
+                const qtd = parseInt(document.getElementById('inp-qtd-parcelas').value) || 1;
+                const total = parseFloat(document.getElementById('inp-valor').value);
+                const valorP = Math.floor((total / qtd) * 100) / 100;
+                const sobra = parseFloat((total - (valorP * qtd)).toFixed(2));
+                for (let i = 1; i <= qtd; i++) {
+                    let d = new Date(document.getElementById('inp-venc').value + 'T12:00:00');
+                    d.setMonth(d.getMonth() + (i - 1));
+                    state[type === 'receita' ? 'receitas' : 'despesas'].push({
+                        id: Date.now() + Math.random(),
+                        descricao: document.getElementById('inp-desc').value,
+                        valor: i === qtd ? valorP + sobra : valorP,
+                        venc: d.toISOString().slice(0, 10),
+                        categoria: document.getElementById('inp-cat').value,
+                        status: 'pendente', parcela: `${i}/${qtd}`, observacoes: obs,
+                        comprovante: comprovante || null, comprovanteNome: compNome || null
+                    });
+                }
+            } else {
+                let list = (type === 'receita') ? 'receitas' : (type === 'despesa') ? 'despesas' : (type === 'rv') ? 'investRV' : 'investRF';
+                const item = {
+                    id: id ? parseFloat(id) : Date.now(),
+                    descricao: document.getElementById('inp-desc').value,
+                    ticker: document.getElementById('inp-desc').value.toUpperCase(),
+                    valor: parseFloat(document.getElementById('inp-valor').value),
+                    venc: document.getElementById('inp-venc').value,
+                    categoria: document.getElementById('inp-cat').value,
+                    observacoes: obs,
+                    qtd: parseFloat(document.getElementById('inp-qtd').value),
+                    pm: parseFloat(document.getElementById('inp-pm').value),
+                    status: 'pendente',
+                    comprovante: comprovante || null, comprovanteNome: compNome || null
+                };
+                if(id) {
+                    const original = state[list].find(i => i.id == id);
+                    if(original) { item.status = original.status; item.parcela = original.parcela; }
+                    state[list] = state[list].filter(i => i.id != id);
+                }
+                state[list].push(item);
+            }
+            save(); closeModal();
+        };
+
+        function cloneItem(list, id) {
+            const original = state[list].find(i => i.id == id);
+            if(original) { state[list].push({...original, id: Date.now() + Math.random(), status: 'pendente'}); save(); }
+        }
+
+        function getChain(target) {
+            let months = new Set();
+            [...state.receitas, ...state.despesas].forEach(i => i.venc && months.add(i.venc.slice(0,7)));
+            months.add(new Date().toISOString().slice(0,7));
+            let sorted = Array.from(months).sort();
+            let p = 0, r = 0, res = { recR: 0, desR: 0, finalR: 0, finalP: 0 };
+            if (target === 'all') {
+                let rP = state.receitas.reduce((a,c)=>a+c.valor, 0), rR = state.receitas.filter(i=>i.status==='pago').reduce((a,c)=>a+c.valor, 0);
+                let dP = state.despesas.reduce((a,c)=>a+c.valor, 0), dR = state.despesas.filter(i=>i.status==='pago').reduce((a,c)=>a+c.valor, 0);
+                return { recR: rR, desR: dR, finalR: rR - dR, finalP: rP - dP };
+            }
+            sorted.forEach(m => {
+                let recM = state.receitas.filter(i => i.venc?.startsWith(m)), desM = state.despesas.filter(i => i.venc?.startsWith(m));
+                let rP = recM.reduce((a,c)=>a+c.valor,0), rR = recM.filter(i=>i.status==='pago').reduce((a,c)=>a+c.valor,0);
+                let dP = desM.reduce((a,c)=>a+c.valor,0), dR = desM.filter(i=>i.status==='pago').reduce((a,c)=>a+c.valor,0);
+                if(m === target) { res.recR = rR; res.desR = dR; }
+                p += (rP - dP); r += (rR - dR);
+                if(m === target) { res.finalR = r; res.finalP = p; }
+            });
+            return res;
+        }
+
+        function render() {
+            populateMonthFilter();
+            const isAll = state.selectedMonth === 'all';
+            const res = getChain(state.selectedMonth);
+            const hojeStr = new Date().toISOString().slice(0, 10);
+
+            document.getElementById('dash-receita-mes').innerText = fmt(res.recR);
+            document.getElementById('dash-despesa-paga-mes').innerText = fmt(res.desR);
+            document.getElementById('dash-saldo-real-mes').innerText = fmt(res.finalR);
+            document.getElementById('dash-saldo-previsto-mes').innerText = fmt(res.finalP);
+
+            document.getElementById('alerta-vencidos').classList.toggle('hidden', state.despesas.filter(d => d.status === 'pendente' && d.venc < hojeStr).length === 0);
+
+            const invCustoRV = state.investRV.reduce((a,c) => a + (c.qtd * c.pm), 0);
+            const invAtualRV = state.investRV.reduce((a,c) => a + (c.qtd * (c.cotacao || c.pm)), 0);
+            const invRF = state.investRF.reduce((a,c) => a + c.valor, 0);
+            document.getElementById('dash-inv-custo').innerText = fmt(invCustoRV + invRF);
+            document.getElementById('dash-inv-atual').innerText = fmt(invAtualRV + invRF);
+            document.getElementById('inv-rv-mercado').innerText = fmt(invAtualRV);
+            document.getElementById('inv-rf-total').innerText = fmt(invRF);
+
+            if (isAll) {
+                document.getElementById('secao-todos-lancamentos').classList.remove('hidden');
+                const todos = [...state.receitas.map(r=>({...r,tipo:'receita'})), ...state.despesas.map(d=>({...d,tipo:'despesa'}))].sort((a,b)=>(a.venc||'').localeCompare(b.venc||''));
+                document.getElementById('badge-total-receitas').innerText = `Total Rec: ${fmt(state.receitas.reduce((a,c)=>a+c.valor,0))}`;
+                document.getElementById('badge-total-despesas').innerText = `Total Desp: ${fmt(state.despesas.reduce((a,c)=>a+c.valor,0))}`;
+                document.getElementById('corpo-todos-lancamentos').innerHTML = todos.map(item => `
+                    <tr class="border-b border-slate-800 hover:bg-slate-900/50 transition">
+                        <td class="p-3 font-bold"><span class="px-2 py-0.5 rounded-md text-[10px] uppercase ${item.tipo==='despesa'?'bg-rose-500/10 text-rose-400':'bg-emerald-500/10 text-emerald-400'}">${item.tipo}</span></td>
+                        <td class="p-3 font-bold text-white">${item.descricao} ${item.parcela?`<span class="parcela-tag">${item.parcela}</span>`:''}</td>
+                        <td class="p-3 text-slate-400">${item.venc?item.venc.split('-').reverse().join('/'):'-'}</td>
+                        <td class="p-3 text-slate-400">${item.categoria || '-'}</td>
+                        <td class="p-3 font-bold"><span class="px-2 py-0.5 rounded-full text-[10px] ${item.status==='pago'?'bg-emerald-500/20 text-emerald-400':'bg-amber-500/20 text-amber-400'}">${item.status}</span></td>
+                        <td class="p-3 font-bold ${item.tipo==='despesa'?'text-rose-400':'text-emerald-400'}">${fmt(item.valor)}</td>
+                        <td class="p-3 text-center">${item.comprovante?`<button onclick='abrirComprovante("${item.comprovante}", "${item.comprovanteNome}")' class="p-1.5 bg-indigo-600/20 text-indigo-400 rounded-lg"><i data-lucide="paperclip" class="w-3.5 h-3.5"></i></button>`:'-'}</td>
+                    </tr>`).join('');
+            } else document.getElementById('secao-todos-lancamentos').classList.add('hidden');
+
+            ['receita', 'despesa'].forEach(type => {
+                const list = state[type + 's'].filter(i => isAll || i.venc?.startsWith(state.selectedMonth));
+                document.getElementById(`lista-${type}s-agrupadas`).innerHTML = list.sort((a,b)=>a.venc.localeCompare(b.venc)).map(i => `
+                    <div class="card p-4 flex justify-between items-center group">
+                        <div class="flex items-center gap-3">
+                            <button onclick="toggleStatus('${type}', ${i.id})" class="w-7 h-7 rounded-full border-2 ${i.status==='pago'?(type==='receita'?'bg-emerald-500':'bg-rose-500'):'border-slate-700'} flex items-center justify-center">
+                                ${i.status==='pago'?'<i data-lucide="check" class="w-4 h-4 text-white"></i>':''}
+                            </button>
+                            <div onclick="openForm('${type}', ${i.id})" class="cursor-pointer">
+                                <p class="text-sm font-bold ${i.status==='pago'?'strikethrough':''}">${i.descricao} ${i.parcela?`<span class="parcela-tag">${i.parcela}</span>`:''}</p>
+                                <p class="text-[10px] text-slate-500 uppercase">${i.venc?.split('-').reverse().join('/')} • ${i.categoria}</p>
+                                ${i.observacoes ? `<p class="text-[10px] text-indigo-400 italic mt-1 leading-tight">"${i.observacoes}"</p>` : ''}
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            ${i.comprovante ? `<button onclick='abrirComprovante("${i.comprovante}", "${i.comprovanteNome}")' class="p-1.5 bg-indigo-600/20 text-indigo-400 rounded-lg"><i data-lucide="paperclip" class="w-4 h-4"></i></button>` : ''}
+                            <p class="font-bold ${type==='receita'?'text-emerald-500':'text-rose-500'}">${fmt(i.valor)}</p>
+                            <button onclick="cloneItem('${type}s', ${i.id})" class="text-slate-600 hover:text-indigo-400 opacity-0 group-hover:opacity-100 transition"><i data-lucide="copy" class="w-4 h-4"></i></button>
+                            <button onclick="deleteItem('${type}s', ${i.id})" class="text-slate-600 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        </div>
+                    </div>`).join('') || `<div class="p-6 text-center text-slate-600 text-xs">Nenhum registro.</div>`;
+            });
+
+            document.getElementById('corpo-investimentos').innerHTML = state.investRV.map(i => `
+                <tr class="border-b border-slate-800 hover:bg-slate-900/50 transition">
+                    <td class="p-4 font-bold text-indigo-400">${i.ticker}</td><td class="p-4">${i.qtd}</td><td class="p-4 text-slate-400">${fmt(i.pm)}</td><td class="p-4">${fmt(i.qtd*i.pm)}</td>
+                    <td class="p-4 text-cyan-400">${fmt(i.cotacao||i.pm)}</td><td class="p-4 font-bold">${fmt(i.qtd*(i.cotacao||i.pm))}</td>
+                    <td class="p-4 font-bold ${(i.qtd*(i.cotacao||i.pm))-(i.qtd*i.pm)>=0?'text-emerald-500':'text-rose-500'}">${fmt((i.qtd*(i.cotacao||i.pm))-(i.qtd*i.pm))}</td>
+                    <td class="p-4 text-right"><button onclick="deleteItem('investRV', ${i.id})" class="text-slate-600"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td>
+                </tr>`).join('') + state.investRF.map(i => `
+                <tr class="border-b border-slate-800 bg-emerald-900/5 transition">
+                    <td class="p-4 font-bold text-emerald-400">${i.nome||i.descricao}</td><td class="p-4">-</td><td class="p-4">-</td><td class="p-4">${fmt(i.valor)}</td><td class="p-4">-</td><td class="p-4 font-bold">${fmt(i.valor)}</td><td class="p-4 text-emerald-500 text-[10px]">Renda Fixa</td>
+                    <td class="p-4 text-right"><button onclick="deleteItem('investRF', ${i.id})" class="text-slate-600"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td>
+                </tr>`).join('');
+
+            document.getElementById('lista-agenda').innerHTML = state.despesas.filter(d=>d.status==='pendente'&&(isAll||d.venc?.startsWith(state.selectedMonth))).sort((a,b)=>a.venc.localeCompare(b.venc)).slice(0,8).map(d=>`
+                <div class="text-[11px] p-2 bg-slate-900 rounded-lg flex justify-between items-center border ${d.venc<hojeStr?'border-rose-500/30':'border-transparent'}">
+                    <div class="flex flex-col"><span class="font-bold ${d.venc<hojeStr?'text-rose-400':'text-slate-200'}">${d.descricao}</span><span class="text-[9px] text-slate-500">${d.venc?d.venc.split('-').reverse().slice(0,2).join('/'):'-'}</span></div>
+                    <span class="font-bold ${d.venc<hojeStr?'text-rose-500':'text-rose-400/80'}">${fmt(d.valor)}</span>
+                </div>`).join('') || '<p class="text-xs text-slate-600 text-center py-4">Sem pendências.</p>';
+
+            renderChart(res.recR, res.desR); lucide.createIcons();
+        }
+
+        function toggleStatus(type, id) { const list = state[type + 's']; const item = list.find(i => i.id == id); if(item) item.status = item.status === 'pago' ? 'pendente' : 'pago'; save(); }
+        function deleteItem(list, id) { if(confirm('Excluir lançamento?')) { state[list] = state[list].filter(i => i.id != id); save(); } }
+        function clearData() { if(confirm('Apagar TUDO?')) { localStorage.clear(); location.reload(); } }
+
+        let fChart;
+        function renderChart(r, d) {
+            const ctx = document.getElementById('chartFluxo');
+            if (fChart) fChart.destroy();
+            fChart = new Chart(ctx, { type: 'doughnut', data: { datasets: [{ data: [r, d], backgroundColor: ['#10b981', '#f43f5e'], borderWidth: 0 }] }, options: { cutout: '80%', plugins: { tooltip: { enabled: false } } } });
+        }
+
+        window.onload = () => {
+            document.getElementById('current-date').innerText = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'full' }).format(new Date());
+            showTab('dashboard'); // Isso faz os menus aparecerem
+        };
+    </script> <!-- Fecha o script do seu app -->
+
+    <!-- SCRIPT DO SERVICE WORKER (SEPARADO) -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./sw.js').catch(err => console.log('Erro:', err));
+        });
+      }
+    </script>
+</body>
+</html>
