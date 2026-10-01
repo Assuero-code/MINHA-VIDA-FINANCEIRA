@@ -629,14 +629,14 @@
                 let dP = state.despesas.reduce((a,c)=>a+c.valor, 0), dR = state.despesas.filter(i=>i.status==='pago').reduce((a,c)=>a+c.valor, 0);
                 return { recR: rR, desR: dR, finalR: rR - dR, finalP: rP - dP };
             }
-            sorted.forEach(m => {
-                let recM = state.receitas.filter(i => i.venc?.startsWith(m)), desM = state.despesas.filter(i => i.venc?.startsWith(m));
-                let rP = recM.reduce((a,c)=>a+c.valor,0), rR = recM.filter(i=>i.status==='pago').reduce((a,c)=>a+c.valor,0);
-                let dP = desM.reduce((a,c)=>a+c.valor,0), dR = desM.filter(i=>i.status==='pago').reduce((a,c)=>a+c.valor,0);
-                if(m === target) { res.recR = rR; res.desR = dR; }
-                p += (rP - dP); r += (rR - dR);
-                if(m === target) { res.finalR = r; res.finalP = p; }
-            });
+            // Mês específico: cálculo isolado, SEM acumular meses anteriores.
+            // Saldo Previsto = todas as receitas - todas as despesas do mês (independe do status)
+            // Saldo Real = receitas pagas - despesas pagas do mês
+            let recM = state.receitas.filter(i => i.venc?.startsWith(target)), desM = state.despesas.filter(i => i.venc?.startsWith(target));
+            let rP = recM.reduce((a,c)=>a+c.valor,0), rR = recM.filter(i=>i.status==='pago').reduce((a,c)=>a+c.valor,0);
+            let dP = desM.reduce((a,c)=>a+c.valor,0), dR = desM.filter(i=>i.status==='pago').reduce((a,c)=>a+c.valor,0);
+            res.recR = rR; res.desR = dR;
+            res.finalR = rR - dR; res.finalP = rP - dP;
             return res;
         }
 
