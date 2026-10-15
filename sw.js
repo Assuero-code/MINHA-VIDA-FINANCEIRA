@@ -1,7 +1,9 @@
-const CACHE_NAME = 'finance-v1';
-const ASSETS = [
-  './',
-  './index.html',
+// Service Worker - Minha Vida Financeira (funciona 100% offline)
+const CACHE = 'mvf-cache-v3';
+
+const LOCAL = ['./', './index.html', './manifest.json'];
+
+const CDN = [
   'https://cdn.tailwindcss.com',
   'https://cdn.jsdelivr.net/npm/chart.js',
   'https://unpkg.com/lucide@latest',
@@ -11,29 +13,54 @@ const ASSETS = [
   'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap'
 ];
 
-// Instalação: Salva os arquivos no cache
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS);
-    })
-  );
+  event.waitUntil((async () => {
+    const cache = await caches.open(CACHE);
+    // Arquivos locais
+    await Promise.all(LOCAL.map(u => cache.add(u).catch(() => {})));
+    // Bibliotecas externas (resposta opaca também pode ser guardada)
+    await Promise.all(CDN.map(async (u) => {
+      try {
+        const res = await fetch(u, { mode: 'no-cors' });
+        await cache.put(u, res);
+      } catch (e) { /* sem internet agora: tenta de novo na navegação */ }
+    }));
+    self.skipWaiting();
+  })());
 });
 
-// Ativação: Limpa caches antigos
 self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys().then((keys) => {
-      return Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key)));
-    })
-  );
+  event.waitUntil((async () => {
+    const keys = await caches.keys();
+    await Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)));
+    await self.clients.claim();
+  })());
 });
 
-// Intercepta as requisições: Tenta o cache primeiro, se não tiver, vai na rede
 self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request);
-    })
-  );
+  const req = event.request;
+  if (req.method !== 'GET') return;
+  const url = new URL(req.url);
+
+  // Nunca interceptar a API de cotações (precisa de internet de verdade)
+  if (url.hostname.includes('alphavantage.co')) return;
+
+  event.respondWith((async () => {
+    const cache = await caches.open(CACHE);
+    const cached = await cache.match(req, { ignoreSearch: false }) ||
+                   (req.mode === 'navigate' ? await cache.match('./index.html') : null);
+
+    const network = fetch(req).then(res => {
+      // guarda cópia atualizada (inclui respostas opacas de CDN)
+      if (res && (res.ok || res.type === 'opaque')) cache.put(req, res.clone()).catch(() => {});
+      return res;
+    }).catch(() => null);
+
+    // Cache primeiro (rápido e offline); atualiza em segundo plano
+    if (cached) { event.waitUntil(network); return cached; }
+
+    const res = await network;
+    if (res) return res;
+    return new Response('', { status: 504, statusText: 'Offline' });
+  })());
 });
