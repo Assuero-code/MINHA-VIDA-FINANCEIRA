@@ -1,17 +1,20 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <!-- Link para o Manifesto -->
-<link rel="manifest" href="manifest.json">
-<!-- Cor da barra de status no mobile -->
-<meta name="theme-color" content="#020617">
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <!-- Link para o Manifesto -->
+    <link rel="manifest" href="manifest.json">
+    <!-- Cor da barra de status no mobile -->
+    <meta name="theme-color" content="#020617">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <title>Minha Vida Financeira | Alpha Master Plus</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    
+
     <!-- LIB FOR EXCEL EXPORT (.xlsx) -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <!-- LIBS FOR PDF EXPORT (.pdf) -->
@@ -20,143 +23,269 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        :root { --bg: #020617; --card: #0f172a; --border: #1e293b; }
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background-color: var(--bg); 
-            color: #f1f5f9; 
+        :root {
+            --bg: #020617; --card: #0f172a; --border: #1e293b;
+            --accent: #8b5cf6; --pos: #10b981; --neg: #f43f5e; --warn: #f59e0b;
+        }
+        * { -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: #f1f5f9;
             margin: 0; padding: 0;
             height: 100vh; height: 100dvh;
             display: flex; flex-direction: column;
             overflow: hidden;
         }
-        .tab-content { 
-            display: none; 
+        .tab-content {
+            display: none;
             flex: 1;
-            overflow-y: auto; 
+            overflow-y: auto;
             -webkit-overflow-scrolling: touch;
             padding-bottom: 120px;
         }
         .tab-content.active { display: block; }
+        .tab-content > * { max-width: 1150px; margin-left: auto; margin-right: auto; }
         .card { background-color: #0f172a; border: 1px solid var(--border); border-radius: 1.2rem; }
-        input, select, textarea { 
-            background: #1e293b !important; border: 1px solid #334155 !important; 
+        button.card { width: 100%; cursor: pointer; transition: transform .12s, border-color .12s; }
+        button.card:hover { border-color: rgba(139,92,246,.6); }
+        button.card:active { transform: scale(.98); }
+        input, select, textarea {
+            background: #1e293b !important; border: 1px solid #334155 !important;
             color: white !important; padding: 12px; border-radius: 12px; width: 100%; font-size: 16px;
         }
+        input::placeholder, textarea::placeholder { color: #94a3b8; }
         textarea { resize: none; min-height: 80px; }
         .strikethrough { text-decoration: line-through; opacity: 0.4; }
-        .nav-active { background-color: #1e293b; color: white !important; border-left: 4px solid #6366f1; }
-        .parcela-tag { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: #334155; color: #94a3b8; font-weight: 800; }
-        
+        .nav-active { background-color: #1e293b; color: white !important; border-left: 4px solid var(--accent); }
+        .parcela-tag { font-size: 11px; padding: 2px 6px; border-radius: 4px; background: #334155; color: #cbd5e1; font-weight: 800; }
+
         main { flex: 1; position: relative; overflow: hidden; display: flex; flex-direction: column; }
-        
+
         .table-container { overflow-x: auto; -webkit-overflow-scrolling: touch; }
         table { min-width: 800px; }
+
+        /* Foco visível (teclado) */
+        :focus-visible { outline: 2px solid #a78bfa; outline-offset: 2px; border-radius: 8px; }
+        .skip-link { position: absolute; left: -999px; top: 8px; background: var(--accent); color: #fff; padding: 8px 14px; border-radius: 10px; z-index: 500; font-weight: 700; font-size: 13px; }
+        .skip-link:focus { left: 8px; }
+        .visually-hidden { position: absolute !important; width: 1px; height: 1px; padding: 0 !important; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0 !important; }
+        .lbl { display: block; font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin: 0 0 4px 2px; letter-spacing: .02em; }
+
+        /* Menu inferior (celular) - independente do Tailwind para nunca sumir offline */
+        .mobnav {
+            position: fixed; left: 0; right: 0; bottom: 0; z-index: 100;
+            display: flex; justify-content: space-around; gap: 2px;
+            padding: 6px 6px calc(6px + env(safe-area-inset-bottom));
+            background: rgba(15,23,42,.97); border-top: 1px solid #1e293b;
+            -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+        }
+        .mobnav button {
+            flex: 1; min-width: 0; min-height: 54px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+            background: none; border: 0; color: #94a3b8; font-size: 11px; font-weight: 700; position: relative; border-radius: 12px; padding: 4px 2px; cursor: pointer;
+        }
+        .mobnav button svg, .mobnav button > span:first-child { width: 22px; height: 22px; font-size: 18px; line-height: 22px; }
+        .mobnav button.mob-active { color: #fff; background: rgba(139,92,246,.14); }
+        .mobnav button.mob-active::before { content: ''; position: absolute; top: 0; left: 28%; right: 28%; height: 3px; border-radius: 0 0 4px 4px; background: var(--accent); }
+        @media (min-width: 768px) { .mobnav { display: none; } }
+
+        /* Ações das linhas: sempre visíveis no toque; no mouse aparecem ao passar/focar */
+        .row-actions button { padding: 8px; border-radius: 10px; color: #94a3b8; }
+        .row-actions button:hover { color: #fff; background: #1e293b; }
+        @media (hover: hover) {
+            .row-actions { opacity: 0; transition: opacity .15s; }
+            .group:hover .row-actions, .group:focus-within .row-actions { opacity: 1; }
+        }
+        @media (pointer: coarse) {
+            .row-actions button, .tap { min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; }
+        }
+
+        /* Selos de situação */
+        .badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+        .b-ok { background: rgba(16,185,129,.15); color: #34d399; }
+        .b-warn { background: rgba(245,158,11,.15); color: #fbbf24; }
+        .b-bad { background: rgba(244,63,94,.15); color: #fb7185; }
+        .b-info { background: rgba(139,92,246,.18); color: #c4b5fd; }
+        .b-mute { background: rgba(148,163,184,.14); color: #cbd5e1; }
+
+        /* Barras (relatórios) */
+        .bar { height: 6px; border-radius: 999px; background: #1e293b; overflow: hidden; }
+        .bar > i { display: block; height: 100%; border-radius: 999px; }
+
+        /* Carregamento */
+        .busy { opacity: .6; pointer-events: none; cursor: wait; }
+        .busy > svg, .busy > span:first-child { animation: mvf-spin 1s linear infinite; }
+        @keyframes mvf-spin { to { transform: rotate(360deg); } }
+
+        /* Avisos (toasts) */
+        #toast-root { position: fixed; left: 0; right: 0; bottom: calc(86px + env(safe-area-inset-bottom)); z-index: 400; display: flex; flex-direction: column; align-items: center; gap: 8px; pointer-events: none; padding: 0 12px; }
+        @media (min-width: 768px) { #toast-root { bottom: 24px; } }
+        .toast { pointer-events: auto; display: flex; align-items: center; gap: 10px; max-width: 460px; width: 100%; padding: 12px 14px; border-radius: 14px; font-size: 13px; font-weight: 600; background: #1e293b; color: #f1f5f9; border: 1px solid #334155; box-shadow: 0 10px 30px rgba(0,0,0,.45); animation: mvf-in .18s ease-out; }
+        .toast button { background: rgba(139,92,246,.25); color: #ddd6fe; border: 0; border-radius: 10px; padding: 8px 12px; font-weight: 800; font-size: 12px; cursor: pointer; min-height: 36px; }
+        .toast-ok { border-color: rgba(16,185,129,.5); }
+        .toast-erro { border-color: rgba(244,63,94,.6); background: #2a1020; }
+        .toast-warn { border-color: rgba(245,158,11,.55); }
+        .toast-info { border-color: rgba(139,92,246,.5); }
+        @keyframes mvf-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+        @media (prefers-reduced-motion: reduce) { * { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+
+        .filebtn { display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; }
+        .filebtn:focus-within { outline: 2px solid #a78bfa; outline-offset: 2px; }
+        #confirm-msg { white-space: pre-line; }
     </style>
 </head>
 <body class="antialiased">
+    <a href="#conteudo" class="skip-link">Pular para o conteúdo</a>
+    <div id="toast-root" role="status" aria-live="polite"></div>
 
     <!-- MENU MOBILE -->
-    <nav class="fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 flex justify-around p-4 z-[100] md:hidden pb-safe">
-        <button onclick="showTab('dashboard')" id="mob-dashboard" class="text-slate-400 p-2"><i data-lucide="layout-dashboard"></i></button>
-        <button onclick="showTab('receitas')" id="mob-receitas" class="text-slate-400 p-2"><i data-lucide="trending-up"></i></button>
-        <button onclick="showTab('despesas')" id="mob-despesas" class="text-slate-400 p-2"><i data-lucide="trending-down"></i></button>
-        <button onclick="showTab('investimentos')" id="mob-investimentos" class="text-slate-400 p-2"><i data-lucide="line-chart"></i></button>
-        <button onclick="showTab('configuracoes')" id="mob-configuracoes" class="text-slate-400 p-2"><i data-lucide="settings"></i></button>
+    <nav class="mobnav" aria-label="Navegação principal">
+        <button type="button" onclick="showTab('dashboard')" id="mob-dashboard" aria-label="Dashboard"><i data-lucide="layout-dashboard" aria-hidden="true"></i><span>Início</span></button>
+        <button type="button" onclick="showTab('receitas')" id="mob-receitas" aria-label="Receitas"><i data-lucide="trending-up" aria-hidden="true"></i><span>Receitas</span></button>
+        <button type="button" onclick="showTab('despesas')" id="mob-despesas" aria-label="Despesas"><i data-lucide="trending-down" aria-hidden="true"></i><span>Despesas</span></button>
+        <button type="button" onclick="showTab('investimentos')" id="mob-investimentos" aria-label="Investimentos"><i data-lucide="line-chart" aria-hidden="true"></i><span>Invest.</span></button>
+        <button type="button" onclick="showTab('relatorios')" id="mob-relatorios" aria-label="Relatórios"><i data-lucide="bar-chart-3" aria-hidden="true"></i><span>Relatórios</span></button>
+        <button type="button" onclick="showTab('configuracoes')" id="mob-configuracoes" aria-label="Configurações"><i data-lucide="settings" aria-hidden="true"></i><span>Ajustes</span></button>
     </nav>
 
     <div class="flex h-full w-full overflow-hidden">
         <!-- SIDEBAR DESKTOP -->
         <aside class="hidden md:flex flex-col w-72 bg-slate-950 border-r border-slate-800 p-6">
             <div class="flex items-center gap-3 mb-10">
-                <div class="bg-indigo-600 p-2 rounded-xl shadow-lg"><i data-lucide="wallet" class="text-white"></i></div>
-                <h1 class="text-lg font-black tracking-tighter uppercase leading-none">Minha Vida<br><span class="text-indigo-500 text-xs">Financeira</span></h1>
+                <div class="bg-indigo-600 p-2 rounded-xl shadow-lg"><i data-lucide="wallet" class="text-white" aria-hidden="true"></i></div>
+                <h1 class="text-lg font-black tracking-tighter uppercase leading-none">Minha Vida<br><span class="text-indigo-400 text-xs">Financeira</span></h1>
             </div>
-            <nav class="space-y-2 flex-1">
-                <button onclick="showTab('dashboard')" id="nav-dashboard" class="flex items-center gap-3 w-full p-3 rounded-xl transition text-slate-400 hover:bg-slate-900"><i data-lucide="layout-dashboard"></i> Dashboard</button>
-                <button onclick="showTab('receitas')" id="nav-receitas" class="flex items-center gap-3 w-full p-3 rounded-xl transition text-slate-400 hover:bg-slate-900"><i data-lucide="trending-up"></i> Receitas</button>
-                <button onclick="showTab('despesas')" id="nav-despesas" class="flex items-center gap-3 w-full p-3 rounded-xl transition text-slate-400 hover:bg-slate-900"><i data-lucide="trending-down"></i> Despesas</button>
-                <button onclick="showTab('investimentos')" id="nav-investimentos" class="flex items-center gap-3 w-full p-3 rounded-xl transition text-slate-400 hover:bg-slate-900"><i data-lucide="line-chart"></i> Investimentos</button>
-                <button onclick="showTab('configuracoes')" id="nav-configuracoes" class="flex items-center gap-3 w-full p-3 rounded-xl transition text-slate-400 hover:bg-slate-900"><i data-lucide="settings"></i> Configurações</button>
+            <nav class="space-y-2 flex-1" aria-label="Menu lateral">
+                <button type="button" onclick="showTab('dashboard')" id="nav-dashboard" class="flex items-center gap-3 w-full p-3 rounded-xl transition text-slate-400 hover:bg-slate-900"><i data-lucide="layout-dashboard" aria-hidden="true"></i> Dashboard</button>
+                <button type="button" onclick="showTab('receitas')" id="nav-receitas" class="flex items-center gap-3 w-full p-3 rounded-xl transition text-slate-400 hover:bg-slate-900"><i data-lucide="trending-up" aria-hidden="true"></i> Receitas</button>
+                <button type="button" onclick="showTab('despesas')" id="nav-despesas" class="flex items-center gap-3 w-full p-3 rounded-xl transition text-slate-400 hover:bg-slate-900"><i data-lucide="trending-down" aria-hidden="true"></i> Despesas</button>
+                <button type="button" onclick="showTab('investimentos')" id="nav-investimentos" class="flex items-center gap-3 w-full p-3 rounded-xl transition text-slate-400 hover:bg-slate-900"><i data-lucide="line-chart" aria-hidden="true"></i> Investimentos</button>
+                <button type="button" onclick="showTab('relatorios')" id="nav-relatorios" class="flex items-center gap-3 w-full p-3 rounded-xl transition text-slate-400 hover:bg-slate-900"><i data-lucide="bar-chart-3" aria-hidden="true"></i> Relatórios</button>
+                <button type="button" onclick="showTab('configuracoes')" id="nav-configuracoes" class="flex items-center gap-3 w-full p-3 rounded-xl transition text-slate-400 hover:bg-slate-900"><i data-lucide="settings" aria-hidden="true"></i> Configurações</button>
             </nav>
+            <p class="text-[11px] text-slate-400">Versão 3.0 · dados salvos neste aparelho</p>
         </aside>
 
         <!-- MAIN CONTENT -->
-        <main class="flex-1 flex flex-col p-4 md:p-10">
-            <header class="flex justify-between items-start mb-6">
-                <div>
+        <main id="conteudo" tabindex="-1" class="flex-1 flex flex-col p-4 md:p-10">
+            <header class="flex justify-between items-start mb-6 gap-3">
+                <div class="min-w-0">
                     <h2 id="tab-title" class="text-2xl md:text-3xl font-black text-white">Dashboard</h2>
-                    <p id="current-date" class="text-slate-500 text-xs font-medium capitalize"></p>
+                    <p class="flex items-center gap-2 flex-wrap">
+                        <span id="current-date" class="text-slate-400 text-xs font-medium capitalize"></span>
+                        <span id="badge-offline" class="hidden badge b-warn">Offline</span>
+                    </p>
                 </div>
                 <div class="flex flex-col items-end gap-2">
                     <div class="flex items-center gap-2">
-                        <button onclick="syncAlphaVantage()" class="p-2 bg-slate-900 rounded-lg text-indigo-400 hover:bg-slate-800 transition" id="btn-sync" title="Sincronizar Cotações">
-                            <i data-lucide="refresh-cw" id="sync-icon" class="w-4 h-4"></i>
+                        <button type="button" onclick="syncAlphaVantage()" class="p-2 bg-slate-900 rounded-lg text-indigo-400 hover:bg-slate-800 transition tap" id="btn-sync" title="Sincronizar Cotações" aria-label="Sincronizar cotações">
+                            <i data-lucide="refresh-cw" id="sync-icon" class="w-4 h-4" aria-hidden="true"></i>
                         </button>
-                        
-                        <button onclick="exportToExcel()" title="Exportar para Excel (.xlsx)" class="px-2.5 py-1.5 bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-600 hover:text-white rounded-lg text-xs font-bold transition flex items-center gap-1">
-                            <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i> <span class="hidden sm:inline">Excel</span>
+
+                        <button type="button" id="btn-excel" onclick="exportToExcel()" title="Exportar para Excel (.xlsx)" aria-label="Exportar lançamentos para Excel" class="px-2.5 py-1.5 bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-600 hover:text-white rounded-lg text-xs font-bold transition flex items-center gap-1 tap">
+                            <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5" aria-hidden="true"></i> <span class="hidden sm:inline">Excel</span>
                         </button>
-                        <button onclick="exportToPDF()" title="Exportar Relatório PDF" class="px-2.5 py-1.5 bg-rose-600/20 text-rose-400 border border-rose-500/30 hover:bg-rose-600 hover:text-white rounded-lg text-xs font-bold transition flex items-center gap-1">
-                            <i data-lucide="file-text" class="w-3.5 h-3.5"></i> <span class="hidden sm:inline">PDF</span>
+                        <button type="button" id="btn-pdf" onclick="exportToPDF()" title="Exportar Relatório PDF" aria-label="Exportar lançamentos para PDF" class="px-2.5 py-1.5 bg-rose-600/20 text-rose-400 border border-rose-500/30 hover:bg-rose-600 hover:text-white rounded-lg text-xs font-bold transition flex items-center gap-1 tap">
+                            <i data-lucide="file-text" class="w-3.5 h-3.5" aria-hidden="true"></i> <span class="hidden sm:inline">PDF</span>
                         </button>
                     </div>
-                    <select id="filtro-mes-global" onchange="changeFilterMonth(this.value)" class="!p-2 text-xs font-bold w-32 md:w-48"></select>
+                    <div class="flex items-center gap-1">
+                        <button type="button" id="mes-prev" onclick="navegarMes(-1)" aria-label="Mês anterior" title="Mês anterior" class="tap px-2.5 py-1.5 bg-slate-900 rounded-lg text-slate-300 hover:bg-slate-800 text-sm font-bold">‹</button>
+                        <select id="filtro-mes-global" onchange="changeFilterMonth(this.value)" aria-label="Filtrar por mês" class="!p-2 text-xs font-bold w-28 md:w-44"></select>
+                        <button type="button" id="mes-next" onclick="navegarMes(1)" aria-label="Próximo mês" title="Próximo mês" class="tap px-2.5 py-1.5 bg-slate-900 rounded-lg text-slate-300 hover:bg-slate-800 text-sm font-bold">›</button>
+                    </div>
                 </div>
             </header>
 
             <!-- ABA DASHBOARD -->
-            <section id="dashboard" class="tab-content active space-y-6">
+            <section id="dashboard" class="tab-content active space-y-6" aria-label="Dashboard">
                 <div id="alerta-vencidos" class="hidden">
-                    <div class="bg-rose-500/10 border border-rose-500/20 p-3 rounded-xl flex items-center gap-3 text-rose-500">
-                        <i data-lucide="alert-circle" class="w-5 h-5"></i>
-                        <p class="text-xs font-bold uppercase tracking-wider">Atenção: Você possui contas vencidas!</p>
-                    </div>
+                    <button type="button" onclick="aplicarFiltroRapido('despesa','vencido')" class="w-full text-left bg-rose-500/10 border border-rose-500/20 p-3 rounded-xl flex items-center gap-3 text-rose-400">
+                        <i data-lucide="alert-circle" class="w-5 h-5 shrink-0" aria-hidden="true"></i>
+                        <p class="text-xs font-bold uppercase tracking-wider">Atenção: Você possui contas vencidas! <span id="alerta-vencidos-detalhe" class="normal-case font-semibold opacity-90"></span></p>
+                        <span class="ml-auto text-xs underline shrink-0">Ver</span>
+                    </button>
+                </div>
+                <div id="alerta-proximos" class="hidden">
+                    <button type="button" onclick="aplicarFiltroRapido('despesa','breve')" class="w-full text-left bg-amber-500/10 border border-amber-500/20 p-3 rounded-xl flex items-center gap-3 text-amber-400">
+                        <i data-lucide="clock" class="w-5 h-5 shrink-0" aria-hidden="true"></i>
+                        <p class="text-xs font-bold tracking-wide"><span id="alerta-proximos-detalhe"></span></p>
+                        <span class="ml-auto text-xs underline shrink-0">Ver</span>
+                    </button>
                 </div>
 
                 <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
                     <div class="card p-4 border-emerald-500/20 bg-emerald-500/5">
-                        <p id="label-receita-dash" class="text-emerald-500 text-[10px] font-bold uppercase">Receitas (Real)</p>
+                        <p id="label-receita-dash" class="text-emerald-400 text-[10px] font-bold uppercase">Receitas (Real)</p>
                         <h3 id="dash-receita-mes" class="text-lg md:text-2xl font-black">R$ 0,00</h3>
+                        <p id="sub-receita" class="text-[10px] text-slate-400 mt-1"></p>
+                        <p id="delta-receita" class="text-[10px] mt-0.5"></p>
                     </div>
                     <div class="card p-4 border-rose-500/20 bg-rose-500/5">
-                        <p id="label-despesa-dash" class="text-rose-500 text-[10px] font-bold uppercase">Despesas (Pagas)</p>
+                        <p id="label-despesa-dash" class="text-rose-400 text-[10px] font-bold uppercase">Despesas (Pagas)</p>
                         <h3 id="dash-despesa-paga-mes" class="text-lg md:text-2xl font-black">R$ 0,00</h3>
+                        <p id="sub-despesa" class="text-[10px] text-slate-400 mt-1"></p>
+                        <p id="delta-despesa" class="text-[10px] mt-0.5"></p>
                     </div>
-                    <div class="card p-4 border-indigo-500/20 bg-indigo-500/5">
-                        <p class="text-indigo-400 text-[10px] font-bold uppercase">Saldo Real</p>
+                    <button type="button" onclick="abrirDetalheSaldo('real')" aria-label="Ver composição do saldo real" class="card p-4 border-indigo-500/20 bg-indigo-500/5 text-left">
+                        <p class="text-indigo-300 text-[10px] font-bold uppercase">Saldo Real</p>
                         <h3 id="dash-saldo-real-mes" class="text-lg md:text-2xl font-black">R$ 0,00</h3>
-                    </div>
-                    <div class="card p-4 bg-indigo-600 border-none">
-                        <p class="text-white/70 text-[10px] font-bold uppercase">Saldo Previsto</p>
+                        <p id="delta-real" class="text-[10px] mt-1"></p>
+                        <p class="text-[10px] text-indigo-300 mt-1 underline">Ver composição</p>
+                    </button>
+                    <button type="button" onclick="abrirDetalheSaldo('previsto')" aria-label="Ver composição do saldo previsto" class="card p-4 bg-indigo-600 border-none text-left">
+                        <p class="text-white/80 text-[10px] font-bold uppercase">Saldo Previsto</p>
                         <h3 id="dash-saldo-previsto-mes" class="text-lg md:text-2xl font-black text-white">R$ 0,00</h3>
-                    </div>
+                        <p id="delta-previsto" class="text-[10px] mt-1 text-white/90"></p>
+                        <p class="text-[10px] text-white/80 mt-1 underline">Ver composição</p>
+                    </button>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div class="card p-4 border-amber-500/20 bg-amber-500/5 flex justify-between items-center">
                         <div>
-                            <p class="text-amber-500 text-[10px] font-bold uppercase">Investimento Feito (Custo)</p>
+                            <p class="text-amber-400 text-[10px] font-bold uppercase">Investimento Feito (Custo)</p>
                             <h3 id="dash-inv-custo" class="text-lg md:text-2xl font-black">R$ 0,00</h3>
                         </div>
-                        <i data-lucide="arrow-down-right" class="text-amber-500 opacity-20 w-8 h-8"></i>
+                        <i data-lucide="arrow-down-right" class="text-amber-500 opacity-20 w-8 h-8" aria-hidden="true"></i>
                     </div>
                     <div class="card p-4 border-cyan-500/20 bg-cyan-500/5 flex justify-between items-center">
                         <div>
-                            <p class="text-cyan-500 text-[10px] font-bold uppercase">Patrimônio Atual (Mercado)</p>
+                            <p class="text-cyan-400 text-[10px] font-bold uppercase">Patrimônio Atual (Mercado)</p>
                             <h3 id="dash-inv-atual" class="text-lg md:text-2xl font-black">R$ 0,00</h3>
+                            <p id="dash-inv-resultado" class="text-[10px] mt-1"></p>
                         </div>
-                        <i data-lucide="trending-up" class="text-cyan-500 opacity-20 w-8 h-8"></i>
+                        <i data-lucide="trending-up" class="text-cyan-500 opacity-20 w-8 h-8" aria-hidden="true"></i>
+                    </div>
+                </div>
+
+                <div id="card-comparativo" class="card p-4">
+                    <div class="flex justify-between items-center mb-3 flex-wrap gap-2">
+                        <h4 class="font-bold text-sm">Comparação com o mês anterior</h4>
+                        <span id="comp-meses" class="text-[11px] text-slate-400"></span>
+                    </div>
+                    <div class="table-container">
+                        <table class="w-full text-left text-xs" style="min-width:520px">
+                            <thead class="text-slate-400 border-b border-slate-800">
+                                <tr><th class="p-2">Indicador</th><th class="p-2" id="comp-th-atual">Mês</th><th class="p-2" id="comp-th-ant">Anterior</th><th class="p-2">Variação</th></tr>
+                            </thead>
+                            <tbody id="corpo-comparativo"></tbody>
+                        </table>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                     <div class="card p-4">
                         <h4 id="titulo-fluxo-chart" class="font-bold text-sm mb-4">Fluxo do Mês</h4>
-                        <canvas id="chartFluxo" style="max-height: 200px;"></canvas>
+                        <div id="fluxo-vazio" class="hidden text-xs text-slate-400 text-center py-8">Sem movimentação paga neste período.</div>
+                        <canvas id="chartFluxo" style="max-height: 200px;" role="img" aria-label="Gráfico de fluxo: receitas e despesas pagas"></canvas>
+                        <div id="fluxo-legenda" class="mt-4 text-xs space-y-1"></div>
                     </div>
                     <div class="card p-4">
-                        <h4 id="titulo-agenda-dash" class="font-bold text-sm mb-4">Pendências do Mês</h4>
+                        <div class="flex justify-between items-center mb-4">
+                            <h4 id="titulo-agenda-dash" class="font-bold text-sm">Pendências do Mês</h4>
+                            <button type="button" onclick="aplicarFiltroRapido('despesa','pendente', true)" class="text-[11px] font-bold text-indigo-300 underline">Ver todas</button>
+                        </div>
                         <div id="lista-agenda" class="space-y-2"></div>
                     </div>
                 </div>
@@ -165,10 +294,10 @@
                     <div class="flex justify-between items-center border-b border-slate-800 pb-3 flex-wrap gap-2">
                         <div>
                             <h4 class="font-bold text-base text-white flex items-center gap-2">
-                                <i data-lucide="layers" class="text-indigo-400 w-5 h-5"></i>
+                                <i data-lucide="layers" class="text-indigo-400 w-5 h-5" aria-hidden="true"></i>
                                 Relatório Geral de Todos os Lançamentos
                             </h4>
-                            <p class="text-xs text-slate-500">Visão consolidada de todas as receitas e despesas registradas no sistema</p>
+                            <p class="text-xs text-slate-400">Visão consolidada de todas as receitas e despesas registradas no sistema</p>
                         </div>
                         <div class="flex gap-2 items-center flex-wrap">
                             <span id="badge-total-receitas" class="text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3 py-1 rounded-lg"></span>
@@ -195,41 +324,52 @@
             </section>
 
             <!-- ABA RECEITAS -->
-            <section id="receitas" class="tab-content space-y-4">
+            <section id="receitas" class="tab-content space-y-4" aria-label="Receitas">
                 <div class="flex justify-between items-center bg-slate-900 p-4 rounded-2xl border border-slate-800 flex-wrap gap-2">
-                    <h3 class="font-bold text-emerald-500">Minhas Receitas</h3>
+                    <h3 class="font-bold text-emerald-400">Minhas Receitas</h3>
                     <div class="flex gap-2">
-                        <button onclick="openForm('receita')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl font-bold text-xs transition">+ Adicionar</button>
+                        <button type="button" onclick="openForm('receita')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl font-bold text-xs transition tap">+ Adicionar</button>
                     </div>
                 </div>
+                <div id="filtros-receita" class="card p-3"></div>
+                <div id="resumo-receitas" class="text-xs text-slate-400 px-1"></div>
                 <div id="lista-receitas-agrupadas" class="space-y-4"></div>
             </section>
 
             <!-- ABA DESPESAS -->
-            <section id="despesas" class="tab-content space-y-4">
+            <section id="despesas" class="tab-content space-y-4" aria-label="Despesas">
                 <div class="flex justify-between items-center bg-slate-900 p-4 rounded-2xl border border-slate-800 flex-wrap gap-2">
-                    <h3 class="font-bold text-rose-500">Minhas Despesas</h3>
+                    <h3 class="font-bold text-rose-400">Minhas Despesas</h3>
                     <div class="flex gap-2">
-                        <button onclick="openForm('despesa')" class="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-xl font-bold text-xs transition">+ Adicionar</button>
+                        <button type="button" onclick="openForm('despesa')" class="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-xl font-bold text-xs transition tap">+ Adicionar</button>
                     </div>
                 </div>
+                <div id="filtros-despesa" class="card p-3"></div>
+                <div id="resumo-despesas" class="text-xs text-slate-400 px-1"></div>
                 <div id="lista-despesas-agrupadas" class="space-y-4"></div>
             </section>
 
             <!-- ABA INVESTIMENTOS -->
-            <section id="investimentos" class="tab-content space-y-4">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <section id="investimentos" class="tab-content space-y-4" aria-label="Investimentos">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div class="card p-5">
-                        <p class="text-[10px] font-bold text-slate-500 uppercase">Renda Variável (Mercado)</p>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase">Renda Variável (Mercado)</p>
                         <h3 id="inv-rv-mercado" class="text-2xl font-black">R$ 0,00</h3>
-                        <button onclick="openForm('rv')" class="text-indigo-400 text-[10px] mt-2 font-bold">+ NOVO ATIVO</button>
+                        <button type="button" onclick="openForm('rv')" class="text-indigo-300 text-[11px] mt-2 font-bold tap">+ NOVO ATIVO</button>
                     </div>
                     <div class="card p-5">
-                        <p class="text-[10px] font-bold text-slate-500 uppercase">Renda Fixa</p>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase">Renda Fixa</p>
                         <h3 id="inv-rf-total" class="text-2xl font-black">R$ 0,00</h3>
-                        <button onclick="openForm('rf')" class="text-emerald-400 text-[10px] mt-2 font-bold">+ NOVO TÍTULO</button>
+                        <button type="button" onclick="openForm('rf')" class="text-emerald-400 text-[11px] mt-2 font-bold tap">+ NOVO TÍTULO</button>
+                    </div>
+                    <div class="card p-5">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase">Resultado da Renda Variável</p>
+                        <h3 id="inv-resultado-total" class="text-2xl font-black">R$ 0,00</h3>
+                        <p id="inv-resultado-pct" class="text-xs mt-1 text-slate-400"></p>
                     </div>
                 </div>
+                <p id="sync-status" class="text-[11px] text-slate-400 px-1"></p>
+                <div id="inv-aviso-cotacao" class="hidden text-[11px] text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-xl p-3"></div>
                 <div class="card table-container">
                     <table class="w-full text-left text-xs">
                         <thead class="bg-slate-900 border-b border-slate-800">
@@ -245,138 +385,437 @@
                             </tr>
                         </thead>
                         <tbody id="corpo-investimentos"></tbody>
+                        <tfoot id="rodape-investimentos"></tfoot>
                     </table>
                 </div>
             </section>
 
+            <!-- ABA RELATÓRIOS -->
+            <section id="relatorios" class="tab-content space-y-4" aria-label="Relatórios">
+                <div class="card p-4 flex flex-wrap gap-3 items-end justify-between">
+                    <div class="flex gap-3 flex-wrap items-end">
+                        <div>
+                            <label class="lbl" for="rel-modo">Período</label>
+                            <select id="rel-modo" onchange="renderRelatorios()" style="width:auto;min-width:130px">
+                                <option value="mes">Mensal</option>
+                                <option value="ano">Anual</option>
+                            </select>
+                        </div>
+                        <div id="rel-ano-box" class="hidden">
+                            <label class="lbl" for="rel-ano">Ano</label>
+                            <select id="rel-ano" onchange="renderRelatorios()" style="width:auto;min-width:100px"></select>
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button type="button" id="btn-rel-excel" onclick="exportRelatorioExcel()" class="px-3 py-2 bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-600 hover:text-white rounded-lg text-xs font-bold transition flex items-center gap-1 tap"><i data-lucide="file-spreadsheet" class="w-3.5 h-3.5" aria-hidden="true"></i> Excel</button>
+                        <button type="button" id="btn-rel-pdf" onclick="exportRelatorioPDF()" class="px-3 py-2 bg-rose-600/20 text-rose-400 border border-rose-500/30 hover:bg-rose-600 hover:text-white rounded-lg text-xs font-bold transition flex items-center gap-1 tap"><i data-lucide="file-text" class="w-3.5 h-3.5" aria-hidden="true"></i> PDF</button>
+                    </div>
+                </div>
+                <p id="rel-periodo-txt" class="text-xs text-slate-400 px-1"></p>
+                <div id="rel-cards" class="grid grid-cols-2 lg:grid-cols-4 gap-3"></div>
+                <div id="rel-anual-wrap" class="card p-4 hidden">
+                    <h4 class="font-bold text-sm mb-3">Evolução mês a mês</h4>
+                    <div class="table-container">
+                        <table class="w-full text-left text-xs" style="min-width:760px">
+                            <thead class="text-slate-400 border-b border-slate-800">
+                                <tr><th class="p-2">Mês</th><th class="p-2">Receitas (prev.)</th><th class="p-2">Receitas (reais)</th><th class="p-2">Despesas (prev.)</th><th class="p-2">Despesas (pagas)</th><th class="p-2">Saldo previsto</th><th class="p-2">Saldo real</th><th class="p-2" style="min-width:110px">Visual</th></tr>
+                            </thead>
+                            <tbody id="corpo-rel-anual"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div class="card p-4"><h4 class="font-bold text-sm mb-3 text-rose-400">Despesas por categoria</h4><div id="rel-cat-despesas" class="space-y-3"></div></div>
+                    <div class="card p-4"><h4 class="font-bold text-sm mb-3 text-emerald-400">Receitas por categoria</h4><div id="rel-cat-receitas" class="space-y-3"></div></div>
+                </div>
+            </section>
+
             <!-- ABA CONFIG -->
-            <section id="configuracoes" class="tab-content space-y-4">
+            <section id="configuracoes" class="tab-content space-y-4" aria-label="Configurações">
                 <div class="card p-6 max-w-md mx-auto space-y-6">
                     <h3 class="font-bold mb-4">Configurações</h3>
                     <div>
-                        <label class="text-[10px] font-bold text-slate-500 uppercase mb-2 block">Alpha Vantage API Key</label>
-                        <input type="password" id="cfg-api-key" placeholder="Insira sua chave aqui..." class="mb-2">
-                        <button onclick="saveApiKey()" class="bg-indigo-600 w-full p-2 rounded-xl text-xs font-bold">Salvar Chave</button>
+                        <label for="cfg-api-key" class="lbl">Alpha Vantage API Key</label>
+                        <input type="password" id="cfg-api-key" placeholder="Insira sua chave aqui..." class="mb-2" autocomplete="off">
+                        <button type="button" onclick="saveApiKey()" class="bg-indigo-600 w-full p-2 rounded-xl text-xs font-bold tap">Salvar Chave</button>
                     </div>
                     <hr class="border-slate-800">
-                    <button onclick="clearData()" class="w-full p-4 bg-rose-600/20 text-rose-500 rounded-xl font-bold text-xs uppercase">Apagar todos os dados</button>
+                    <div class="space-y-3">
+                        <h4 class="font-bold text-sm">Backup dos dados</h4>
+                        <p class="text-xs text-slate-400">Baixe uma cópia completa (lançamentos, categorias, investimentos e comprovantes). A chave da API <strong>não</strong> é incluída no arquivo.</p>
+                        <button type="button" id="btn-backup" onclick="exportBackup()" class="w-full p-3 rounded-xl text-xs font-bold bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-600 hover:text-white transition tap">Baixar backup (.json)</button>
+                        <label id="lbl-restore" for="inp-restore" class="filebtn w-full p-3 rounded-xl text-xs font-bold bg-slate-800 text-slate-200 hover:bg-slate-700 transition tap">Restaurar backup...</label>
+                        <input type="file" id="inp-restore" accept=".json,application/json" class="visually-hidden" onchange="handleRestoreFile(event)">
+                        <button type="button" id="btn-undo-restore" onclick="undoRestore()" class="hidden w-full p-3 rounded-xl text-xs font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30 tap">Desfazer última restauração</button>
+                        <p id="storage-info" class="text-[11px] text-slate-400"></p>
+                    </div>
+                    <hr class="border-slate-800">
+                    <button type="button" onclick="clearData()" class="w-full p-4 bg-rose-600/20 text-rose-400 rounded-xl font-bold text-xs uppercase tap">Apagar todos os dados</button>
                 </div>
             </section>
         </main>
     </div>
 
     <!-- MODAL DE VISUALIZAÇÃO DE DOCUMENTO -->
-    <div id="modal-doc" class="fixed inset-0 bg-black/90 backdrop-blur-sm hidden z-[250] flex items-center justify-center p-4">
+    <div id="modal-doc" class="fixed inset-0 bg-black/90 backdrop-blur-sm hidden z-[250] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="doc-modal-title" onclick="if(event.target===this) closeDocModal()">
         <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-2xl p-6 flex flex-col gap-4 max-h-[90vh]">
             <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-                <h3 id="doc-modal-title" class="text-base font-bold text-white flex items-center gap-2"><i data-lucide="file-text" class="text-indigo-400"></i> Comprovante Anexo</h3>
-                <button onclick="closeDocModal()" class="text-slate-400 hover:text-white p-1"><i data-lucide="x"></i></button>
+                <h3 id="doc-modal-title" class="text-base font-bold text-white flex items-center gap-2"><i data-lucide="file-text" class="text-indigo-400" aria-hidden="true"></i> Comprovante Anexo</h3>
+                <button type="button" onclick="closeDocModal()" aria-label="Fechar documento" class="text-slate-400 hover:text-white p-1 tap"><i data-lucide="x" aria-hidden="true"></i></button>
             </div>
             <div id="doc-modal-container" class="flex-1 overflow-auto flex items-center justify-center bg-slate-950 p-4 rounded-xl border border-slate-800 min-h-[300px]"></div>
             <div class="flex justify-between items-center">
-                <a id="doc-modal-download" href="#" download="comprovante" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-4 py-2 rounded-xl flex items-center gap-2"><i data-lucide="download" class="w-4 h-4"></i> Baixar</a>
-                <button onclick="closeDocModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs px-4 py-2 rounded-xl">Fechar</button>
+                <a id="doc-modal-download" href="#" download="comprovante" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-4 py-2 rounded-xl flex items-center gap-2 tap"><i data-lucide="download" class="w-4 h-4" aria-hidden="true"></i> Baixar</a>
+                <button type="button" onclick="closeDocModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs px-4 py-2 rounded-xl tap">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DETALHE DO SALDO -->
+    <div id="modal-detalhe" class="fixed inset-0 bg-black/90 backdrop-blur-sm hidden z-[230] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="detalhe-titulo" onclick="if(event.target===this) fecharModal('modal-detalhe')">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-2xl p-6 flex flex-col gap-4 max-h-[90vh]">
+            <div class="flex justify-between items-start gap-3 border-b border-slate-800 pb-3">
+                <div>
+                    <h3 id="detalhe-titulo" class="text-base font-bold text-white">Composição do saldo</h3>
+                    <p id="detalhe-periodo" class="text-[11px] text-slate-400"></p>
+                </div>
+                <button type="button" onclick="fecharModal('modal-detalhe')" aria-label="Fechar detalhes" class="text-slate-400 hover:text-white p-1 tap"><i data-lucide="x" aria-hidden="true"></i></button>
+            </div>
+            <div class="overflow-y-auto space-y-4" style="min-height:0">
+                <p id="detalhe-formula" class="text-sm font-bold bg-slate-950 border border-slate-800 rounded-xl p-3"></p>
+                <p id="detalhe-explica" class="text-xs text-slate-400"></p>
+                <div>
+                    <h4 class="text-xs font-bold text-emerald-400 uppercase mb-2" id="detalhe-rec-titulo">Receitas</h4>
+                    <div id="detalhe-receitas" class="space-y-1"></div>
+                </div>
+                <div>
+                    <h4 class="text-xs font-bold text-rose-400 uppercase mb-2" id="detalhe-des-titulo">Despesas</h4>
+                    <div id="detalhe-despesas" class="space-y-1"></div>
+                </div>
+                <p id="detalhe-nota" class="text-[11px] text-amber-400"></p>
+            </div>
+            <div class="flex justify-end"><button type="button" onclick="fecharModal('modal-detalhe')" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs px-4 py-2 rounded-xl tap">Fechar</button></div>
+        </div>
+    </div>
+
+    <!-- MODAL DE CONFIRMAÇÃO -->
+    <div id="modal-confirm" class="fixed inset-0 bg-black/90 backdrop-blur-sm hidden z-[300] flex items-center justify-center p-4" role="alertdialog" aria-modal="true" aria-labelledby="confirm-title" aria-describedby="confirm-msg">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-sm p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+            <h3 id="confirm-title" class="text-lg font-bold">Confirmar</h3>
+            <p id="confirm-msg" class="text-sm text-slate-300"></p>
+            <div id="confirm-text-box" class="hidden">
+                <label for="confirm-text" class="lbl" id="confirm-text-hint"></label>
+                <input type="text" id="confirm-text" autocomplete="off" autocapitalize="characters" oninput="atualizarConfirmTexto()">
+            </div>
+            <div class="flex gap-2 justify-end">
+                <button type="button" id="confirm-cancel" onclick="fecharConfirm(false)" class="bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-sm px-4 py-3 rounded-xl tap">Cancelar</button>
+                <button type="button" id="confirm-ok" onclick="fecharConfirm(true)" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm px-4 py-3 rounded-xl tap">Confirmar</button>
             </div>
         </div>
     </div>
 
     <!-- MODAL PRINCIPAL -->
-    <div id="modal-form" class="fixed inset-0 bg-black/90 backdrop-blur-sm hidden z-[200] flex items-center justify-center p-4">
+    <div id="modal-form" class="fixed inset-0 bg-black/90 backdrop-blur-sm hidden z-[200] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="form-title">
         <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-md p-6 overflow-y-auto max-h-[90vh]">
             <h3 id="form-title" class="text-xl font-bold mb-6">Lançamento</h3>
-            <form id="main-form" class="space-y-4">
+            <form id="main-form" class="space-y-4" novalidate>
                 <input type="hidden" id="form-type">
                 <input type="hidden" id="form-id">
                 <input type="hidden" id="form-comprovante-b64">
                 <input type="hidden" id="form-comprovante-nome">
-                
-                <input type="text" id="inp-desc" placeholder="Descrição / Ticker" required>
-                
-                <div class="grid grid-cols-2 gap-4">
-                    <input type="number" step="0.01" id="inp-valor" placeholder="Valor R$">
-                    <input type="date" id="inp-venc">
+
+                <div id="form-erro" role="alert" class="hidden bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-bold p-3 rounded-xl"></div>
+
+                <div>
+                    <label class="lbl" for="inp-desc" id="lbl-desc">Descrição</label>
+                    <input type="text" id="inp-desc" placeholder="Descrição / Ticker" required autocomplete="off" maxlength="120">
+                </div>
+
+                <div id="box-valor-venc" class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="lbl" for="inp-valor">Valor (R$)</label>
+                        <input type="number" step="0.01" min="0" inputmode="decimal" id="inp-valor" placeholder="Valor R$">
+                    </div>
+                    <div>
+                        <label class="lbl" for="inp-venc" id="lbl-venc">Vencimento</label>
+                        <input type="date" id="inp-venc">
+                    </div>
                 </div>
 
                 <div id="box-parcelas" class="p-3 bg-slate-950 rounded-xl border border-slate-800">
-                    <label class="flex items-center gap-2 text-xs text-slate-400 mb-2">
+                    <label class="flex items-center gap-2 text-xs text-slate-300 mb-2">
                         <input type="checkbox" id="inp-is-parcelado" class="w-4 h-4" onchange="document.getElementById('box-qtd').classList.toggle('hidden', !this.checked); if(this.checked) toggleClonarMeses(false);">
                         Parcelar este lançamento
                     </label>
                     <div id="box-qtd" class="hidden">
+                        <label class="lbl" for="inp-qtd-parcelas">Quantidade de parcelas (1 a 12)</label>
                         <input type="number" id="inp-qtd-parcelas" min="1" max="12" placeholder="Qtd de Parcelas">
                     </div>
                 </div>
 
                 <div id="box-clonar" class="p-3 bg-slate-950 rounded-xl border border-slate-800">
-                    <label class="flex items-center gap-2 text-xs text-slate-400 mb-2">
+                    <label class="flex items-center gap-2 text-xs text-slate-300 mb-2">
                         <input type="checkbox" id="inp-is-clonar" class="w-4 h-4" onchange="toggleClonarMeses(this.checked)">
                         Clonar este lançamento para os próximos meses
                     </label>
                     <div id="box-qtd-clonar" class="hidden">
+                        <label class="lbl" for="inp-qtd-clonar">Quantos meses seguintes (1 a 60)</label>
                         <input type="number" id="inp-qtd-clonar" min="1" max="60" placeholder="Clonar para quantos meses?">
-                        <p class="text-[10px] text-slate-500 mt-1">Mesmo valor e descrição, com vencimento nos meses seguintes.</p>
+                        <p class="text-[11px] text-slate-400 mt-1">Mesmo valor e descrição, com vencimento nos meses seguintes.</p>
                     </div>
                 </div>
 
                 <!-- CATEGORIA + ADD CATEGORIA -->
                 <div id="container-categoria" class="space-y-2">
+                    <label class="lbl" for="inp-cat">Categoria</label>
                     <div class="flex gap-2">
                         <select id="inp-cat"></select>
-                        <button type="button" onclick="toggleAddCat()" class="bg-indigo-600/20 text-indigo-400 px-3 rounded-xl border border-indigo-500/30 font-bold text-xs" title="Adicionar Categoria">+</button>
+                        <button type="button" onclick="toggleAddCat()" class="bg-indigo-600/20 text-indigo-300 px-3 rounded-xl border border-indigo-500/30 font-bold text-xs tap" title="Adicionar Categoria" aria-label="Adicionar nova categoria">+</button>
                     </div>
                     <div id="box-nova-cat" class="hidden flex gap-2 p-2 bg-indigo-500/5 border border-indigo-500/20 rounded-xl animate-in slide-in-from-top-1">
-                        <input type="text" id="inp-nova-cat-nome" placeholder="Nova categoria..." class="!py-1 !text-xs">
-                        <button type="button" onclick="adicionarNovaCategoria()" class="bg-indigo-600 text-white px-3 py-1 rounded-lg font-bold text-[10px]">Salvar</button>
+                        <input type="text" id="inp-nova-cat-nome" placeholder="Nova categoria..." class="!py-1 !text-xs" aria-label="Nome da nova categoria" maxlength="40">
+                        <button type="button" onclick="adicionarNovaCategoria()" class="bg-indigo-600 text-white px-3 py-1 rounded-lg font-bold text-[11px] tap">Salvar</button>
                     </div>
                 </div>
 
                 <!-- CAMPO OBSERVAÇÕES -->
                 <div id="box-observacoes">
-                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1 px-1">Observações (Opcional)</label>
-                    <textarea id="inp-obs" placeholder="Detalhes adicionais sobre este lançamento..."></textarea>
+                    <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1 px-1" for="inp-obs">Observações (Opcional)</label>
+                    <textarea id="inp-obs" placeholder="Detalhes adicionais sobre este lançamento..." maxlength="500"></textarea>
                 </div>
 
                 <div id="box-comprovante" class="p-3 bg-slate-950 rounded-xl border border-slate-800 space-y-2">
-                    <label class="block text-xs font-bold text-slate-400 uppercase">Documento / Comprovante</label>
+                    <label class="block text-xs font-bold text-slate-300 uppercase" for="inp-comprovante">Documento / Comprovante</label>
                     <input type="file" id="inp-comprovante" accept="image/*,.pdf" class="text-xs text-slate-400 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700 cursor-pointer w-full" onchange="handleFileSelect(event)">
                     <div id="preview-comprovante" class="hidden flex items-center justify-between text-xs bg-slate-900 p-2.5 rounded-xl border border-slate-800">
-                        <span id="nome-comprovante" class="truncate text-indigo-400 font-bold max-w-[200px]"></span>
-                        <button type="button" onclick="removerComprovanteForm()" class="text-rose-500 hover:text-rose-400 font-bold ml-2 text-[11px]">Remover</button>
+                        <span id="nome-comprovante" class="truncate text-indigo-300 font-bold max-w-[200px]"></span>
+                        <button type="button" onclick="removerComprovanteForm()" class="text-rose-400 hover:text-rose-300 font-bold ml-2 text-[11px] tap">Remover</button>
                     </div>
                 </div>
 
                 <div id="box-invest" class="grid grid-cols-2 gap-4 hidden">
-                    <input type="number" step="0.0001" id="inp-qtd" placeholder="Quantidade">
-                    <input type="number" step="0.01" id="inp-pm" placeholder="Preço Médio">
+                    <div>
+                        <label class="lbl" for="inp-qtd">Quantidade</label>
+                        <input type="number" step="0.0001" min="0" inputmode="decimal" id="inp-qtd" placeholder="Quantidade">
+                    </div>
+                    <div>
+                        <label class="lbl" for="inp-pm">Preço médio (R$)</label>
+                        <input type="number" step="0.01" min="0" inputmode="decimal" id="inp-pm" placeholder="Preço Médio">
+                    </div>
                 </div>
 
                 <button type="submit" class="w-full bg-indigo-600 p-4 rounded-xl font-bold hover:bg-indigo-700 transition">Salvar Dados</button>
-                <button type="button" onclick="closeModal()" class="w-full text-slate-500 text-sm font-bold">Cancelar</button>
+                <button type="button" onclick="closeModal()" class="w-full text-slate-400 text-sm font-bold p-2">Cancelar</button>
             </form>
         </div>
     </div>
 
     <script>
-        let state = JSON.parse(localStorage.getItem('mvf_v2')) || {
-            receitas: [], despesas: [], investRV: [], investRF: [],
-            categoriasReceitas: ['Salário', 'Investimento', 'Extra'],
-            categoriasDespesas: ['Aluguel', 'Saúde', 'Lazer', 'Alimentação'],
-            selectedMonth: new Date().toISOString().slice(0, 7),
-            config: { apiKey: '' }
-        };
+        /* =====================================================================
+           MINHA VIDA FINANCEIRA | ALPHA MASTER PLUS  — v3.0
+           Chave de armazenamento preservada: localStorage 'mvf_v2'
+           ===================================================================== */
+        const STORAGE_KEY = 'mvf_v2';
+        const KEY_ANTES_RESTAURACAO = 'mvf_v2_antes_restauracao';
+        const KEY_CORROMPIDO = 'mvf_v2_corrompido';
+        const APP_VERSAO = '3.0';
+        const TITULOS = { dashboard: 'Dashboard', receitas: 'Receitas', despesas: 'Despesas', investimentos: 'Investimentos', relatorios: 'Relatórios', configuracoes: 'Configurações' };
+        const MESES = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+        const MESES_CURTOS = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
 
+        /* ---------- Utilitários ---------- */
+        const $ = (id) => document.getElementById(id);
+        const pad = (n) => String(n).padStart(2, '0');
+        const num = (v) => { const n = Number(v); return Number.isFinite(n) ? n : 0; };
+        // Data/mês de HOJE no fuso do aparelho (toISOString usa UTC e errava o mês à noite no Brasil)
+        function hojeISO() { const d = new Date(); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; }
+        const mesAtual = () => hojeISO().slice(0, 7);
+        function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+        const norm = (s) => String(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+        const safe = (fn, rotulo) => { try { fn(); } catch (e) { console.error('Erro em ' + (rotulo || fn.name) + ':', e); } };
+        const dataValida = (s) => {
+            if (typeof s !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(s)) return false;
+            const [y, m, d] = s.split('-').map(Number);
+            const dt = new Date(y, m - 1, d);
+            return dt.getFullYear() === y && dt.getMonth() === m - 1 && dt.getDate() === d;
+        };
+        const fmtData = (iso) => iso ? iso.split('-').reverse().join('/') : '-';
+        const fmtDataHora = (iso) => { try { return new Date(iso).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }); } catch (e) { return '-'; } };
+        const nomeMes = (key) => { const [y, m] = key.split('-'); return `${MESES[Number(m) - 1]}/${y}`; };
+
+        // Soma N meses a uma data 'YYYY-MM-DD' mantendo o dia (ou o último dia do mês, se não existir)
+        function addMonthsStr(dateStr, n) {
+            const [y, m, d] = dateStr.split('-').map(Number);
+            const total = (m - 1) + n;
+            const ny = y + Math.floor(total / 12), nm = ((total % 12) + 12) % 12;
+            const ultimo = new Date(ny, nm + 1, 0).getDate();
+            return `${ny}-${String(nm + 1).padStart(2, '0')}-${String(Math.min(d, ultimo)).padStart(2, '0')}`;
+        }
+        const mesAnterior = (mes) => addMonthsStr(mes + '-01', -1).slice(0, 7);
+        function diasAte(venc) {
+            const [y, m, d] = venc.split('-').map(Number);
+            const [hy, hm, hd] = hojeISO().split('-').map(Number);
+            return Math.round((Date.UTC(y, m - 1, d) - Date.UTC(hy, hm - 1, hd)) / 86400000);
+        }
+
+        const _fmtBRL = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+        const fmt = (v) => _fmtBRL.format(v || 0);
+        const fmtPct = (v) => `${v >= 0 ? '+' : '−'}${Math.abs(v * 100).toFixed(2).replace('.', ',')}%`;
+
+        /* ---------- Estado (compatível com os dados já salvos) ---------- */
+        function estadoPadrao() {
+            return {
+                receitas: [], despesas: [], investRV: [], investRF: [],
+                categoriasReceitas: ['Salário', 'Investimento', 'Extra'],
+                categoriasDespesas: ['Aluguel', 'Saúde', 'Lazer', 'Alimentação'],
+                selectedMonth: mesAtual(),
+                config: { apiKey: '' }
+            };
+        }
+        function normalizarEstado(s) {
+            if (!s || typeof s !== 'object' || Array.isArray(s)) return estadoPadrao();
+            const p = estadoPadrao();
+            ['receitas', 'despesas', 'investRV', 'investRF', 'categoriasReceitas', 'categoriasDespesas'].forEach(k => { if (!Array.isArray(s[k])) s[k] = p[k]; });
+            if (!(s.selectedMonth === 'all' || (typeof s.selectedMonth === 'string' && /^\d{4}-\d{2}$/.test(s.selectedMonth)))) s.selectedMonth = p.selectedMonth;
+            if (!s.config || typeof s.config !== 'object') s.config = { apiKey: '' };
+            return s;
+        }
+        let _ultimoSalvo = null;
+        function loadState() {
+            let raw = null;
+            try { raw = localStorage.getItem(STORAGE_KEY); } catch (e) { console.error(e); }
+            if (!raw) return estadoPadrao();
+            try {
+                const s = normalizarEstado(JSON.parse(raw));
+                _ultimoSalvo = raw;
+                return s;
+            } catch (e) {
+                // Dados ilegíveis: guarda uma cópia do texto original antes de qualquer gravação nova
+                try { localStorage.setItem(KEY_CORROMPIDO, raw); } catch (_) { }
+                window.__estadoCorrompido = true;
+                return estadoPadrao();
+            }
+        }
+        let state = loadState();
+        let abaAtiva = 'dashboard';
+
+        // Grava com segurança: se o navegador recusar (armazenamento cheio), volta ao último estado salvo
+        function persistir() {
+            const json = JSON.stringify(state);
+            try {
+                localStorage.setItem(STORAGE_KEY, json);
+                _ultimoSalvo = json;
+                return true;
+            } catch (e) {
+                console.error(e);
+                if (_ultimoSalvo) { try { state = normalizarEstado(JSON.parse(_ultimoSalvo)); } catch (_) { } }
+                toast('Não foi possível salvar: o armazenamento do navegador está cheio ou bloqueado. A última alteração foi desfeita para não perder dados. Baixe um backup e remova comprovantes grandes.', { type: 'erro', ms: 10000 });
+                return false;
+            }
+        }
         const save = () => {
-            localStorage.setItem('mvf_v2', JSON.stringify(state));
+            const ok = persistir();
             render();
+            return ok;
         };
 
-        const fmt = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v || 0);
+        /* ---------- Avisos, confirmações e janelas ---------- */
+        function toast(msg, opts) {
+            const o = typeof opts === 'string' ? { type: opts } : (opts || {});
+            const type = o.type || 'ok', ms = o.ms === undefined ? 3800 : o.ms;
+            const root = $('toast-root');
+            while (root.children.length >= 3) root.firstChild.remove();
+            const el = document.createElement('div');
+            el.className = 'toast toast-' + type;
+            el.setAttribute('role', type === 'erro' ? 'alert' : 'status');
+            const icone = { ok: '✓', erro: '⚠', warn: '⚠', info: 'ℹ' }[type] || 'ℹ';
+            el.innerHTML = `<span aria-hidden="true">${icone}</span><span style="flex:1">${esc(msg)}</span>`;
+            const remover = () => el.remove();
+            if (o.action) {
+                const b = document.createElement('button');
+                b.type = 'button'; b.textContent = o.action.label;
+                b.onclick = () => { remover(); o.action.fn(); };
+                el.appendChild(b);
+            }
+            root.appendChild(el);
+            if (ms > 0) setTimeout(remover, ms);
+            return remover;
+        }
 
-        // Ícones: não quebra o app se a biblioteca (CDN) não carregar offline
+        const _pilha = [], _openers = {};
+        function abrirModal(id, focoId) {
+            const m = $(id);
+            _openers[id] = document.activeElement;
+            m.classList.remove('hidden');
+            if (!_pilha.includes(id)) _pilha.push(id);
+            setTimeout(() => {
+                const f = focoId ? $(focoId) : m.querySelector('input:not([type=hidden]),select,textarea,button');
+                if (f) f.focus();
+            }, 30);
+        }
+        function fecharModal(id) {
+            $(id).classList.add('hidden');
+            const i = _pilha.lastIndexOf(id);
+            if (i > -1) _pilha.splice(i, 1);
+            const op = _openers[id];
+            if (op && document.contains(op)) { try { op.focus(); } catch (e) { } }
+        }
+        document.addEventListener('keydown', (e) => {
+            const topo = _pilha[_pilha.length - 1];
+            if (!topo) return;
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                if (topo === 'modal-confirm') fecharConfirm(false);
+                else if (topo === 'modal-form') closeModal();
+                else if (topo === 'modal-doc') closeDocModal();
+                else fecharModal(topo);
+            } else if (e.key === 'Tab') {
+                const foc = [...$(topo).querySelectorAll('a[href],button:not([disabled]),input:not([type=hidden]):not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')].filter(el => el.offsetParent !== null);
+                if (!foc.length) return;
+                const primeiro = foc[0], ultimo = foc[foc.length - 1];
+                if (e.shiftKey && document.activeElement === primeiro) { e.preventDefault(); ultimo.focus(); }
+                else if (!e.shiftKey && document.activeElement === ultimo) { e.preventDefault(); primeiro.focus(); }
+            }
+        });
+
+        let _confirmResolve = null, _confirmExigir = null;
+        function confirmDialog(o) {
+            o = o || {};
+            return new Promise(resolve => {
+                if (_confirmResolve) _confirmResolve(false);
+                _confirmResolve = resolve;
+                _confirmExigir = o.exigirTexto || null;
+                $('confirm-title').textContent = o.titulo || 'Confirmar';
+                $('confirm-msg').textContent = o.mensagem || '';
+                const ok = $('confirm-ok');
+                ok.textContent = o.confirmar || 'Confirmar';
+                ok.className = (o.perigo ? 'bg-rose-600 hover:bg-rose-700' : 'bg-indigo-600 hover:bg-indigo-700') + ' text-white font-bold text-sm px-4 py-3 rounded-xl tap';
+                $('confirm-cancel').classList.toggle('hidden', !!o.semCancelar);
+                $('confirm-text-box').classList.toggle('hidden', !o.exigirTexto);
+                $('confirm-text').value = '';
+                $('confirm-text-hint').textContent = o.exigirTexto ? `Digite ${o.exigirTexto} para confirmar` : '';
+                ok.disabled = !!o.exigirTexto;
+                ok.style.opacity = o.exigirTexto ? '.5' : '1';
+                abrirModal('modal-confirm', o.exigirTexto ? 'confirm-text' : (o.perigo ? 'confirm-cancel' : 'confirm-ok'));
+            });
+        }
+        function atualizarConfirmTexto() {
+            const ok = $('confirm-ok');
+            const liberado = !_confirmExigir || $('confirm-text').value.trim().toUpperCase() === _confirmExigir;
+            ok.disabled = !liberado; ok.style.opacity = liberado ? '1' : '.5';
+        }
+        function fecharConfirm(res) {
+            if (res && _confirmExigir && $('confirm-text').value.trim().toUpperCase() !== _confirmExigir) return;
+            fecharModal('modal-confirm');
+            const r = _confirmResolve; _confirmResolve = null;
+            if (r) r(!!res);
+        }
+
+        /* ---------- Ícones (seguro offline) ---------- */
         const FALLBACK_ICONS = {
-            'layout-dashboard': '🏠', 'trending-up': '📈', 'trending-down': '📉', 'line-chart': '💹',
+            'layout-dashboard': '🏠', 'trending-up': '📈', 'trending-down': '📉', 'line-chart': '💹', 'bar-chart-3': '📊',
             'settings': '⚙️', 'wallet': '💰', 'refresh-cw': '🔄', 'file-spreadsheet': '📊', 'file-text': '📄',
-            'alert-circle': '⚠️', 'layers': '📚', 'paperclip': '📎', 'copy': '📋', 'trash-2': '🗑️',
+            'alert-circle': '⚠️', 'layers': '📚', 'paperclip': '📎', 'copy': '📋', 'trash-2': '🗑️', 'clock': '⏰',
             'check': '✓', 'x': '✕', 'download': '⬇️', 'file': '📄', 'arrow-down-right': '↘'
         };
         function safeIcons() {
@@ -391,438 +830,1063 @@
                 const span = document.createElement('span');
                 span.textContent = FALLBACK_ICONS[el.getAttribute('data-lucide')] || '•';
                 span.className = el.className;
+                if (el.id) span.id = el.id;
+                if (el.getAttribute('aria-hidden')) span.setAttribute('aria-hidden', 'true');
                 span.style.fontStyle = 'normal';
                 span.style.lineHeight = '1';
                 el.replaceWith(span);
             });
         }
 
+        /* ---------- Navegação ---------- */
         function showTab(id) {
+            if (!$(id)) id = 'dashboard';
+            abaAtiva = id;
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            document.querySelectorAll('nav button, aside button').forEach(b => b.classList.remove('nav-active', 'text-white'));
-            document.getElementById('nav-' + id)?.classList.add('nav-active');
-            document.getElementById('mob-' + id)?.classList.add('text-white');
-            document.getElementById('tab-title').innerText = id.charAt(0).toUpperCase() + id.slice(1);
-            if(id === 'configuracoes') document.getElementById('cfg-api-key').value = state.config?.apiKey || '';
+            $(id).classList.add('active');
+            document.querySelectorAll('nav button, aside button').forEach(b => { b.classList.remove('nav-active', 'mob-active'); b.removeAttribute('aria-current'); });
+            const n = $('nav-' + id); if (n) { n.classList.add('nav-active'); n.setAttribute('aria-current', 'page'); }
+            const m = $('mob-' + id); if (m) { m.classList.add('mob-active'); m.setAttribute('aria-current', 'page'); }
+            $('tab-title').innerText = TITULOS[id] || id;
+            if (id === 'configuracoes') $('cfg-api-key').value = state.config?.apiKey || '';
             render();
             safeIcons();
+            $(id).scrollTop = 0;
         }
 
         function saveApiKey() {
             state.config = state.config || {};
-            state.config.apiKey = document.getElementById('cfg-api-key').value;
-            save();
-            alert("Chave API salva com sucesso!");
+            state.config.apiKey = $('cfg-api-key').value.trim();
+            if (save()) toast('Chave API salva com sucesso!');
         }
 
+        /* ---------- Cotações (Alpha Vantage) ---------- */
         async function syncAlphaVantage() {
             const key = state.config?.apiKey;
-            if(!key) return alert("Configure a API Key nas configurações primeiro.");
-            const btn = document.getElementById('sync-icon');
-            btn.classList.add('animate-spin');
+            if (!key) return toast('Configure a API Key nas configurações primeiro.', { type: 'warn' });
+            if (!state.investRV.length) return toast('Cadastre um ativo de renda variável antes de sincronizar.', { type: 'info' });
+            if (navigator.onLine === false) return toast('Sem conexão com a internet. As cotações mantêm o último valor obtido.', { type: 'warn' });
+            const btn = $('btn-sync');
+            btn.classList.add('busy'); btn.setAttribute('aria-busy', 'true');
+            let ok = 0, falha = 0, limite = false;
             for (let inv of state.investRV) {
                 try {
-                    const symbol = inv.ticker.includes('.') ? inv.ticker : `${inv.ticker}.SA`;
-                    const res = await fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=${key}`);
+                    const ticker = String(inv.ticker || inv.descricao || '').trim();
+                    if (!ticker) { falha++; continue; }
+                    const symbol = ticker.includes('.') ? ticker : `${ticker}.SA`;
+                    const res = await fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${encodeURIComponent(symbol)}&apikey=${encodeURIComponent(key)}`);
                     const data = await res.json();
-                    if(data["Global Quote"] && data["Global Quote"]["05. price"]) inv.cotacao = parseFloat(data["Global Quote"]["05. price"]);
-                    await new Promise(r => setTimeout(r, 1000)); 
-                } catch (e) { console.error(e); }
+                    const preco = parseFloat(data && data["Global Quote"] && data["Global Quote"]["05. price"]);
+                    if (Number.isFinite(preco) && preco > 0) { inv.cotacao = preco; inv.cotacaoEm = new Date().toISOString(); ok++; }
+                    else { falha++; if (data && (data.Note || data.Information)) { limite = true; break; } }
+                    await new Promise(r => setTimeout(r, 1000));
+                } catch (e) { console.error(e); falha++; }
             }
-            btn.classList.remove('animate-spin');
+            btn.classList.remove('busy'); btn.removeAttribute('aria-busy');
+            if (ok > 0) { state.config.ultimaSync = new Date().toISOString(); }
             save();
+            if (ok > 0 && falha === 0) toast(`Cotações atualizadas (${ok}).`);
+            else if (ok > 0) toast(`${ok} cotação(ões) atualizada(s); ${falha} não puderam ser obtidas${limite ? ' (limite da API atingido)' : ''}. As demais mantêm o último valor.`, { type: 'warn', ms: 7000 });
+            else toast(limite ? 'Limite da API atingido. Tente novamente mais tarde.' : 'Nenhuma cotação foi atualizada. Verifique a chave da API, os tickers e a conexão.', { type: 'erro', ms: 7000 });
         }
 
+        /* ---------- Filtro de mês ---------- */
         function populateMonthFilter() {
-            const select = document.getElementById('filtro-mes-global');
+            const select = $('filtro-mes-global');
             const months = new Set();
-            months.add(new Date().toISOString().slice(0, 7));
+            months.add(mesAtual());
+            if (state.selectedMonth !== 'all') months.add(state.selectedMonth);
             [...state.receitas, ...state.despesas].forEach(i => i.venc && months.add(i.venc.slice(0, 7)));
             const sorted = Array.from(months).sort();
             let html = '<option value="all" ' + (state.selectedMonth === 'all' ? 'selected' : '') + '>TODOS</option>';
             sorted.forEach(m => { html += `<option value="${m}" ${state.selectedMonth === m ? 'selected' : ''}>${m.split('-').reverse().join('/')}</option>`; });
             select.innerHTML = html;
+            const todos = state.selectedMonth === 'all';
+            $('mes-prev').disabled = todos; $('mes-next').disabled = todos;
+            $('mes-prev').style.opacity = $('mes-next').style.opacity = todos ? '.4' : '1';
+        }
+        function changeFilterMonth(val) { state.selectedMonth = val; save(); }
+        function navegarMes(delta) {
+            if (state.selectedMonth === 'all') return;
+            state.selectedMonth = addMonthsStr(state.selectedMonth + '-01', delta).slice(0, 7);
+            save();
         }
 
-        function changeFilterMonth(val) { state.selectedMonth = val; save(); }
+        /* ---------- Comprovantes ---------- */
+        function otimizarImagem(file) {
+            // Reduz fotos grandes (mantém legível) para não estourar o armazenamento do navegador
+            return new Promise((resolve) => {
+                if (!/^image\/(jpeg|png|webp)$/.test(file.type) || file.size < 400 * 1024) return resolve(null);
+                const url = URL.createObjectURL(file);
+                const img = new Image();
+                img.onload = () => {
+                    try {
+                        const max = 1600, esc_ = Math.min(1, max / Math.max(img.width, img.height));
+                        const c = document.createElement('canvas');
+                        c.width = Math.round(img.width * esc_); c.height = Math.round(img.height * esc_);
+                        const ctx = c.getContext('2d');
+                        ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height);
+                        ctx.drawImage(img, 0, 0, c.width, c.height);
+                        const out = c.toDataURL('image/jpeg', 0.82);
+                        URL.revokeObjectURL(url);
+                        resolve(out.length < file.size * 1.37 ? out : null);
+                    } catch (e) { URL.revokeObjectURL(url); resolve(null); }
+                };
+                img.onerror = () => { URL.revokeObjectURL(url); resolve(null); };
+                img.src = url;
+            });
+        }
 
         function handleFileSelect(e) {
             const file = e.target.files[0];
             if (!file) return;
-            if (file.size > 5 * 1024 * 1024) { alert("Arquivo muito grande (máx 5MB)."); e.target.value = ''; return; }
+            if (file.size > 5 * 1024 * 1024) { toast("Arquivo muito grande (máx 5MB).", { type: 'erro' }); e.target.value = ''; return; }
+            if (!(file.type.startsWith('image/') || file.type === 'application/pdf' || /\.pdf$/i.test(file.name))) { toast('Envie uma imagem ou um PDF.', { type: 'erro' }); e.target.value = ''; return; }
             const reader = new FileReader();
-            reader.onload = function(evt) {
-                document.getElementById('form-comprovante-b64').value = evt.target.result;
-                document.getElementById('form-comprovante-nome').value = file.name;
-                mostrarPreviewComprovante(file.name);
+            reader.onload = async function (evt) {
+                let dados = evt.target.result, nome = file.name;
+                const otim = await otimizarImagem(file);
+                if (otim) { dados = otim; nome = nome.replace(/\.\w+$/, '') + '.jpg'; toast('Imagem otimizada para economizar espaço.', { type: 'info', ms: 2500 }); }
+                $('form-comprovante-b64').value = dados;
+                $('form-comprovante-nome').value = nome;
+                mostrarPreviewComprovante(nome);
             };
+            reader.onerror = () => toast('Não foi possível ler o arquivo.', { type: 'erro' });
             reader.readAsDataURL(file);
         }
 
         function mostrarPreviewComprovante(nome) {
-            document.getElementById('nome-comprovante').innerText = nome;
-            document.getElementById('preview-comprovante').classList.remove('hidden');
+            $('nome-comprovante').innerText = nome;
+            $('preview-comprovante').classList.remove('hidden');
         }
 
         function removerComprovanteForm() {
-            document.getElementById('form-comprovante-b64').value = '';
-            document.getElementById('form-comprovante-nome').value = '';
-            document.getElementById('inp-comprovante').value = '';
-            document.getElementById('preview-comprovante').classList.add('hidden');
+            $('form-comprovante-b64').value = '';
+            $('form-comprovante-nome').value = '';
+            $('inp-comprovante').value = '';
+            $('preview-comprovante').classList.add('hidden');
         }
 
         function abrirComprovante(b64Data, nome = 'comprovante') {
             if (!b64Data) return;
-            const container = document.getElementById('doc-modal-container');
-            const downloadBtn = document.getElementById('doc-modal-download');
+            const container = $('doc-modal-container');
+            const downloadBtn = $('doc-modal-download');
             downloadBtn.href = b64Data; downloadBtn.download = nome;
-            document.getElementById('doc-modal-title').innerHTML = `<i data-lucide="file-text" class="text-indigo-400"></i> Documento: ${nome}`;
-            if (b64Data.startsWith('data:image/')) container.innerHTML = `<img src="${b64Data}" class="max-h-[60vh] max-w-full rounded-lg object-contain shadow-lg">`;
-            else if (b64Data.startsWith('data:application/pdf')) container.innerHTML = `<iframe src="${b64Data}" class="w-full h-[60vh] rounded-lg border-0"></iframe>`;
-            else container.innerHTML = `<div class="text-center p-6"><i data-lucide="file" class="w-12 h-12 text-indigo-400 mx-auto mb-2"></i><p class="text-sm font-bold text-slate-300">${nome}</p></div>`;
-            document.getElementById('modal-doc').classList.remove('hidden'); safeIcons();
+            $('doc-modal-title').innerHTML = `<i data-lucide="file-text" class="text-indigo-400" aria-hidden="true"></i> Documento: ${esc(nome)}`;
+            if (b64Data.startsWith('data:image/')) container.innerHTML = `<img src="${b64Data}" alt="Comprovante anexado" class="max-h-[60vh] max-w-full rounded-lg object-contain shadow-lg">`;
+            else if (b64Data.startsWith('data:application/pdf')) container.innerHTML = `<iframe src="${b64Data}" title="Comprovante em PDF" class="w-full h-[60vh] rounded-lg border-0"></iframe>`;
+            else container.innerHTML = `<div class="text-center p-6"><i data-lucide="file" class="w-12 h-12 text-indigo-400 mx-auto mb-2" aria-hidden="true"></i><p class="text-sm font-bold text-slate-300">${esc(nome)}</p></div>`;
+            abrirModal('modal-doc'); safeIcons();
         }
+        // Abre pelo ID do lançamento (não coloca o arquivo inteiro dentro do HTML, o que travava no celular)
+        function abrirComprovanteItem(type, id) {
+            const item = state[type + 's'].find(i => i.id == id);
+            if (item && item.comprovante) abrirComprovante(item.comprovante, item.comprovanteNome || 'comprovante');
+        }
+        function closeDocModal() { fecharModal('modal-doc'); }
 
-        function closeDocModal() { document.getElementById('modal-doc').classList.add('hidden'); }
-
-        function toggleAddCat() { document.getElementById('box-nova-cat').classList.toggle('hidden'); document.getElementById('inp-nova-cat-nome').focus(); }
+        /* ---------- Categorias ---------- */
+        function toggleAddCat() { $('box-nova-cat').classList.toggle('hidden'); $('inp-nova-cat-nome').focus(); }
 
         function adicionarNovaCategoria() {
-            const nome = document.getElementById('inp-nova-cat-nome').value.trim();
-            const type = document.getElementById('form-type').value;
+            const nome = $('inp-nova-cat-nome').value.trim();
+            const type = $('form-type').value;
             if (!nome) return;
             const listKey = type === 'receita' ? 'categoriasReceitas' : 'categoriasDespesas';
             const existe = state[listKey].some(c => c.toLowerCase() === nome.toLowerCase());
-            if (existe) { alert("Esta categoria já existe."); return; }
+            if (existe) { toast("Esta categoria já existe.", { type: 'warn' }); return; }
             state[listKey].push(nome);
             state[listKey].sort();
-            document.getElementById('inp-nova-cat-nome').value = '';
-            document.getElementById('box-nova-cat').classList.add('hidden');
-            const sel = document.getElementById('inp-cat');
-            sel.innerHTML = state[listKey].map(c => `<option value="${c}">${c}</option>`).join('');
+            $('inp-nova-cat-nome').value = '';
+            $('box-nova-cat').classList.add('hidden');
+            const sel = $('inp-cat');
+            sel.innerHTML = state[listKey].map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
             sel.value = nome;
             save();
+            toast('Categoria criada.');
         }
 
+        /* ---------- Exportações (Excel / PDF) ---------- */
         function getFilteredExportData(filtroTipo = 'todos') {
             const isAll = state.selectedMonth === 'all';
-            let list = filtroTipo === 'receitas' ? state.receitas.map(r => ({ ...r, tipo: 'Receita' })) : 
+            let list = filtroTipo === 'receitas' ? state.receitas.map(r => ({ ...r, tipo: 'Receita' })) :
                        filtroTipo === 'despesas' ? state.despesas.map(d => ({ ...d, tipo: 'Despesa' })) :
                        [...state.receitas.map(r => ({ ...r, tipo: 'Receita' })), ...state.despesas.map(d => ({ ...d, tipo: 'Despesa' }))];
             if (!isAll) list = list.filter(item => item.venc?.startsWith(state.selectedMonth));
             return list.sort((a, b) => (a.venc || '').localeCompare(b.venc || ''));
         }
 
+        function comBusy(btnId, fn) {
+            const b = $(btnId);
+            if (b) { b.classList.add('busy'); b.setAttribute('aria-busy', 'true'); }
+            setTimeout(() => {
+                try { fn(); } catch (e) { console.error(e); toast('Não foi possível gerar o arquivo: ' + (e.message || e), { type: 'erro', ms: 6000 }); }
+                if (b) { b.classList.remove('busy'); b.removeAttribute('aria-busy'); }
+            }, 30);
+        }
+
         function exportToExcel(filtroTipo = 'todos') {
-            if (typeof XLSX === 'undefined') return alert("Exportar para Excel precisa de internet na primeira vez.");
+            if (typeof XLSX === 'undefined') return toast("Exportar para Excel precisa de internet na primeira vez.", { type: 'warn' });
             const items = getFilteredExportData(filtroTipo);
-            if (items.length === 0) return alert("Nenhum lançamento.");
-            const dataFormatted = items.map(item => ({
-                'Tipo': item.tipo,
-                'Descrição': item.descricao || '',
-                'Categoria': item.categoria || '',
-                'Vencimento': item.venc ? item.venc.split('-').reverse().join('/') : '',
-                'Status': item.status === 'pago' ? 'Pago' : 'Pendente',
-                'Valor (R$)': item.valor || 0,
-                'Observações': item.observacoes || ''
-            }));
-            const ws = XLSX.utils.json_to_sheet(dataFormatted);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Lançamentos");
-            ws['!cols'] = [{ wch: 10 }, { wch: 30 }, { wch: 18 }, { wch: 18 }, { wch: 12 }, { wch: 15 }, { wch: 40 }];
-            XLSX.writeFile(wb, `Financeiro_${state.selectedMonth}.xlsx`);
+            if (items.length === 0) return toast("Nenhum lançamento.", { type: 'info' });
+            comBusy('btn-excel', () => {
+                const dataFormatted = items.map(item => ({
+                    'Tipo': item.tipo,
+                    'Descrição': item.descricao || '',
+                    'Categoria': item.categoria || '',
+                    'Vencimento': item.venc ? item.venc.split('-').reverse().join('/') : '',
+                    'Status': item.status === 'pago' ? 'Pago' : 'Pendente',
+                    'Valor (R$)': item.valor || 0,
+                    'Observações': item.observacoes || ''
+                }));
+                const ws = XLSX.utils.json_to_sheet(dataFormatted);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Lançamentos");
+                ws['!cols'] = [{ wch: 10 }, { wch: 30 }, { wch: 18 }, { wch: 18 }, { wch: 12 }, { wch: 15 }, { wch: 40 }];
+                XLSX.writeFile(wb, `Financeiro_${state.selectedMonth}.xlsx`);
+                toast('Planilha Excel gerada.');
+            });
         }
 
         function exportToPDF(filtroTipo = 'todos') {
-            if (!window.jspdf) return alert("Exportar PDF precisa de internet na primeira vez.");
+            if (!window.jspdf) return toast("Exportar PDF precisa de internet na primeira vez.", { type: 'warn' });
             const items = getFilteredExportData(filtroTipo);
-            if (items.length === 0) return alert("Nenhum lançamento.");
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            doc.setFontSize(16); doc.text("Relatório Financeiro", 14, 15);
-            doc.setFontSize(10); doc.text(`Período: ${state.selectedMonth}`, 14, 22);
-            
-            const tableRows = items.map(i => [
-                i.tipo, i.descricao, i.categoria, i.venc ? i.venc.split('-').reverse().join('/') : '-', 
-                i.status === 'pago' ? 'Pago' : 'Pendente', fmt(i.valor), i.observacoes || '-'
-            ]);
+            if (items.length === 0) return toast("Nenhum lançamento.", { type: 'info' });
+            comBusy('btn-pdf', () => {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                doc.setFontSize(16); doc.text("Relatório Financeiro", 14, 15);
+                doc.setFontSize(10); doc.text(`Período: ${state.selectedMonth}`, 14, 22);
 
-            doc.autoTable({
-                startY: 30,
-                head: [['Tipo', 'Desc', 'Cat', 'Data', 'Status', 'Valor', 'Obs']],
-                body: tableRows,
-                theme: 'striped',
-                headStyles: { fillColor: [30, 41, 59] },
-                styles: { fontSize: 7, cellPadding: 2 },
-                columnStyles: { 6: { cellWidth: 40 } }
+                const tableRows = items.map(i => [
+                    i.tipo, i.descricao, i.categoria, i.venc ? i.venc.split('-').reverse().join('/') : '-',
+                    i.status === 'pago' ? 'Pago' : 'Pendente', fmt(i.valor), i.observacoes || '-'
+                ]);
+
+                doc.autoTable({
+                    startY: 30,
+                    head: [['Tipo', 'Desc', 'Cat', 'Data', 'Status', 'Valor', 'Obs']],
+                    body: tableRows,
+                    theme: 'striped',
+                    headStyles: { fillColor: [30, 41, 59] },
+                    styles: { fontSize: 7, cellPadding: 2 },
+                    columnStyles: { 6: { cellWidth: 40 } }
+                });
+                doc.save(`Financeiro_${state.selectedMonth}.pdf`);
+                toast('Relatório PDF gerado.');
             });
-            doc.save(`Financeiro_${state.selectedMonth}.pdf`);
         }
 
+        /* ---------- Formulário ---------- */
         function toggleClonarMeses(on) {
-            document.getElementById('inp-is-clonar').checked = on;
-            document.getElementById('box-qtd-clonar').classList.toggle('hidden', !on);
+            $('inp-is-clonar').checked = on;
+            $('box-qtd-clonar').classList.toggle('hidden', !on);
             if (on) {
-                document.getElementById('inp-is-parcelado').checked = false;
-                document.getElementById('box-qtd').classList.add('hidden');
+                $('inp-is-parcelado').checked = false;
+                $('box-qtd').classList.add('hidden');
             }
         }
 
-        // Soma N meses a uma data 'YYYY-MM-DD' mantendo o dia (ou o último dia do mês, se não existir)
-        function addMonthsStr(dateStr, n) {
-            const [y, m, d] = dateStr.split('-').map(Number);
-            const total = (m - 1) + n;
-            const ny = y + Math.floor(total / 12), nm = ((total % 12) + 12) % 12;
-            const ultimo = new Date(ny, nm + 1, 0).getDate();
-            return `${ny}-${String(nm + 1).padStart(2, '0')}-${String(Math.min(d, ultimo)).padStart(2, '0')}`;
+        function mostrarErroForm(msg, campoId) {
+            const e = $('form-erro');
+            e.textContent = msg; e.classList.remove('hidden');
+            document.querySelectorAll('#main-form [aria-invalid]').forEach(el => el.removeAttribute('aria-invalid'));
+            if (campoId && $(campoId)) { $(campoId).setAttribute('aria-invalid', 'true'); $(campoId).focus(); }
+        }
+        function limparErroForm() {
+            $('form-erro').classList.add('hidden'); $('form-erro').textContent = '';
+            document.querySelectorAll('#main-form [aria-invalid]').forEach(el => el.removeAttribute('aria-invalid'));
         }
 
         function openForm(type, id = null) {
-            const form = document.getElementById('main-form');
-            form.reset(); removerComprovanteForm();
-            document.getElementById('form-type').value = type;
-            document.getElementById('form-id').value = id || '';
-            document.getElementById('box-nova-cat').classList.add('hidden');
-            
+            const form = $('main-form');
+            form.reset(); removerComprovanteForm(); limparErroForm();
+            $('form-type').value = type;
+            $('form-id').value = id || '';
+            $('box-nova-cat').classList.add('hidden');
+
             const isInvest = (type === 'rv' || type === 'rf');
-            document.getElementById('box-invest').classList.toggle('hidden', type !== 'rv');
-            document.getElementById('box-parcelas').classList.toggle('hidden', isInvest || id !== null);
-            document.getElementById('box-clonar').classList.toggle('hidden', isInvest || id !== null);
-            document.getElementById('box-qtd-clonar').classList.add('hidden');
-            document.getElementById('box-comprovante').classList.toggle('hidden', isInvest);
-            document.getElementById('box-observacoes').classList.toggle('hidden', isInvest);
-            document.getElementById('container-categoria').classList.toggle('hidden', isInvest);
+            const nomes = { receita: 'receita', despesa: 'despesa', rv: 'ativo de renda variável', rf: 'título de renda fixa' };
+            $('form-title').textContent = (id ? 'Editar ' : 'Nova ' ) + nomes[type] ;
+            if (type === 'rv') $('form-title').textContent = (id ? 'Editar ' : 'Novo ') + nomes[type];
+            if (type === 'rf') $('form-title').textContent = (id ? 'Editar ' : 'Novo ') + nomes[type];
+            $('lbl-desc').textContent = type === 'rv' ? 'Ticker (ex.: PETR4)' : (type === 'rf' ? 'Nome do título' : 'Descrição');
+            $('lbl-venc').textContent = type === 'rf' ? 'Vencimento do título (opcional)' : 'Vencimento';
+            $('box-valor-venc').classList.toggle('hidden', type === 'rv');
+            $('box-invest').classList.toggle('hidden', type !== 'rv');
+            $('box-parcelas').classList.toggle('hidden', isInvest || id !== null);
+            $('box-clonar').classList.toggle('hidden', isInvest || id !== null);
+            $('box-qtd-clonar').classList.add('hidden');
+            $('box-comprovante').classList.toggle('hidden', isInvest);
+            $('box-observacoes').classList.toggle('hidden', isInvest);
+            $('container-categoria').classList.toggle('hidden', isInvest);
 
-            const cats = type === 'receita' ? state.categoriasReceitas : state.categoriasDespesas;
-            document.getElementById('inp-cat').innerHTML = cats.map(c => `<option value="${c}">${c}</option>`).join('');
+            const cats = (type === 'receita' ? state.categoriasReceitas : state.categoriasDespesas).slice();
+            const list0 = (type === 'receita') ? state.receitas : (type === 'despesa') ? state.despesas : (type === 'rv') ? state.investRV : state.investRF;
+            const item0 = id ? list0.find(i => i.id == id) : null;
+            if (item0 && item0.categoria && !cats.includes(item0.categoria)) cats.push(item0.categoria);
+            $('inp-cat').innerHTML = cats.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
 
-            if(id) {
-                const list = (type === 'receita') ? state.receitas : (type === 'despesa') ? state.despesas : (type === 'rv') ? state.investRV : state.investRF;
-                const item = list.find(i => i.id == id);
-                if(item) {
-                    document.getElementById('inp-desc').value = item.descricao || item.ticker || '';
-                    document.getElementById('inp-valor').value = item.valor || '';
-                    document.getElementById('inp-venc').value = item.venc || '';
-                    document.getElementById('inp-obs').value = item.observacoes || '';
-                    if(item.categoria) document.getElementById('inp-cat').value = item.categoria;
-                    if(type === 'rv') { document.getElementById('inp-qtd').value = item.qtd; document.getElementById('inp-pm').value = item.pm; }
-                    if(item.comprovante) {
-                        document.getElementById('form-comprovante-b64').value = item.comprovante;
-                        document.getElementById('form-comprovante-nome').value = item.comprovanteNome || 'documento';
+            if (id) {
+                const item = item0;
+                if (item) {
+                    $('inp-desc').value = item.descricao || item.ticker || '';
+                    $('inp-valor').value = item.valor || '';
+                    $('inp-venc').value = item.venc || '';
+                    $('inp-obs').value = item.observacoes || '';
+                    if (item.categoria) $('inp-cat').value = item.categoria;
+                    if (type === 'rv') { $('inp-qtd').value = item.qtd; $('inp-pm').value = item.pm; }
+                    if (item.comprovante) {
+                        $('form-comprovante-b64').value = item.comprovante;
+                        $('form-comprovante-nome').value = item.comprovanteNome || 'documento';
                         mostrarPreviewComprovante(item.comprovanteNome || 'Documento anexado');
                     }
                 }
+            } else if (type === 'receita' || type === 'despesa') {
+                // Sugere uma data dentro do mês que está sendo visualizado
+                const sel = state.selectedMonth;
+                $('inp-venc').value = (sel === 'all' || sel === mesAtual()) ? hojeISO() : sel + '-01';
             }
-            document.getElementById('modal-form').classList.remove('hidden');
+            abrirModal('modal-form', 'inp-desc');
         }
 
-        function closeModal() { document.getElementById('modal-form').classList.add('hidden'); }
+        function closeModal() { fecharModal('modal-form'); }
 
-        document.getElementById('main-form').onsubmit = (e) => {
+        function validarForm(type, id) {
+            const desc = $('inp-desc').value.trim();
+            if (!desc) return { msg: type === 'rv' ? 'Informe o ticker do ativo.' : 'Informe uma descrição.', campo: 'inp-desc' };
+            if (type === 'rv') {
+                if (/\s/.test(desc)) return { msg: 'O ticker não pode ter espaços (ex.: PETR4).', campo: 'inp-desc' };
+                if (!(num($('inp-qtd').value) > 0)) return { msg: 'Informe uma quantidade maior que zero.', campo: 'inp-qtd' };
+                if (!(num($('inp-pm').value) > 0)) return { msg: 'Informe um preço médio maior que zero.', campo: 'inp-pm' };
+                return null;
+            }
+            const valor = parseFloat($('inp-valor').value);
+            if (!Number.isFinite(valor) || valor <= 0) return { msg: 'Informe um valor maior que zero.', campo: 'inp-valor' };
+            if (type === 'rf') {
+                const v = $('inp-venc').value;
+                if (v && !dataValida(v)) return { msg: 'Data de vencimento inválida.', campo: 'inp-venc' };
+                return null;
+            }
+            if (!dataValida($('inp-venc').value)) return { msg: 'Informe uma data de vencimento válida.', campo: 'inp-venc' };
+            if ($('inp-is-parcelado').checked && !id) {
+                const q = parseInt($('inp-qtd-parcelas').value);
+                if (!Number.isInteger(q) || q < 1 || q > 12) return { msg: 'A quantidade de parcelas deve ficar entre 1 e 12.', campo: 'inp-qtd-parcelas' };
+            }
+            return null;
+        }
+
+        $('main-form').onsubmit = (e) => {
             e.preventDefault();
-            const type = document.getElementById('form-type').value;
-            const id = document.getElementById('form-id').value;
-            const isParcelado = document.getElementById('inp-is-parcelado').checked;
-            const obs = document.getElementById('inp-obs').value;
-            const comprovante = document.getElementById('form-comprovante-b64').value;
-            const compNome = document.getElementById('form-comprovante-nome').value;
+            limparErroForm();
+            const type = $('form-type').value;
+            const id = $('form-id').value;
+            const erro = validarForm(type, id);
+            if (erro) { mostrarErroForm(erro.msg, erro.campo); return; }
 
-            const isClonar = document.getElementById('inp-is-clonar').checked;
+            const isParcelado = $('inp-is-parcelado').checked;
+            const obs = $('inp-obs').value;
+            const comprovante = $('form-comprovante-b64').value;
+            const compNome = $('form-comprovante-nome').value;
+            let mensagem = 'Lançamento salvo.';
+
+            const isClonar = $('inp-is-clonar').checked;
             if (isClonar && !isParcelado && !id && (type === 'receita' || type === 'despesa')) {
-                const meses = Math.max(1, Math.min(60, parseInt(document.getElementById('inp-qtd-clonar').value) || 1));
-                const vencBase = document.getElementById('inp-venc').value;
+                const meses = Math.max(1, Math.min(60, parseInt($('inp-qtd-clonar').value) || 1));
+                const vencBase = $('inp-venc').value;
                 for (let i = 0; i <= meses; i++) {
                     state[type === 'receita' ? 'receitas' : 'despesas'].push({
                         id: Date.now() + Math.random(),
-                        descricao: document.getElementById('inp-desc').value,
-                        valor: parseFloat(document.getElementById('inp-valor').value),
+                        descricao: $('inp-desc').value.trim(),
+                        valor: parseFloat($('inp-valor').value),
                         venc: addMonthsStr(vencBase, i),
-                        categoria: document.getElementById('inp-cat').value,
+                        categoria: $('inp-cat').value,
                         status: 'pendente', observacoes: obs,
                         comprovante: comprovante || null, comprovanteNome: compNome || null
                     });
                 }
+                mensagem = `${meses + 1} lançamentos criados (mês inicial + ${meses} seguintes).`;
             } else if (isParcelado && !id) {
-                const qtd = parseInt(document.getElementById('inp-qtd-parcelas').value) || 1;
-                const total = parseFloat(document.getElementById('inp-valor').value);
-                const valorP = Math.floor((total / qtd) * 100) / 100;
-                const sobra = parseFloat((total - (valorP * qtd)).toFixed(2));
+                const qtd = Math.max(1, Math.min(12, parseInt($('inp-qtd-parcelas').value) || 1));
+                const totalC = Math.round(parseFloat($('inp-valor').value) * 100);
+                const baseC = Math.floor(totalC / qtd);
+                const vencBase = $('inp-venc').value;
                 for (let i = 1; i <= qtd; i++) {
-                    let d = new Date(document.getElementById('inp-venc').value + 'T12:00:00');
-                    d.setMonth(d.getMonth() + (i - 1));
+                    const centavos = i === qtd ? totalC - baseC * (qtd - 1) : baseC;
                     state[type === 'receita' ? 'receitas' : 'despesas'].push({
                         id: Date.now() + Math.random(),
-                        descricao: document.getElementById('inp-desc').value,
-                        valor: i === qtd ? valorP + sobra : valorP,
-                        venc: d.toISOString().slice(0, 10),
-                        categoria: document.getElementById('inp-cat').value,
+                        descricao: $('inp-desc').value.trim(),
+                        valor: centavos / 100,
+                        venc: addMonthsStr(vencBase, i - 1),
+                        categoria: $('inp-cat').value,
                         status: 'pendente', parcela: `${i}/${qtd}`, observacoes: obs,
                         comprovante: comprovante || null, comprovanteNome: compNome || null
                     });
                 }
+                mensagem = `${qtd} parcelas criadas.`;
             } else {
                 let list = (type === 'receita') ? 'receitas' : (type === 'despesa') ? 'despesas' : (type === 'rv') ? 'investRV' : 'investRF';
-                const item = {
-                    id: id ? parseFloat(id) : Date.now(),
-                    descricao: document.getElementById('inp-desc').value,
-                    ticker: document.getElementById('inp-desc').value.toUpperCase(),
-                    valor: parseFloat(document.getElementById('inp-valor').value),
-                    venc: document.getElementById('inp-venc').value,
-                    categoria: document.getElementById('inp-cat').value,
-                    observacoes: obs,
-                    qtd: parseFloat(document.getElementById('inp-qtd').value),
-                    pm: parseFloat(document.getElementById('inp-pm').value),
-                    status: 'pendente',
-                    comprovante: comprovante || null, comprovanteNome: compNome || null
-                };
-                if(id) {
-                    const original = state[list].find(i => i.id == id);
-                    if(original) { item.status = original.status; item.parcela = original.parcela; }
-                    state[list] = state[list].filter(i => i.id != id);
+                const idx = id ? state[list].findIndex(i => i.id == id) : -1;
+                const original = idx > -1 ? state[list][idx] : null;
+                const desc = $('inp-desc').value.trim();
+                let item;
+                if (type === 'rv') {
+                    item = { ...(original || {}), id: original ? original.id : Date.now(), descricao: desc, ticker: desc.toUpperCase(), qtd: parseFloat($('inp-qtd').value), pm: parseFloat($('inp-pm').value) };
+                } else if (type === 'rf') {
+                    item = { ...(original || {}), id: original ? original.id : Date.now(), descricao: desc, valor: parseFloat($('inp-valor').value), venc: $('inp-venc').value };
+                } else {
+                    item = {
+                        ...(original || {}),
+                        id: original ? original.id : Date.now(),
+                        descricao: desc,
+                        valor: parseFloat($('inp-valor').value),
+                        venc: $('inp-venc').value,
+                        categoria: $('inp-cat').value,
+                        observacoes: obs,
+                        status: original ? original.status : 'pendente',
+                        comprovante: comprovante || null, comprovanteNome: compNome || null
+                    };
+                    if (original && original.parcela) item.parcela = original.parcela;
                 }
-                state[list].push(item);
+                if (original) state[list][idx] = item; else state[list].push(item);
+                mensagem = original ? 'Alterações salvas.' : 'Lançamento salvo.';
             }
-            save(); closeModal();
+            if (save()) { closeModal(); toast(mensagem); }
         };
 
         function cloneItem(list, id) {
             const original = state[list].find(i => i.id == id);
-            if(original) { state[list].push({...original, id: Date.now() + Math.random(), status: 'pendente'}); save(); }
-        }
-
-        function getChain(target) {
-            let months = new Set();
-            [...state.receitas, ...state.despesas].forEach(i => i.venc && months.add(i.venc.slice(0,7)));
-            months.add(new Date().toISOString().slice(0,7));
-            let sorted = Array.from(months).sort();
-            let p = 0, r = 0, res = { recR: 0, desR: 0, finalR: 0, finalP: 0 };
-            if (target === 'all') {
-                let rP = state.receitas.reduce((a,c)=>a+c.valor, 0), rR = state.receitas.filter(i=>i.status==='pago').reduce((a,c)=>a+c.valor, 0);
-                let dP = state.despesas.reduce((a,c)=>a+c.valor, 0), dR = state.despesas.filter(i=>i.status==='pago').reduce((a,c)=>a+c.valor, 0);
-                return { recR: rR, desR: dR, finalR: rR - dR, finalP: rP - dP };
+            if (original) {
+                state[list].push({ ...original, id: Date.now() + Math.random(), status: 'pendente' });
+                if (save()) toast('Lançamento duplicado como pendente.');
             }
-            // Mês específico: cálculo isolado, SEM acumular meses anteriores.
-            // Saldo Previsto = todas as receitas - todas as despesas do mês (independe do status)
-            // Saldo Real = receitas pagas - despesas pagas do mês
-            let recM = state.receitas.filter(i => i.venc?.startsWith(target)), desM = state.despesas.filter(i => i.venc?.startsWith(target));
-            let rP = recM.reduce((a,c)=>a+c.valor,0), rR = recM.filter(i=>i.status==='pago').reduce((a,c)=>a+c.valor,0);
-            let dP = desM.reduce((a,c)=>a+c.valor,0), dR = desM.filter(i=>i.status==='pago').reduce((a,c)=>a+c.valor,0);
-            res.recR = rR; res.desR = dR;
-            res.finalR = rR - dR; res.finalP = rP - dP;
-            return res;
         }
 
-        function render() {
-            populateMonthFilter();
+        /* ---------- Cálculos ---------- */
+        // Cada mês é calculado de forma isolada (sem acumular meses anteriores):
+        //   Saldo Previsto = todas as receitas - todas as despesas do mês (independe do status)
+        //   Saldo Real     = receitas pagas - despesas pagas do mês
+        function resumoPeriodo(alvo) {
+            const f = (l) => alvo === 'all' ? l : l.filter(i => i.venc?.startsWith(alvo));
+            const rec = f(state.receitas), des = f(state.despesas);
+            const soma = (l) => l.reduce((a, c) => a + num(c.valor), 0);
+            const pagos = (l) => l.filter(i => i.status === 'pago');
+            const recP = soma(rec), recR = soma(pagos(rec)), desP = soma(des), desR = soma(pagos(des));
+            return { recP, recR, desP, desR, finalP: recP - desP, finalR: recR - desR };
+        }
+        function getChain(target) {
+            const r = resumoPeriodo(target);
+            return { recR: r.recR, desR: r.desR, finalR: r.finalR, finalP: r.finalP, recP: r.recP, desP: r.desP };
+        }
+
+        function situacao(item, type) {
+            const rec = type === 'receita';
+            if (item.status === 'pago') return { key: 'pago', label: rec ? 'Recebida' : 'Paga', cls: 'b-ok' };
+            if (!item.venc) return { key: 'pendente', label: rec ? 'A receber' : 'Pendente', cls: 'b-mute' };
+            const d = diasAte(item.venc);
+            if (d < 0) return { key: 'vencido', label: rec ? 'Atrasada' : 'Vencida', cls: 'b-bad' };
+            if (d === 0) return { key: 'breve', label: 'Vence hoje', cls: 'b-warn' };
+            if (d <= 7) return { key: 'breve', label: `Vence em ${d} d`, cls: 'b-warn' };
+            return { key: 'pendente', label: rec ? 'A receber' : 'Pendente', cls: 'b-mute' };
+        }
+
+        function deltaHTML(cur, prev, inverso, curto) {
+            const diff = cur - prev;
+            if (Math.abs(diff) < 0.005) return `<span class="text-slate-400">= igual ao mês anterior</span>`;
+            const sobe = diff > 0, bom = inverso ? !sobe : sobe;
+            const pct = Math.abs(prev) > 0.005 ? ` (${sobe ? '+' : '−'}${(Math.abs(diff / prev) * 100).toFixed(1).replace('.', ',')}%)` : '';
+            return `<span class="${bom ? 'text-emerald-400' : 'text-rose-400'}">${sobe ? '▲' : '▼'} ${fmt(Math.abs(diff))}${pct}</span>${curto ? '' : ' <span class="text-slate-400">vs mês ant.</span>'}`;
+        }
+
+        /* ---------- Renderização ---------- */
+        function renderKPIs() {
             const isAll = state.selectedMonth === 'all';
             const res = getChain(state.selectedMonth);
-            const hojeStr = new Date().toISOString().slice(0, 10);
-
-            document.getElementById('dash-receita-mes').innerText = fmt(res.recR);
-            document.getElementById('dash-despesa-paga-mes').innerText = fmt(res.desR);
-            document.getElementById('dash-saldo-real-mes').innerText = fmt(res.finalR);
-            document.getElementById('dash-saldo-previsto-mes').innerText = fmt(res.finalP);
-
-            document.getElementById('alerta-vencidos').classList.toggle('hidden', state.despesas.filter(d => d.status === 'pendente' && d.venc < hojeStr).length === 0);
-
-            const invCustoRV = state.investRV.reduce((a,c) => a + (c.qtd * c.pm), 0);
-            const invAtualRV = state.investRV.reduce((a,c) => a + (c.qtd * (c.cotacao || c.pm)), 0);
-            const invRF = state.investRF.reduce((a,c) => a + c.valor, 0);
-            document.getElementById('dash-inv-custo').innerText = fmt(invCustoRV + invRF);
-            document.getElementById('dash-inv-atual').innerText = fmt(invAtualRV + invRF);
-            document.getElementById('inv-rv-mercado').innerText = fmt(invAtualRV);
-            document.getElementById('inv-rf-total').innerText = fmt(invRF);
-
+            $('dash-receita-mes').innerText = fmt(res.recR);
+            $('dash-despesa-paga-mes').innerText = fmt(res.desR);
+            $('dash-saldo-real-mes').innerText = fmt(res.finalR);
+            $('dash-saldo-previsto-mes').innerText = fmt(res.finalP);
+            $('dash-saldo-real-mes').className = 'text-lg md:text-2xl font-black ' + (res.finalR < 0 ? 'text-rose-400' : 'text-emerald-300');
+            $('sub-receita').textContent = `Previsto: ${fmt(res.recP)}`;
+            $('sub-despesa').textContent = `Previstas: ${fmt(res.desP)}`;
             if (isAll) {
-                document.getElementById('secao-todos-lancamentos').classList.remove('hidden');
-                const todos = [...state.receitas.map(r=>({...r,tipo:'receita'})), ...state.despesas.map(d=>({...d,tipo:'despesa'}))].sort((a,b)=>(a.venc||'').localeCompare(b.venc||''));
-                document.getElementById('badge-total-receitas').innerText = `Total Rec: ${fmt(state.receitas.reduce((a,c)=>a+c.valor,0))}`;
-                document.getElementById('badge-total-despesas').innerText = `Total Desp: ${fmt(state.despesas.reduce((a,c)=>a+c.valor,0))}`;
-                document.getElementById('corpo-todos-lancamentos').innerHTML = todos.map(item => `
-                    <tr class="border-b border-slate-800 hover:bg-slate-900/50 transition">
-                        <td class="p-3 font-bold"><span class="px-2 py-0.5 rounded-md text-[10px] uppercase ${item.tipo==='despesa'?'bg-rose-500/10 text-rose-400':'bg-emerald-500/10 text-emerald-400'}">${item.tipo}</span></td>
-                        <td class="p-3 font-bold text-white">${item.descricao} ${item.parcela?`<span class="parcela-tag">${item.parcela}</span>`:''}</td>
-                        <td class="p-3 text-slate-400">${item.venc?item.venc.split('-').reverse().join('/'):'-'}</td>
-                        <td class="p-3 text-slate-400">${item.categoria || '-'}</td>
-                        <td class="p-3 font-bold"><span class="px-2 py-0.5 rounded-full text-[10px] ${item.status==='pago'?'bg-emerald-500/20 text-emerald-400':'bg-amber-500/20 text-amber-400'}">${item.status}</span></td>
-                        <td class="p-3 font-bold ${item.tipo==='despesa'?'text-rose-400':'text-emerald-400'}">${fmt(item.valor)}</td>
-                        <td class="p-3 text-center">${item.comprovante?`<button onclick='abrirComprovante("${item.comprovante}", "${item.comprovanteNome}")' class="p-1.5 bg-indigo-600/20 text-indigo-400 rounded-lg"><i data-lucide="paperclip" class="w-3.5 h-3.5"></i></button>`:'-'}</td>
-                    </tr>`).join('');
-            } else document.getElementById('secao-todos-lancamentos').classList.add('hidden');
-
-            ['receita', 'despesa'].forEach(type => {
-                const list = state[type + 's'].filter(i => isAll || i.venc?.startsWith(state.selectedMonth));
-                document.getElementById(`lista-${type}s-agrupadas`).innerHTML = list.sort((a,b)=>a.venc.localeCompare(b.venc)).map(i => `
-                    <div class="card p-4 flex justify-between items-center group">
-                        <div class="flex items-center gap-3">
-                            <button onclick="toggleStatus('${type}', ${i.id})" class="w-7 h-7 rounded-full border-2 ${i.status==='pago'?(type==='receita'?'bg-emerald-500':'bg-rose-500'):'border-slate-700'} flex items-center justify-center">
-                                ${i.status==='pago'?'<i data-lucide="check" class="w-4 h-4 text-white"></i>':''}
-                            </button>
-                            <div onclick="openForm('${type}', ${i.id})" class="cursor-pointer">
-                                <p class="text-sm font-bold ${i.status==='pago'?'strikethrough':''}">${i.descricao} ${i.parcela?`<span class="parcela-tag">${i.parcela}</span>`:''}</p>
-                                <p class="text-[10px] text-slate-500 uppercase">${i.venc?.split('-').reverse().join('/')} • ${i.categoria}</p>
-                                ${i.observacoes ? `<p class="text-[10px] text-indigo-400 italic mt-1 leading-tight">"${i.observacoes}"</p>` : ''}
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            ${i.comprovante ? `<button onclick='abrirComprovante("${i.comprovante}", "${i.comprovanteNome}")' class="p-1.5 bg-indigo-600/20 text-indigo-400 rounded-lg"><i data-lucide="paperclip" class="w-4 h-4"></i></button>` : ''}
-                            <p class="font-bold ${type==='receita'?'text-emerald-500':'text-rose-500'}">${fmt(i.valor)}</p>
-                            <button onclick="cloneItem('${type}s', ${i.id})" class="text-slate-600 hover:text-indigo-400 opacity-0 group-hover:opacity-100 transition"><i data-lucide="copy" class="w-4 h-4"></i></button>
-                            <button onclick="deleteItem('${type}s', ${i.id})" class="text-slate-600 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                        </div>
-                    </div>`).join('') || `<div class="p-6 text-center text-slate-600 text-xs">Nenhum registro.</div>`;
-            });
-
-            document.getElementById('corpo-investimentos').innerHTML = state.investRV.map(i => `
-                <tr class="border-b border-slate-800 hover:bg-slate-900/50 transition">
-                    <td class="p-4 font-bold text-indigo-400">${i.ticker}</td><td class="p-4">${i.qtd}</td><td class="p-4 text-slate-400">${fmt(i.pm)}</td><td class="p-4">${fmt(i.qtd*i.pm)}</td>
-                    <td class="p-4 text-cyan-400">${fmt(i.cotacao||i.pm)}</td><td class="p-4 font-bold">${fmt(i.qtd*(i.cotacao||i.pm))}</td>
-                    <td class="p-4 font-bold ${(i.qtd*(i.cotacao||i.pm))-(i.qtd*i.pm)>=0?'text-emerald-500':'text-rose-500'}">${fmt((i.qtd*(i.cotacao||i.pm))-(i.qtd*i.pm))}</td>
-                    <td class="p-4 text-right"><button onclick="deleteItem('investRV', ${i.id})" class="text-slate-600"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td>
-                </tr>`).join('') + state.investRF.map(i => `
-                <tr class="border-b border-slate-800 bg-emerald-900/5 transition">
-                    <td class="p-4 font-bold text-emerald-400">${i.nome||i.descricao}</td><td class="p-4">-</td><td class="p-4">-</td><td class="p-4">${fmt(i.valor)}</td><td class="p-4">-</td><td class="p-4 font-bold">${fmt(i.valor)}</td><td class="p-4 text-emerald-500 text-[10px]">Renda Fixa</td>
-                    <td class="p-4 text-right"><button onclick="deleteItem('investRF', ${i.id})" class="text-slate-600"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td>
-                </tr>`).join('');
-
-            document.getElementById('lista-agenda').innerHTML = state.despesas.filter(d=>d.status==='pendente'&&(isAll||d.venc?.startsWith(state.selectedMonth))).sort((a,b)=>a.venc.localeCompare(b.venc)).slice(0,8).map(d=>`
-                <div class="text-[11px] p-2 bg-slate-900 rounded-lg flex justify-between items-center border ${d.venc<hojeStr?'border-rose-500/30':'border-transparent'}">
-                    <div class="flex flex-col"><span class="font-bold ${d.venc<hojeStr?'text-rose-400':'text-slate-200'}">${d.descricao}</span><span class="text-[9px] text-slate-500">${d.venc?d.venc.split('-').reverse().slice(0,2).join('/'):'-'}</span></div>
-                    <span class="font-bold ${d.venc<hojeStr?'text-rose-500':'text-rose-400/80'}">${fmt(d.valor)}</span>
-                </div>`).join('') || '<p class="text-xs text-slate-600 text-center py-4">Sem pendências.</p>';
-
-            renderChart(res.recR, res.desR); safeIcons();
+                ['delta-receita', 'delta-despesa', 'delta-real', 'delta-previsto'].forEach(i => $(i).innerHTML = '');
+            } else {
+                const ant = getChain(mesAnterior(state.selectedMonth));
+                $('delta-receita').innerHTML = deltaHTML(res.recR, ant.recR, false);
+                $('delta-despesa').innerHTML = deltaHTML(res.desR, ant.desR, true);
+                $('delta-real').innerHTML = deltaHTML(res.finalR, ant.finalR, false);
+                $('delta-previsto').innerHTML = deltaHTML(res.finalP, ant.finalP, false).replace(/text-emerald-400/g, 'text-emerald-200').replace(/text-rose-400/g, 'text-rose-200').replace(/text-slate-400/g, 'text-white/80');
+            }
+            $('titulo-fluxo-chart').textContent = isAll ? 'Fluxo (todos os lançamentos)' : 'Fluxo do Mês';
+            $('titulo-agenda-dash').textContent = isAll ? 'Pendências' : 'Pendências do Mês';
         }
 
-        function toggleStatus(type, id) { const list = state[type + 's']; const item = list.find(i => i.id == id); if(item) item.status = item.status === 'pago' ? 'pendente' : 'pago'; save(); }
-        function deleteItem(list, id) { if(confirm('Excluir lançamento?')) { state[list] = state[list].filter(i => i.id != id); save(); } }
-        function clearData() { if(confirm('Apagar TUDO?')) { localStorage.clear(); location.reload(); } }
+        function renderComparativo() {
+            const card = $('card-comparativo');
+            if (state.selectedMonth === 'all') { card.classList.add('hidden'); return; }
+            card.classList.remove('hidden');
+            const atual = state.selectedMonth, ant = mesAnterior(atual);
+            const a = resumoPeriodo(atual), b = resumoPeriodo(ant);
+            $('comp-meses').textContent = `${nomeMes(atual)} × ${nomeMes(ant)}`;
+            $('comp-th-atual').textContent = MESES_CURTOS[Number(atual.slice(5)) - 1] + '/' + atual.slice(0, 4);
+            $('comp-th-ant').textContent = MESES_CURTOS[Number(ant.slice(5)) - 1] + '/' + ant.slice(0, 4);
+            const linhas = [['Receitas (previstas)', 'recP', false], ['Receitas (reais)', 'recR', false], ['Despesas (previstas)', 'desP', true], ['Despesas (pagas)', 'desR', true], ['Saldo previsto', 'finalP', false], ['Saldo real', 'finalR', false]];
+            $('corpo-comparativo').innerHTML = linhas.map(([nome, k, inv]) => `
+                <tr class="border-b border-slate-800">
+                    <td class="p-2 font-bold ${k.startsWith('final') ? 'text-white' : 'text-slate-300'}">${nome}</td>
+                    <td class="p-2 font-bold">${fmt(a[k])}</td>
+                    <td class="p-2 text-slate-400">${fmt(b[k])}</td>
+                    <td class="p-2">${deltaHTML(a[k], b[k], inv, true)}</td>
+                </tr>`).join('');
+        }
+
+        function renderAlertas() {
+            const hoje = hojeISO();
+            const vencidas = state.despesas.filter(d => d.status === 'pendente' && d.venc && d.venc < hoje);
+            $('alerta-vencidos').classList.toggle('hidden', vencidas.length === 0);
+            $('alerta-vencidos-detalhe').textContent = vencidas.length ? `(${vencidas.length} ${vencidas.length === 1 ? 'conta' : 'contas'} · ${fmt(vencidas.reduce((a, c) => a + num(c.valor), 0))})` : '';
+            const breve = state.despesas.filter(d => d.status === 'pendente' && d.venc && d.venc >= hoje && diasAte(d.venc) <= 7);
+            $('alerta-proximos').classList.toggle('hidden', breve.length === 0);
+            $('alerta-proximos-detalhe').textContent = breve.length ? `${breve.length} ${breve.length === 1 ? 'conta vence' : 'contas vencem'} nos próximos 7 dias · ${fmt(breve.reduce((a, c) => a + num(c.valor), 0))}` : '';
+        }
+
+        function renderTodos() {
+            const isAll = state.selectedMonth === 'all';
+            if (!isAll) { $('secao-todos-lancamentos').classList.add('hidden'); return; }
+            $('secao-todos-lancamentos').classList.remove('hidden');
+            const todos = [...state.receitas.map(r => ({ ...r, tipo: 'receita' })), ...state.despesas.map(d => ({ ...d, tipo: 'despesa' }))].sort((a, b) => (a.venc || '').localeCompare(b.venc || ''));
+            const soma = (l) => l.reduce((a, c) => a + num(c.valor), 0);
+            $('badge-total-receitas').innerText = `Total Rec: ${fmt(soma(state.receitas))}`;
+            $('badge-total-despesas').innerText = `Total Desp: ${fmt(soma(state.despesas))}`;
+            $('corpo-todos-lancamentos').innerHTML = todos.map(item => {
+                const sit = situacao(item, item.tipo);
+                return `
+                <tr class="border-b border-slate-800 hover:bg-slate-900/50 transition">
+                    <td class="p-3 font-bold"><span class="px-2 py-0.5 rounded-md text-[11px] uppercase ${item.tipo === 'despesa' ? 'bg-rose-500/10 text-rose-400' : 'bg-emerald-500/10 text-emerald-400'}">${item.tipo}</span></td>
+                    <td class="p-3 font-bold text-white">${esc(item.descricao)} ${item.parcela ? `<span class="parcela-tag">${esc(item.parcela)}</span>` : ''}</td>
+                    <td class="p-3 text-slate-400">${fmtData(item.venc)}</td>
+                    <td class="p-3 text-slate-400">${esc(item.categoria || '-')}</td>
+                    <td class="p-3 font-bold"><span class="badge ${sit.cls}">${sit.label}</span></td>
+                    <td class="p-3 font-bold ${item.tipo === 'despesa' ? 'text-rose-400' : 'text-emerald-400'}">${fmt(item.valor)}</td>
+                    <td class="p-3 text-center">${item.comprovante ? `<button type="button" onclick="abrirComprovanteItem('${item.tipo}', ${item.id})" aria-label="Abrir comprovante" class="p-1.5 bg-indigo-600/20 text-indigo-300 rounded-lg tap"><i data-lucide="paperclip" class="w-3.5 h-3.5" aria-hidden="true"></i></button>` : '-'}</td>
+                </tr>`;
+            }).join('') || `<tr><td colspan="7" class="p-6 text-center text-slate-400">Nenhum lançamento registrado ainda.</td></tr>`;
+        }
+
+        /* --- Busca e filtros das listas --- */
+        const filtros = { receita: { busca: '', cat: '', sit: '', de: '', ate: '' }, despesa: { busca: '', cat: '', sit: '', de: '', ate: '' } };
+
+        function buildFilterBar(type) {
+            const rec = type === 'receita';
+            $(`filtros-${type}`).innerHTML = `
+                <div class="grid grid-cols-2 md:grid-cols-6 gap-2 items-end">
+                    <div class="col-span-2">
+                        <label class="lbl" for="f-${type}-busca">Buscar</label>
+                        <input type="search" id="f-${type}-busca" placeholder="Descrição, categoria, observação..." oninput="onFiltro('${type}', true)" autocomplete="off">
+                    </div>
+                    <div>
+                        <label class="lbl" for="f-${type}-cat">Categoria</label>
+                        <select id="f-${type}-cat" onchange="onFiltro('${type}')"><option value="">Todas</option></select>
+                    </div>
+                    <div>
+                        <label class="lbl" for="f-${type}-sit">Situação</label>
+                        <select id="f-${type}-sit" onchange="onFiltro('${type}')">
+                            <option value="">Todas</option>
+                            <option value="pago">${rec ? 'Recebidas' : 'Pagas'}</option>
+                            <option value="pendente">Pendentes</option>
+                            <option value="vencido">${rec ? 'Atrasadas' : 'Vencidas'}</option>
+                            <option value="breve">Vencem em 7 dias</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="lbl" for="f-${type}-de">Venc. de</label>
+                        <input type="date" id="f-${type}-de" onchange="onFiltro('${type}')">
+                    </div>
+                    <div>
+                        <label class="lbl" for="f-${type}-ate">Venc. até</label>
+                        <input type="date" id="f-${type}-ate" onchange="onFiltro('${type}')">
+                    </div>
+                </div>
+                <div class="flex justify-between items-center mt-2 gap-2 flex-wrap">
+                    <p id="f-${type}-info" class="text-[11px] text-slate-400">Os filtros valem junto com o mês escolhido no topo (use TODOS para ver todos os meses).</p>
+                    <button type="button" onclick="limparFiltros('${type}')" class="text-xs font-bold text-indigo-300 underline tap">Limpar filtros</button>
+                </div>`;
+        }
+        let _debounce = null;
+        function onFiltro(type, comAtraso) {
+            const ler = () => {
+                filtros[type] = { busca: $(`f-${type}-busca`).value, cat: $(`f-${type}-cat`).value, sit: $(`f-${type}-sit`).value, de: $(`f-${type}-de`).value, ate: $(`f-${type}-ate`).value };
+                safe(() => renderListas(type), 'listas'); safeIcons();
+            };
+            if (comAtraso) { clearTimeout(_debounce); _debounce = setTimeout(ler, 160); } else ler();
+        }
+        function syncFiltroUI(type) {
+            const f = filtros[type];
+            $(`f-${type}-busca`).value = f.busca; $(`f-${type}-sit`).value = f.sit; $(`f-${type}-de`).value = f.de; $(`f-${type}-ate`).value = f.ate;
+            renderFiltroCategorias(type); $(`f-${type}-cat`).value = f.cat;
+        }
+        function limparFiltros(type) {
+            filtros[type] = { busca: '', cat: '', sit: '', de: '', ate: '' };
+            syncFiltroUI(type); renderListas(type); safeIcons();
+        }
+        function aplicarFiltroRapido(type, sit, manterMes) {
+            if (!manterMes) { state.selectedMonth = 'all'; persistir(); }
+            filtros[type] = { busca: '', cat: '', sit, de: '', ate: '' };
+            showTab(type === 'receita' ? 'receitas' : 'despesas');
+            syncFiltroUI(type);
+        }
+        function renderFiltroCategorias(type) {
+            const sel = $(`f-${type}-cat`); if (!sel) return;
+            const cats = new Set(type === 'receita' ? state.categoriasReceitas : state.categoriasDespesas);
+            state[type + 's'].forEach(i => i.categoria && cats.add(i.categoria));
+            const opts = ['<option value="">Todas</option>'].concat([...cats].sort((a, b) => a.localeCompare(b, 'pt-BR')).map(c => `<option value="${esc(c)}">${esc(c)}</option>`)).join('');
+            if (sel.dataset.opts !== opts) { const atual = sel.value; sel.innerHTML = opts; sel.dataset.opts = opts; sel.value = atual; if (sel.value !== atual) sel.value = ''; }
+            if (!([...sel.options].some(o => o.value === filtros[type].cat))) filtros[type].cat = '';
+        }
+        function listaFiltrada(type) {
+            const isAll = state.selectedMonth === 'all';
+            const f = filtros[type], q = norm(f.busca.trim());
+            return state[type + 's'].filter(i => {
+                if (!(isAll || i.venc?.startsWith(state.selectedMonth))) return false;
+                if (q) {
+                    const alvo = norm([i.descricao, i.categoria, i.observacoes, i.parcela, i.valor].join(' '));
+                    if (!alvo.includes(q)) return false;
+                }
+                if (f.cat && i.categoria !== f.cat) return false;
+                if (f.sit) {
+                    const s = situacao(i, type).key;
+                    if (f.sit === 'pago' && s !== 'pago') return false;
+                    if (f.sit === 'pendente' && s === 'pago') return false;
+                    if (f.sit === 'vencido' && s !== 'vencido') return false;
+                    if (f.sit === 'breve' && s !== 'breve') return false;
+                }
+                if (f.de && !(i.venc && i.venc >= f.de)) return false;
+                if (f.ate && !(i.venc && i.venc <= f.ate)) return false;
+                return true;
+            }).sort((a, b) => (a.venc || '').localeCompare(b.venc || ''));
+        }
+        function filtroAtivo(type) { const f = filtros[type]; return !!(f.busca.trim() || f.cat || f.sit || f.de || f.ate); }
+
+        function linhaLancamento(i, type) {
+            const sit = situacao(i, type);
+            const pago = i.status === 'pago';
+            const rotuloPago = type === 'receita' ? 'recebida' : 'paga';
+            return `
+                <div class="card p-4 flex justify-between items-center group gap-2">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <button type="button" onclick="toggleStatus('${type}', ${i.id})" aria-pressed="${pago}" aria-label="${pago ? 'Marcar como pendente' : 'Marcar como ' + rotuloPago}: ${esc(i.descricao)}" class="tap w-7 h-7 shrink-0 rounded-full border-2 ${pago ? (type === 'receita' ? 'bg-emerald-500 border-emerald-500' : 'bg-rose-500 border-rose-500') : 'border-slate-500'} flex items-center justify-center">
+                            ${pago ? '<i data-lucide="check" class="w-4 h-4 text-white" aria-hidden="true"></i>' : ''}
+                        </button>
+                        <div onclick="openForm('${type}', ${i.id})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openForm('${type}', ${i.id});}" role="button" tabindex="0" aria-label="Editar ${esc(i.descricao)}" class="cursor-pointer min-w-0">
+                            <p class="text-sm font-bold ${pago ? 'strikethrough' : ''} break-words">${esc(i.descricao)} ${i.parcela ? `<span class="parcela-tag">${esc(i.parcela)}</span>` : ''}</p>
+                            <p class="text-[11px] text-slate-400 uppercase flex items-center gap-2 flex-wrap mt-0.5"><span>${fmtData(i.venc)} • ${esc(i.categoria || '-')}</span><span class="badge ${sit.cls}">${sit.label}</span></p>
+                            ${i.observacoes ? `<p class="text-[11px] text-indigo-300 italic mt-1 leading-tight">"${esc(i.observacoes)}"</p>` : ''}
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-1 shrink-0">
+                        ${i.comprovante ? `<button type="button" onclick="abrirComprovanteItem('${type}', ${i.id})" aria-label="Abrir comprovante" class="p-1.5 bg-indigo-600/20 text-indigo-300 rounded-lg tap"><i data-lucide="paperclip" class="w-4 h-4" aria-hidden="true"></i></button>` : ''}
+                        <p class="font-bold ml-1 ${type === 'receita' ? 'text-emerald-400' : 'text-rose-400'}">${fmt(i.valor)}</p>
+                        <span class="row-actions flex">
+                            <button type="button" onclick="cloneItem('${type}s', ${i.id})" aria-label="Duplicar ${esc(i.descricao)}" title="Duplicar"><i data-lucide="copy" class="w-4 h-4" aria-hidden="true"></i></button>
+                            <button type="button" onclick="deleteItem('${type}s', ${i.id})" aria-label="Excluir ${esc(i.descricao)}" title="Excluir"><i data-lucide="trash-2" class="w-4 h-4" aria-hidden="true"></i></button>
+                        </span>
+                    </div>
+                </div>`;
+        }
+
+        function renderListas(only) {
+            ['receita', 'despesa'].forEach(type => {
+                if (only && only !== type) return;
+                renderFiltroCategorias(type);
+                const list = listaFiltrada(type);
+                const soma = (l) => l.reduce((a, c) => a + num(c.valor), 0);
+                const total = soma(list), pagos = soma(list.filter(i => i.status === 'pago'));
+                const rot = type === 'receita' ? 'Recebido' : 'Pago';
+                $(`resumo-${type}s`).innerHTML = list.length ? `<strong class="text-slate-200">${list.length}</strong> ${list.length === 1 ? 'lançamento' : 'lançamentos'} · Total <strong class="text-slate-200">${fmt(total)}</strong> · ${rot} <strong class="text-slate-200">${fmt(pagos)}</strong> · Pendente <strong class="text-slate-200">${fmt(total - pagos)}</strong>` : '';
+                const vazio = filtroAtivo(type)
+                    ? `<div class="p-8 text-center text-slate-400 text-sm card"><p class="text-2xl mb-2" aria-hidden="true">🔎</p><p class="font-bold text-slate-300">Nenhum resultado para esses filtros.</p><button type="button" onclick="limparFiltros('${type}')" class="mt-3 text-xs font-bold text-indigo-300 underline tap">Limpar filtros</button></div>`
+                    : `<div class="p-8 text-center text-slate-400 text-sm card"><p class="text-2xl mb-2" aria-hidden="true">${type === 'receita' ? '💵' : '🧾'}</p><p class="font-bold text-slate-300">Nenhum registro${state.selectedMonth === 'all' ? '' : ' neste mês'}.</p><button type="button" onclick="openForm('${type}')" class="mt-3 text-xs font-bold text-indigo-300 underline tap">+ Adicionar ${type === 'receita' ? 'receita' : 'despesa'}</button></div>`;
+                $(`lista-${type}s-agrupadas`).innerHTML = list.map(i => linhaLancamento(i, type)).join('') || vazio;
+            });
+        }
+
+        /* --- Investimentos --- */
+        function cotacaoInfo(i) {
+            if (!i.cotacao) return { txt: 'Indisponível', sub: 'usando preço médio', warn: true };
+            if (!i.cotacaoEm) return { txt: fmt(i.cotacao), sub: 'sem data de atualização', warn: true };
+            const h = (Date.now() - new Date(i.cotacaoEm).getTime()) / 36e5;
+            const rel = h < 1 ? 'há minutos' : h < 24 ? `há ${Math.floor(h)} h` : `há ${Math.floor(h / 24)} d`;
+            return { txt: fmt(i.cotacao), sub: h > 24 ? `desatualizada (${rel})` : `atualizada ${rel}`, warn: h > 24 };
+        }
+        function renderInvest() {
+            let custoRV = 0, atualRV = 0, semCotacao = 0, velhas = 0;
+            const linhasRV = state.investRV.map(i => {
+                const custo = num(i.qtd) * num(i.pm);
+                const cot = i.cotacao || i.pm;
+                const atual = num(i.qtd) * num(cot);
+                const res = atual - custo, pct = custo > 0 ? res / custo : null;
+                custoRV += custo; atualRV += atual;
+                const ci = cotacaoInfo(i);
+                if (!i.cotacao) semCotacao++; else if (ci.warn) velhas++;
+                const cor = res >= 0 ? 'text-emerald-400' : 'text-rose-400';
+                return `
+                <tr class="border-b border-slate-800 hover:bg-slate-900/50 transition">
+                    <td class="p-4 font-bold text-indigo-300"><button type="button" onclick="openForm('rv', ${i.id})" aria-label="Editar ativo ${esc(i.ticker)}" class="underline decoration-dotted tap">${esc(i.ticker)}</button></td><td class="p-4">${esc(i.qtd)}</td><td class="p-4 text-slate-400">${fmt(i.pm)}</td><td class="p-4">${fmt(custo)}</td>
+                    <td class="p-4 ${ci.warn ? 'text-amber-400' : 'text-cyan-400'}">${ci.txt}<span class="block text-[11px] ${ci.warn ? 'text-amber-400' : 'text-slate-400'}">${ci.sub}</span></td><td class="p-4 font-bold">${fmt(atual)}</td>
+                    <td class="p-4 font-bold ${cor}">${fmt(res)}<span class="block text-[11px]">${pct === null ? '' : fmtPct(pct)}</span></td>
+                    <td class="p-4 text-right"><button type="button" onclick="deleteItem('investRV', ${i.id})" aria-label="Excluir ativo ${esc(i.ticker)}" class="text-slate-400 hover:text-rose-400 tap"><i data-lucide="trash-2" class="w-4 h-4" aria-hidden="true"></i></button></td>
+                </tr>`;
+            }).join('');
+            const invRF = state.investRF.reduce((a, c) => a + num(c.valor), 0);
+            const linhasRF = state.investRF.map(i => `
+                <tr class="border-b border-slate-800 bg-emerald-900/5 transition">
+                    <td class="p-4 font-bold text-emerald-400"><button type="button" onclick="openForm('rf', ${i.id})" aria-label="Editar título ${esc(i.nome || i.descricao)}" class="underline decoration-dotted tap">${esc(i.nome || i.descricao)}</button></td><td class="p-4">-</td><td class="p-4">-</td><td class="p-4">${fmt(i.valor)}</td><td class="p-4">-</td><td class="p-4 font-bold">${fmt(i.valor)}</td><td class="p-4 text-emerald-400 text-[11px]">Renda Fixa${i.venc ? `<span class="block text-slate-400">vence ${fmtData(i.venc)}</span>` : ''}</td>
+                    <td class="p-4 text-right"><button type="button" onclick="deleteItem('investRF', ${i.id})" aria-label="Excluir título ${esc(i.nome || i.descricao)}" class="text-slate-400 hover:text-rose-400 tap"><i data-lucide="trash-2" class="w-4 h-4" aria-hidden="true"></i></button></td>
+                </tr>`).join('');
+            $('corpo-investimentos').innerHTML = (linhasRV + linhasRF) || `<tr><td colspan="8" class="p-8 text-center text-slate-400">Nenhum investimento cadastrado. Use <strong>+ NOVO ATIVO</strong> ou <strong>+ NOVO TÍTULO</strong>.</td></tr>`;
+
+            const resRV = atualRV - custoRV, pctRV = custoRV > 0 ? resRV / custoRV : null;
+            $('inv-rv-mercado').innerText = fmt(atualRV);
+            $('inv-rf-total').innerText = fmt(invRF);
+            const corRes = resRV >= 0 ? 'text-emerald-400' : 'text-rose-400';
+            $('inv-resultado-total').innerText = fmt(resRV);
+            $('inv-resultado-total').className = 'text-2xl font-black ' + (state.investRV.length ? corRes : '');
+            $('inv-resultado-pct').textContent = pctRV === null ? 'Sem ativos de renda variável.' : `${fmtPct(pctRV)} sobre o custo de ${fmt(custoRV)}`;
+            $('dash-inv-custo').innerText = fmt(custoRV + invRF);
+            $('dash-inv-atual').innerText = fmt(atualRV + invRF);
+            $('dash-inv-resultado').innerHTML = pctRV === null ? '' : `<span class="${corRes}">Renda variável: ${fmt(resRV)} (${fmtPct(pctRV)})</span>`;
+            $('rodape-investimentos').innerHTML = (state.investRV.length || state.investRF.length) ? `
+                <tr class="bg-slate-900 font-bold">
+                    <td class="p-4" colspan="3">Total</td><td class="p-4">${fmt(custoRV + invRF)}</td><td class="p-4"></td><td class="p-4">${fmt(atualRV + invRF)}</td><td class="p-4 ${corRes}">${fmt(resRV)}</td><td class="p-4"></td>
+                </tr>` : '';
+            const aviso = $('inv-aviso-cotacao');
+            const msgs = [];
+            if (semCotacao) msgs.push(`${semCotacao} ${semCotacao === 1 ? 'ativo está sem cotação' : 'ativos estão sem cotação'}: o total usa o preço médio, não o valor de mercado.`);
+            if (velhas) msgs.push(`${velhas} ${velhas === 1 ? 'cotação está desatualizada' : 'cotações estão desatualizadas'} (mais de 24 horas). Use o botão de sincronizar.`);
+            aviso.textContent = msgs.join(' '); aviso.classList.toggle('hidden', msgs.length === 0);
+            $('sync-status').textContent = state.config?.ultimaSync ? `Última sincronização de cotações: ${fmtDataHora(state.config.ultimaSync)}` : (state.investRV.length ? 'As cotações ainda não foram sincronizadas.' : '');
+        }
+
+        function renderAgenda() {
+            const isAll = state.selectedMonth === 'all';
+            const hojeStr = hojeISO();
+            $('lista-agenda').innerHTML = state.despesas.filter(d => d.status === 'pendente' && (isAll || d.venc?.startsWith(state.selectedMonth))).sort((a, b) => (a.venc || '').localeCompare(b.venc || '')).slice(0, 8).map(d => {
+                const venc = d.venc && d.venc < hojeStr;
+                return `
+                <button type="button" onclick="openForm('despesa', ${d.id})" aria-label="Editar ${esc(d.descricao)}" class="w-full text-left text-[11px] p-2 bg-slate-900 rounded-lg flex justify-between items-center border ${venc ? 'border-rose-500/30' : 'border-transparent'} hover:border-indigo-500/40">
+                    <div class="flex flex-col"><span class="font-bold ${venc ? 'text-rose-400' : 'text-slate-200'}">${esc(d.descricao)}</span><span class="text-[10px] text-slate-400">${d.venc ? d.venc.split('-').reverse().slice(0, 2).join('/') : '-'}${venc ? ' · vencida' : ''}</span></div>
+                    <span class="font-bold ${venc ? 'text-rose-400' : 'text-rose-300'}">${fmt(d.valor)}</span>
+                </button>`;
+            }).join('') || '<p class="text-xs text-slate-400 text-center py-4">Sem pendências. Tudo em dia! ✅</p>';
+        }
 
         let fChart;
         function renderChart(r, d) {
-            const ctx = document.getElementById('chartFluxo');
-            if (typeof Chart === 'undefined' || !ctx) return; // Chart.js indisponível offline: ignora o gráfico
+            const ctx = $('chartFluxo');
+            const vazio = !(r > 0 || d > 0);
+            $('fluxo-vazio').classList.toggle('hidden', !vazio);
+            const saldo = r - d;
+            $('fluxo-legenda').innerHTML = `
+                <div class="flex justify-between"><span class="text-emerald-400">● Receitas recebidas</span><strong>${fmt(r)}</strong></div>
+                <div class="flex justify-between"><span class="text-rose-400">● Despesas pagas</span><strong>${fmt(d)}</strong></div>
+                <div class="flex justify-between border-t border-slate-800 pt-1"><span class="text-slate-300">Saldo real</span><strong class="${saldo < 0 ? 'text-rose-400' : 'text-emerald-300'}">${fmt(saldo)}</strong></div>`;
+            if (ctx) ctx.setAttribute('aria-label', `Fluxo: receitas recebidas ${fmt(r)}, despesas pagas ${fmt(d)}`);
+            if (typeof Chart === 'undefined' || !ctx) { if (ctx) ctx.style.display = 'none'; return; }
             if (fChart) fChart.destroy();
+            ctx.style.display = vazio ? 'none' : '';
+            if (vazio) { fChart = null; return; }
             fChart = new Chart(ctx, { type: 'doughnut', data: { datasets: [{ data: [r, d], backgroundColor: ['#10b981', '#f43f5e'], borderWidth: 0 }] }, options: { cutout: '80%', plugins: { tooltip: { enabled: false } } } });
         }
+        function renderFluxo() { const r = getChain(state.selectedMonth); renderChart(r.recR, r.desR); }
 
-        // Estilo mínimo de reserva: se o Tailwind (CDN) não carregar offline, o menu inferior continua visível
+        /* --- Composição dos saldos --- */
+        function abrirDetalheSaldo(tipo) {
+            const alvo = state.selectedMonth;
+            const filtra = (l) => alvo === 'all' ? l : l.filter(i => i.venc?.startsWith(alvo));
+            const recAll = filtra(state.receitas), desAll = filtra(state.despesas);
+            const real = tipo === 'real';
+            const pago = (l) => l.filter(i => i.status === 'pago');
+            const rec = real ? pago(recAll) : recAll, des = real ? pago(desAll) : desAll;
+            const soma = (l) => l.reduce((a, c) => a + num(c.valor), 0);
+            const tr = soma(rec), td = soma(des);
+            $('detalhe-titulo').textContent = real ? 'Composição do Saldo Real' : 'Composição do Saldo Previsto';
+            $('detalhe-periodo').textContent = alvo === 'all' ? 'Todos os lançamentos' : nomeMes(alvo);
+            $('detalhe-formula').innerHTML = `${fmt(tr)} <span class="text-slate-400 font-semibold">${real ? 'receitas recebidas' : 'receitas'}</span> − ${fmt(td)} <span class="text-slate-400 font-semibold">${real ? 'despesas pagas' : 'despesas'}</span> = <span class="${tr - td < 0 ? 'text-rose-400' : 'text-emerald-300'}">${fmt(tr - td)}</span>`;
+            $('detalhe-explica').textContent = real
+                ? 'Considera somente as receitas marcadas como recebidas e as despesas marcadas como pagas, com vencimento no período.'
+                : 'Considera todas as receitas e despesas com vencimento no período, estejam pagas ou não. Cada mês é calculado isoladamente, sem acumular o saldo de meses anteriores.';
+            const linha = (i, cor, type) => {
+                const s = situacao(i, type);
+                return `<div class="flex justify-between items-center gap-2 text-xs bg-slate-950 border border-slate-800 rounded-lg px-3 py-2"><div class="min-w-0"><p class="font-bold truncate">${esc(i.descricao)} ${i.parcela ? `<span class="parcela-tag">${esc(i.parcela)}</span>` : ''}</p><p class="text-[11px] text-slate-400">${fmtData(i.venc)} · ${esc(i.categoria || '-')} · <span class="badge ${s.cls}">${s.label}</span></p></div><strong class="${cor} shrink-0">${fmt(i.valor)}</strong></div>`;
+            };
+            const ord = (l) => l.slice().sort((a, b) => (a.venc || '').localeCompare(b.venc || ''));
+            $('detalhe-rec-titulo').textContent = `Receitas incluídas (${rec.length})`;
+            $('detalhe-des-titulo').textContent = `Despesas incluídas (${des.length})`;
+            $('detalhe-receitas').innerHTML = ord(rec).map(i => linha(i, 'text-emerald-400', 'receita')).join('') || '<p class="text-xs text-slate-400">Nenhuma receita incluída.</p>';
+            $('detalhe-despesas').innerHTML = ord(des).map(i => linha(i, 'text-rose-400', 'despesa')).join('') || '<p class="text-xs text-slate-400">Nenhuma despesa incluída.</p>';
+            if (real) {
+                const rp = recAll.length - rec.length, dp = desAll.length - des.length;
+                $('detalhe-nota').textContent = (rp || dp) ? `Ainda fora do saldo real: ${rp} ${rp === 1 ? 'receita pendente' : 'receitas pendentes'} (${fmt(soma(recAll) - tr)}) e ${dp} ${dp === 1 ? 'despesa pendente' : 'despesas pendentes'} (${fmt(soma(desAll) - td)}).` : '';
+            } else $('detalhe-nota').textContent = '';
+            abrirModal('modal-detalhe'); safeIcons();
+        }
+
+        /* --- Relatórios mensais e anuais --- */
+        function porCategoria(lista) {
+            const mapa = {};
+            lista.forEach(i => { const c = i.categoria || 'Sem categoria'; mapa[c] = mapa[c] || { total: 0, pago: 0, n: 0 }; mapa[c].total += num(i.valor); if (i.status === 'pago') mapa[c].pago += num(i.valor); mapa[c].n++; });
+            return Object.entries(mapa).map(([cat, v]) => ({ cat, ...v })).sort((a, b) => b.total - a.total);
+        }
+        function periodoRelatorio() {
+            if ($('rel-modo').value === 'ano') { const ano = $('rel-ano').value || String(new Date().getFullYear()); return { modo: 'ano', prefixo: ano, titulo: `Ano ${ano}` }; }
+            const mes = state.selectedMonth !== 'all' ? state.selectedMonth : mesAtual();
+            return { modo: 'mes', prefixo: mes, titulo: nomeMes(mes) };
+        }
+        function dadosRelatorio() {
+            const p = periodoRelatorio();
+            const filtra = (l) => l.filter(i => i.venc?.startsWith(p.prefixo));
+            const meses = p.modo === 'ano' ? Array.from({ length: 12 }, (_, k) => { const key = `${p.prefixo}-${pad(k + 1)}`; return { key, nome: MESES[k], ...resumoPeriodo(key) }; }) : null;
+            return { ...p, resumo: resumoPeriodo(p.prefixo), meses, catDes: porCategoria(filtra(state.despesas)), catRec: porCategoria(filtra(state.receitas)) };
+        }
+        function renderRelatorios() {
+            const selAno = $('rel-ano');
+            const anos = new Set([String(new Date().getFullYear())]);
+            [...state.receitas, ...state.despesas].forEach(i => i.venc && anos.add(i.venc.slice(0, 4)));
+            const lista = [...anos].sort();
+            const atualAno = selAno.value || (state.selectedMonth !== 'all' ? state.selectedMonth.slice(0, 4) : String(new Date().getFullYear()));
+            selAno.innerHTML = lista.map(a => `<option value="${a}">${a}</option>`).join('');
+            selAno.value = lista.includes(atualAno) ? atualAno : lista[lista.length - 1];
+            $('rel-ano-box').classList.toggle('hidden', $('rel-modo').value !== 'ano');
+
+            const d = dadosRelatorio();
+            $('rel-periodo-txt').textContent = d.modo === 'mes' ? `Relatório mensal de ${d.titulo}${state.selectedMonth === 'all' ? ' (mês atual — escolha outro mês no seletor do topo)' : ' — troque o mês no seletor do topo'}.` : `Relatório anual de ${d.prefixo}. Cada mês é calculado isoladamente.`;
+            const r = d.resumo;
+            const card = (rot, val, cor, sub) => `<div class="card p-4"><p class="text-[10px] font-bold uppercase ${cor}">${rot}</p><h3 class="text-lg md:text-xl font-black mt-1">${fmt(val)}</h3>${sub ? `<p class="text-[11px] text-slate-400 mt-1">${sub}</p>` : ''}</div>`;
+            $('rel-cards').innerHTML = card('Receitas', r.recP, 'text-emerald-400', `Recebido: ${fmt(r.recR)}`) + card('Despesas', r.desP, 'text-rose-400', `Pago: ${fmt(r.desR)}`) + card('Saldo previsto', r.finalP, 'text-indigo-300', r.finalP < 0 ? 'Resultado negativo' : 'Resultado positivo') + card('Saldo real', r.finalR, 'text-indigo-300', `Receitas recebidas − despesas pagas`);
+            $('rel-anual-wrap').classList.toggle('hidden', d.modo !== 'ano');
+            if (d.meses) {
+                const max = Math.max(1, ...d.meses.map(m => Math.max(m.recP, m.desP)));
+                const linhas = d.meses.map((m, k) => `
+                    <tr class="border-b border-slate-800 hover:bg-slate-900/50">
+                        <td class="p-2 font-bold">${MESES_CURTOS[k]}</td><td class="p-2">${fmt(m.recP)}</td><td class="p-2 text-slate-400">${fmt(m.recR)}</td><td class="p-2">${fmt(m.desP)}</td><td class="p-2 text-slate-400">${fmt(m.desR)}</td>
+                        <td class="p-2 font-bold ${m.finalP < 0 ? 'text-rose-400' : 'text-emerald-400'}">${fmt(m.finalP)}</td><td class="p-2 font-bold ${m.finalR < 0 ? 'text-rose-400' : 'text-emerald-400'}">${fmt(m.finalR)}</td>
+                        <td class="p-2"><div class="bar mb-1" title="Receitas"><i style="width:${(m.recP / max * 100).toFixed(1)}%;background:#10b981"></i></div><div class="bar" title="Despesas"><i style="width:${(m.desP / max * 100).toFixed(1)}%;background:#f43f5e"></i></div></td>
+                    </tr>`).join('');
+                $('corpo-rel-anual').innerHTML = linhas + `<tr class="bg-slate-900 font-bold"><td class="p-2">Total</td><td class="p-2">${fmt(r.recP)}</td><td class="p-2">${fmt(r.recR)}</td><td class="p-2">${fmt(r.desP)}</td><td class="p-2">${fmt(r.desR)}</td><td class="p-2 ${r.finalP < 0 ? 'text-rose-400' : 'text-emerald-400'}">${fmt(r.finalP)}</td><td class="p-2 ${r.finalR < 0 ? 'text-rose-400' : 'text-emerald-400'}">${fmt(r.finalR)}</td><td></td></tr>`;
+            }
+            const blocoCat = (cats, total, cor, rotPago) => cats.length ? cats.map(c => `
+                <div><div class="flex justify-between text-xs gap-2"><span class="font-bold truncate">${esc(c.cat)} <span class="text-slate-400 font-normal">(${c.n})</span></span><span><strong>${fmt(c.total)}</strong> <span class="text-slate-400">${total > 0 ? (c.total / total * 100).toFixed(1).replace('.', ',') + '%' : ''}</span></span></div>
+                <div class="bar mt-1"><i style="width:${total > 0 ? (c.total / total * 100).toFixed(1) : 0}%;background:${cor}"></i></div>
+                <p class="text-[11px] text-slate-400 mt-0.5">${rotPago}: ${fmt(c.pago)}</p></div>`).join('') : '<p class="text-xs text-slate-400">Sem lançamentos no período.</p>';
+            $('rel-cat-despesas').innerHTML = blocoCat(d.catDes, r.desP, '#f43f5e', 'Pago');
+            $('rel-cat-receitas').innerHTML = blocoCat(d.catRec, r.recP, '#10b981', 'Recebido');
+        }
+        function exportRelatorioExcel() {
+            if (typeof XLSX === 'undefined') return toast('Exportar para Excel precisa de internet na primeira vez.', { type: 'warn' });
+            comBusy('btn-rel-excel', () => {
+                const d = dadosRelatorio(), wb = XLSX.utils.book_new();
+                const linhasResumo = d.meses ? d.meses.map(m => ({ 'Mês': m.nome, 'Receitas previstas': m.recP, 'Receitas reais': m.recR, 'Despesas previstas': m.desP, 'Despesas pagas': m.desR, 'Saldo previsto': m.finalP, 'Saldo real': m.finalR })) : [];
+                linhasResumo.push({ 'Mês': d.modo === 'ano' ? 'TOTAL' : d.titulo, 'Receitas previstas': d.resumo.recP, 'Receitas reais': d.resumo.recR, 'Despesas previstas': d.resumo.desP, 'Despesas pagas': d.resumo.desR, 'Saldo previsto': d.resumo.finalP, 'Saldo real': d.resumo.finalR });
+                XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(linhasResumo), 'Resumo');
+                const cat = (l) => l.map(c => ({ 'Categoria': c.cat, 'Lançamentos': c.n, 'Total': c.total, 'Pago/Recebido': c.pago }));
+                XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(cat(d.catDes)), 'Despesas por categoria');
+                XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(cat(d.catRec)), 'Receitas por categoria');
+                XLSX.writeFile(wb, `Relatorio_${d.prefixo}.xlsx`);
+                toast('Relatório em Excel gerado.');
+            });
+        }
+        function exportRelatorioPDF() {
+            if (!window.jspdf) return toast('Exportar PDF precisa de internet na primeira vez.', { type: 'warn' });
+            comBusy('btn-rel-pdf', () => {
+                const d = dadosRelatorio(), { jsPDF } = window.jspdf, doc = new jsPDF();
+                doc.setFontSize(16); doc.text(`Relatório Financeiro - ${d.titulo}`, 14, 15);
+                doc.setFontSize(10);
+                const r = d.resumo;
+                doc.text(`Receitas: ${fmt(r.recP)} (recebido ${fmt(r.recR)})   Despesas: ${fmt(r.desP)} (pago ${fmt(r.desR)})`, 14, 23);
+                doc.text(`Saldo previsto: ${fmt(r.finalP)}   Saldo real: ${fmt(r.finalR)}`, 14, 29);
+                let y = 36;
+                if (d.meses) {
+                    doc.autoTable({ startY: y, head: [['Mês', 'Rec. prev.', 'Rec. reais', 'Desp. prev.', 'Desp. pagas', 'Saldo prev.', 'Saldo real']], body: d.meses.map(m => [m.nome, fmt(m.recP), fmt(m.recR), fmt(m.desP), fmt(m.desR), fmt(m.finalP), fmt(m.finalR)]), theme: 'striped', headStyles: { fillColor: [30, 41, 59] }, styles: { fontSize: 8 } });
+                    y = doc.lastAutoTable.finalY + 8;
+                }
+                const cat = (titulo, l) => { if (!l.length) return; doc.autoTable({ startY: y, head: [[titulo, 'Qtd', 'Total', 'Pago/Recebido']], body: l.map(c => [c.cat, c.n, fmt(c.total), fmt(c.pago)]), theme: 'striped', headStyles: { fillColor: [30, 41, 59] }, styles: { fontSize: 8 } }); y = doc.lastAutoTable.finalY + 8; };
+                cat('Despesas por categoria', d.catDes); cat('Receitas por categoria', d.catRec);
+                doc.save(`Relatorio_${d.prefixo}.pdf`);
+                toast('Relatório em PDF gerado.');
+            });
+        }
+
+        /* --- Configurações: armazenamento e backup --- */
+        function atualizarConfigUI() {
+            let raw = ''; try { raw = localStorage.getItem(STORAGE_KEY) || ''; } catch (e) { }
+            const mb = raw.length / 1048576, pct = Math.min(100, mb / 5 * 100);
+            const nLanc = state.receitas.length + state.despesas.length;
+            const ult = state.config?.ultimoBackup ? `Último backup: ${fmtDataHora(state.config.ultimoBackup)}.` : 'Você ainda não baixou nenhum backup.';
+            const aviso = pct > 70 ? ' ⚠ Espaço quase cheio: baixe um backup e remova comprovantes grandes.' : '';
+            $('storage-info').textContent = `${nLanc} lançamentos · ${state.investRV.length + state.investRF.length} investimentos · ${mb.toFixed(2)} MB usados (limite aproximado do navegador: 5 MB). ${ult}${aviso}`;
+            let temSnap = false; try { temSnap = !!localStorage.getItem(KEY_ANTES_RESTAURACAO); } catch (e) { }
+            $('btn-undo-restore').classList.toggle('hidden', !temSnap);
+        }
+
+        function exportBackup() {
+            comBusy('btn-backup', () => {
+                const copia = JSON.parse(JSON.stringify(state));
+                if (copia.config) delete copia.config.apiKey;
+                const pacote = {
+                    app: 'minha-vida-financeira', chave: STORAGE_KEY, versao: APP_VERSAO, exportadoEm: new Date().toISOString(),
+                    totais: { receitas: state.receitas.length, despesas: state.despesas.length, investRV: state.investRV.length, investRF: state.investRF.length },
+                    dados: copia
+                };
+                const blob = new Blob([JSON.stringify(pacote)], { type: 'application/json' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = `backup-minha-vida-financeira-${hojeISO()}.json`;
+                document.body.appendChild(a); a.click(); a.remove();
+                setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+                state.config.ultimoBackup = new Date().toISOString();
+                save();
+                toast('Backup baixado. Guarde o arquivo em local seguro.');
+            });
+        }
+
+        function validarBackup(obj) {
+            const erros = [];
+            if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return { ok: false, erros: ['O arquivo não tem o formato de um backup.'] };
+            if (obj.app && obj.app !== 'minha-vida-financeira') return { ok: false, erros: ['Este arquivo pertence a outro aplicativo.'] };
+            if (obj.chave && obj.chave !== STORAGE_KEY) return { ok: false, erros: ['Este backup é de uma versão incompatível dos dados.'] };
+            const dados = (obj.dados && typeof obj.dados === 'object') ? obj.dados : obj;
+            if (!Array.isArray(dados.receitas) || !Array.isArray(dados.despesas)) return { ok: false, erros: ['O arquivo não contém as listas de receitas e despesas.'] };
+            ['investRV', 'investRF', 'categoriasReceitas', 'categoriasDespesas'].forEach(k => { if (dados[k] !== undefined && !Array.isArray(dados[k])) erros.push(`O campo "${k}" está inválido.`); });
+            const obter = (v) => typeof v === 'number' && Number.isFinite(v);
+            const checarLanc = (lista, rot) => {
+                lista.forEach((i, idx) => {
+                    const p = `${rot} #${idx + 1}`;
+                    if (!i || typeof i !== 'object') return erros.push(`${p}: registro inválido.`);
+                    if (!(obter(i.id) || (typeof i.id === 'string' && i.id))) erros.push(`${p}: identificador ausente.`);
+                    if (typeof i.descricao !== 'string' || !i.descricao.trim()) erros.push(`${p}: descrição ausente.`);
+                    if (!obter(i.valor)) erros.push(`${p}: valor inválido.`);
+                    if (i.venc && !dataValida(i.venc)) erros.push(`${p}: data de vencimento inválida.`);
+                    if (i.status !== undefined && i.status !== 'pago' && i.status !== 'pendente') erros.push(`${p}: status inválido.`);
+                    if (i.comprovante && (typeof i.comprovante !== 'string' || !i.comprovante.startsWith('data:'))) erros.push(`${p}: comprovante inválido.`);
+                });
+            };
+            if (dados.receitas.length > 50000 || dados.despesas.length > 50000) erros.push('Quantidade de lançamentos acima do suportado.');
+            checarLanc(dados.receitas, 'Receita'); checarLanc(dados.despesas, 'Despesa');
+            (dados.investRV || []).forEach((i, idx) => { if (!i || typeof i.ticker !== 'string' || !obter(i.qtd) || !obter(i.pm)) erros.push(`Ativo #${idx + 1}: ticker, quantidade ou preço médio inválido.`); });
+            (dados.investRF || []).forEach((i, idx) => { if (!i || !(i.nome || i.descricao) || !obter(i.valor)) erros.push(`Título #${idx + 1}: nome ou valor inválido.`); });
+            ['categoriasReceitas', 'categoriasDespesas'].forEach(k => { if (Array.isArray(dados[k]) && dados[k].some(c => typeof c !== 'string')) erros.push(`Há categorias inválidas em "${k}".`); });
+            if (erros.length) return { ok: false, erros };
+            const novo = normalizarEstado(JSON.parse(JSON.stringify(dados)));
+            novo.config = { ...(novo.config || {}), apiKey: state.config?.apiKey || '' };
+            return { ok: true, dados: novo, exportadoEm: obj.exportadoEm };
+        }
+
+        async function handleRestoreFile(e) {
+            const input = e.target, file = input.files[0];
+            input.value = '';
+            if (!file) return;
+            if (file.size > 60 * 1024 * 1024) return toast('O arquivo é grande demais para ser um backup deste aplicativo.', { type: 'erro' });
+            const lbl = $('lbl-restore'); lbl.classList.add('busy');
+            let obj;
+            try { obj = JSON.parse(await file.text()); }
+            catch (err) { lbl.classList.remove('busy'); return toast('O arquivo não é um JSON válido.', { type: 'erro' }); }
+            lbl.classList.remove('busy');
+            const v = validarBackup(obj);
+            if (!v.ok) {
+                await confirmDialog({ titulo: 'Backup inválido', mensagem: 'Nada foi alterado. Problemas encontrados:\n\n• ' + v.erros.slice(0, 6).join('\n• ') + (v.erros.length > 6 ? `\n• ... e mais ${v.erros.length - 6}` : ''), confirmar: 'Entendi', semCancelar: true });
+                return;
+            }
+            const n = v.dados;
+            const ok = await confirmDialog({
+                titulo: 'Restaurar backup?',
+                mensagem: `Arquivo: ${file.name}\n${v.exportadoEm ? 'Exportado em: ' + fmtDataHora(v.exportadoEm) + '\n' : ''}\nO backup contém ${n.receitas.length} receitas, ${n.despesas.length} despesas, ${n.investRV.length} ativos de renda variável e ${n.investRF.length} títulos de renda fixa.\n\nOs dados atuais (${state.receitas.length} receitas, ${state.despesas.length} despesas) serão SUBSTITUÍDOS. Uma cópia dos dados atuais fica guardada neste aparelho e você poderá desfazer em Configurações.`,
+                confirmar: 'Substituir dados', perigo: true
+            });
+            if (!ok) return;
+            try { localStorage.setItem(KEY_ANTES_RESTAURACAO, localStorage.getItem(STORAGE_KEY) || JSON.stringify(estadoPadrao())); }
+            catch (err) { return toast('Não foi possível guardar uma cópia de segurança dos dados atuais (armazenamento cheio). Baixe um backup antes de restaurar.', { type: 'erro', ms: 9000 }); }
+            state = n;
+            if (!persistir()) { try { localStorage.removeItem(KEY_ANTES_RESTAURACAO); } catch (_) { } render(); return; }
+            render();
+            toast('Backup restaurado com sucesso.', { ms: 9000, action: { label: 'Desfazer', fn: undoRestore } });
+        }
+
+        async function undoRestore() {
+            let snap = null; try { snap = localStorage.getItem(KEY_ANTES_RESTAURACAO); } catch (e) { }
+            if (!snap) return toast('Não há restauração para desfazer.', { type: 'info' });
+            const ok = await confirmDialog({ titulo: 'Desfazer a restauração?', mensagem: 'Os dados voltarão ao estado de antes da última restauração. As alterações feitas depois dela serão perdidas.', confirmar: 'Voltar aos dados anteriores', perigo: true });
+            if (!ok) return;
+            try { state = normalizarEstado(JSON.parse(snap)); } catch (e) { return toast('A cópia de segurança está ilegível. Nada foi alterado.', { type: 'erro' }); }
+            if (!persistir()) return;
+            try { localStorage.removeItem(KEY_ANTES_RESTAURACAO); } catch (e) { }
+            render();
+            toast('Dados anteriores recuperados.');
+        }
+
+        /* ---------- Ações sobre lançamentos ---------- */
+        function toggleStatus(type, id) { const list = state[type + 's']; const item = list.find(i => i.id == id); if (item) item.status = item.status === 'pago' ? 'pendente' : 'pago'; save(); }
+
+        async function deleteItem(list, id) {
+            const item = state[list].find(i => i.id == id);
+            if (!item) return;
+            const nome = item.descricao || item.ticker || item.nome || 'este item';
+            const ok = await confirmDialog({ titulo: 'Excluir lançamento?', mensagem: `"${nome}" será removido.${item.comprovante ? '\nO comprovante anexado também será removido.' : ''}\n\nVocê poderá desfazer logo após excluir.`, confirmar: 'Excluir', perigo: true });
+            if (!ok) return;
+            const idx = state[list].findIndex(i => i.id == id);
+            if (idx < 0) return;
+            const [removido] = state[list].splice(idx, 1);
+            if (!save()) return;
+            toast('Lançamento excluído.', { type: 'info', ms: 8000, action: { label: 'Desfazer', fn: () => { state[list].splice(Math.min(idx, state[list].length), 0, removido); if (save()) toast('Exclusão desfeita.'); } } });
+        }
+
+        async function clearData() {
+            const ok = await confirmDialog({
+                titulo: 'Apagar TODOS os dados?',
+                mensagem: 'Todas as receitas, despesas, investimentos, categorias e comprovantes deste aplicativo serão apagados deste aparelho. Isso não pode ser desfeito.\n\nBaixe um backup antes, se quiser guardar uma cópia.',
+                confirmar: 'Apagar tudo', perigo: true, exigirTexto: 'APAGAR'
+            });
+            if (!ok) return;
+            // Remove apenas as chaves deste app (não apaga dados de outros apps do mesmo endereço)
+            try { [STORAGE_KEY, KEY_ANTES_RESTAURACAO, KEY_CORROMPIDO].forEach(k => localStorage.removeItem(k)); } catch (e) { }
+            location.reload();
+        }
+
+        /* ---------- Renderização geral ---------- */
+        function render() {
+            safe(populateMonthFilter, 'filtro de mês');
+            safe(renderKPIs, 'indicadores');
+            safe(renderAlertas, 'alertas');
+            safe(renderComparativo, 'comparação');
+            safe(renderTodos, 'relatório geral');
+            safe(() => renderListas(), 'listas');
+            safe(renderInvest, 'investimentos');
+            safe(renderAgenda, 'pendências');
+            safe(renderFluxo, 'gráfico');
+            if (abaAtiva === 'relatorios') safe(renderRelatorios, 'relatórios');
+            if (abaAtiva === 'configuracoes') safe(atualizarConfigUI, 'configurações');
+            safeIcons();
+        }
+
+        function atualizarOnline() { $('badge-offline').classList.toggle('hidden', navigator.onLine !== false); }
+        window.addEventListener('online', atualizarOnline);
+        window.addEventListener('offline', atualizarOnline);
+
+        window.onload = () => {
+            $('current-date').innerText = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'full' }).format(new Date());
+            buildFilterBar('receita'); buildFilterBar('despesa');
+            atualizarOnline();
+            showTab('dashboard'); // Isso faz os menus aparecerem
+            if (window.__estadoCorrompido) toast('Os dados salvos estavam ilegíveis. Uma cópia do conteúdo original foi preservada neste aparelho.', { type: 'erro', ms: 12000 });
+            try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) { }
+        };
+
+        // Estilo mínimo de reserva: se o Tailwind (CDN) não carregar offline, o app continua utilizável
         if (typeof tailwind === 'undefined') {
             const fb = document.createElement('style');
-            fb.textContent = `
-                nav.fixed { position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; padding: 16px; background: rgba(15,23,42,.97); border-top: 1px solid #1e293b; z-index: 100; }
-                nav.fixed button { background: none; border: 0; color: #94a3b8; font-size: 22px; padding: 8px; }
-                nav.fixed button.text-white { color: #fff; }
-                .hidden { display: none !important; }
-                @media (min-width: 768px) { nav.fixed { display: none; } }
-            `;
+            fb.textContent = `.hidden { display: none !important; }`;
             document.head.appendChild(fb);
         }
-        window.onload = () => {
-            document.getElementById('current-date').innerText = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'full' }).format(new Date());
-            showTab('dashboard'); // Isso faz os menus aparecerem
-        };
     </script> <!-- Fecha o script do seu app -->
 
     <!-- SCRIPT DO SERVICE WORKER (SEPARADO) -->
