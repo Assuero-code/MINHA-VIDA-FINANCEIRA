@@ -372,6 +372,31 @@
 
         const fmt = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v || 0);
 
+        // Ícones: não quebra o app se a biblioteca (CDN) não carregar offline
+        const FALLBACK_ICONS = {
+            'layout-dashboard': '🏠', 'trending-up': '📈', 'trending-down': '📉', 'line-chart': '💹',
+            'settings': '⚙️', 'wallet': '💰', 'refresh-cw': '🔄', 'file-spreadsheet': '📊', 'file-text': '📄',
+            'alert-circle': '⚠️', 'layers': '📚', 'paperclip': '📎', 'copy': '📋', 'trash-2': '🗑️',
+            'check': '✓', 'x': '✕', 'download': '⬇️', 'file': '📄', 'arrow-down-right': '↘'
+        };
+        function safeIcons() {
+            try {
+                if (window.lucide && typeof window.lucide.createIcons === 'function') {
+                    window.lucide.createIcons();
+                    return;
+                }
+            } catch (e) { console.warn('Lucide indisponível:', e); }
+            // Fallback offline: troca o ícone por um emoji para os botões continuarem visíveis
+            document.querySelectorAll('i[data-lucide]').forEach(el => {
+                const span = document.createElement('span');
+                span.textContent = FALLBACK_ICONS[el.getAttribute('data-lucide')] || '•';
+                span.className = el.className;
+                span.style.fontStyle = 'normal';
+                span.style.lineHeight = '1';
+                el.replaceWith(span);
+            });
+        }
+
         function showTab(id) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.getElementById(id).classList.add('active');
@@ -381,7 +406,7 @@
             document.getElementById('tab-title').innerText = id.charAt(0).toUpperCase() + id.slice(1);
             if(id === 'configuracoes') document.getElementById('cfg-api-key').value = state.config?.apiKey || '';
             render();
-            lucide.createIcons();
+            safeIcons();
         }
 
         function saveApiKey() {
@@ -456,7 +481,7 @@
             if (b64Data.startsWith('data:image/')) container.innerHTML = `<img src="${b64Data}" class="max-h-[60vh] max-w-full rounded-lg object-contain shadow-lg">`;
             else if (b64Data.startsWith('data:application/pdf')) container.innerHTML = `<iframe src="${b64Data}" class="w-full h-[60vh] rounded-lg border-0"></iframe>`;
             else container.innerHTML = `<div class="text-center p-6"><i data-lucide="file" class="w-12 h-12 text-indigo-400 mx-auto mb-2"></i><p class="text-sm font-bold text-slate-300">${nome}</p></div>`;
-            document.getElementById('modal-doc').classList.remove('hidden'); lucide.createIcons();
+            document.getElementById('modal-doc').classList.remove('hidden'); safeIcons();
         }
 
         function closeDocModal() { document.getElementById('modal-doc').classList.add('hidden'); }
@@ -490,6 +515,7 @@
         }
 
         function exportToExcel(filtroTipo = 'todos') {
+            if (typeof XLSX === 'undefined') return alert("Exportar para Excel precisa de internet na primeira vez.");
             const items = getFilteredExportData(filtroTipo);
             if (items.length === 0) return alert("Nenhum lançamento.");
             const dataFormatted = items.map(item => ({
@@ -509,6 +535,7 @@
         }
 
         function exportToPDF(filtroTipo = 'todos') {
+            if (!window.jspdf) return alert("Exportar PDF precisa de internet na primeira vez.");
             const items = getFilteredExportData(filtroTipo);
             if (items.length === 0) return alert("Nenhum lançamento.");
             const { jsPDF } = window.jspdf;
@@ -765,7 +792,7 @@
                     <span class="font-bold ${d.venc<hojeStr?'text-rose-500':'text-rose-400/80'}">${fmt(d.valor)}</span>
                 </div>`).join('') || '<p class="text-xs text-slate-600 text-center py-4">Sem pendências.</p>';
 
-            renderChart(res.recR, res.desR); lucide.createIcons();
+            renderChart(res.recR, res.desR); safeIcons();
         }
 
         function toggleStatus(type, id) { const list = state[type + 's']; const item = list.find(i => i.id == id); if(item) item.status = item.status === 'pago' ? 'pendente' : 'pago'; save(); }
@@ -775,10 +802,23 @@
         let fChart;
         function renderChart(r, d) {
             const ctx = document.getElementById('chartFluxo');
+            if (typeof Chart === 'undefined' || !ctx) return; // Chart.js indisponível offline: ignora o gráfico
             if (fChart) fChart.destroy();
             fChart = new Chart(ctx, { type: 'doughnut', data: { datasets: [{ data: [r, d], backgroundColor: ['#10b981', '#f43f5e'], borderWidth: 0 }] }, options: { cutout: '80%', plugins: { tooltip: { enabled: false } } } });
         }
 
+        // Estilo mínimo de reserva: se o Tailwind (CDN) não carregar offline, o menu inferior continua visível
+        if (typeof tailwind === 'undefined') {
+            const fb = document.createElement('style');
+            fb.textContent = `
+                nav.fixed { position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; padding: 16px; background: rgba(15,23,42,.97); border-top: 1px solid #1e293b; z-index: 100; }
+                nav.fixed button { background: none; border: 0; color: #94a3b8; font-size: 22px; padding: 8px; }
+                nav.fixed button.text-white { color: #fff; }
+                .hidden { display: none !important; }
+                @media (min-width: 768px) { nav.fixed { display: none; } }
+            `;
+            document.head.appendChild(fb);
+        }
         window.onload = () => {
             document.getElementById('current-date').innerText = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'full' }).format(new Date());
             showTab('dashboard'); // Isso faz os menus aparecerem
