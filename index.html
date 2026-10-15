@@ -299,11 +299,22 @@
 
                 <div id="box-parcelas" class="p-3 bg-slate-950 rounded-xl border border-slate-800">
                     <label class="flex items-center gap-2 text-xs text-slate-400 mb-2">
-                        <input type="checkbox" id="inp-is-parcelado" class="w-4 h-4" onchange="document.getElementById('box-qtd').classList.toggle('hidden', !this.checked)">
+                        <input type="checkbox" id="inp-is-parcelado" class="w-4 h-4" onchange="document.getElementById('box-qtd').classList.toggle('hidden', !this.checked); if(this.checked) toggleClonarMeses(false);">
                         Parcelar este lançamento
                     </label>
                     <div id="box-qtd" class="hidden">
                         <input type="number" id="inp-qtd-parcelas" min="1" max="12" placeholder="Qtd de Parcelas">
+                    </div>
+                </div>
+
+                <div id="box-clonar" class="p-3 bg-slate-950 rounded-xl border border-slate-800">
+                    <label class="flex items-center gap-2 text-xs text-slate-400 mb-2">
+                        <input type="checkbox" id="inp-is-clonar" class="w-4 h-4" onchange="toggleClonarMeses(this.checked)">
+                        Clonar este lançamento para os próximos meses
+                    </label>
+                    <div id="box-qtd-clonar" class="hidden">
+                        <input type="number" id="inp-qtd-clonar" min="1" max="60" placeholder="Clonar para quantos meses?">
+                        <p class="text-[10px] text-slate-500 mt-1">Mesmo valor e descrição, com vencimento nos meses seguintes.</p>
                     </div>
                 </div>
 
@@ -361,6 +372,31 @@
 
         const fmt = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v || 0);
 
+        // Ícones: não quebra o app se a biblioteca (CDN) não carregar offline
+        const FALLBACK_ICONS = {
+            'layout-dashboard': '🏠', 'trending-up': '📈', 'trending-down': '📉', 'line-chart': '💹',
+            'settings': '⚙️', 'wallet': '💰', 'refresh-cw': '🔄', 'file-spreadsheet': '📊', 'file-text': '📄',
+            'alert-circle': '⚠️', 'layers': '📚', 'paperclip': '📎', 'copy': '📋', 'trash-2': '🗑️',
+            'check': '✓', 'x': '✕', 'download': '⬇️', 'file': '📄', 'arrow-down-right': '↘'
+        };
+        function safeIcons() {
+            try {
+                if (window.lucide && typeof window.lucide.createIcons === 'function') {
+                    window.lucide.createIcons();
+                    return;
+                }
+            } catch (e) { console.warn('Lucide indisponível:', e); }
+            // Fallback offline: troca o ícone por um emoji para os botões continuarem visíveis
+            document.querySelectorAll('i[data-lucide]').forEach(el => {
+                const span = document.createElement('span');
+                span.textContent = FALLBACK_ICONS[el.getAttribute('data-lucide')] || '•';
+                span.className = el.className;
+                span.style.fontStyle = 'normal';
+                span.style.lineHeight = '1';
+                el.replaceWith(span);
+            });
+        }
+
         function showTab(id) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.getElementById(id).classList.add('active');
@@ -370,7 +406,7 @@
             document.getElementById('tab-title').innerText = id.charAt(0).toUpperCase() + id.slice(1);
             if(id === 'configuracoes') document.getElementById('cfg-api-key').value = state.config?.apiKey || '';
             render();
-            lucide.createIcons();
+            safeIcons();
         }
 
         function saveApiKey() {
@@ -445,7 +481,7 @@
             if (b64Data.startsWith('data:image/')) container.innerHTML = `<img src="${b64Data}" class="max-h-[60vh] max-w-full rounded-lg object-contain shadow-lg">`;
             else if (b64Data.startsWith('data:application/pdf')) container.innerHTML = `<iframe src="${b64Data}" class="w-full h-[60vh] rounded-lg border-0"></iframe>`;
             else container.innerHTML = `<div class="text-center p-6"><i data-lucide="file" class="w-12 h-12 text-indigo-400 mx-auto mb-2"></i><p class="text-sm font-bold text-slate-300">${nome}</p></div>`;
-            document.getElementById('modal-doc').classList.remove('hidden'); lucide.createIcons();
+            document.getElementById('modal-doc').classList.remove('hidden'); safeIcons();
         }
 
         function closeDocModal() { document.getElementById('modal-doc').classList.add('hidden'); }
@@ -479,6 +515,7 @@
         }
 
         function exportToExcel(filtroTipo = 'todos') {
+            if (typeof XLSX === 'undefined') return alert("Exportar para Excel precisa de internet na primeira vez.");
             const items = getFilteredExportData(filtroTipo);
             if (items.length === 0) return alert("Nenhum lançamento.");
             const dataFormatted = items.map(item => ({
@@ -498,6 +535,7 @@
         }
 
         function exportToPDF(filtroTipo = 'todos') {
+            if (!window.jspdf) return alert("Exportar PDF precisa de internet na primeira vez.");
             const items = getFilteredExportData(filtroTipo);
             if (items.length === 0) return alert("Nenhum lançamento.");
             const { jsPDF } = window.jspdf;
@@ -522,6 +560,24 @@
             doc.save(`Financeiro_${state.selectedMonth}.pdf`);
         }
 
+        function toggleClonarMeses(on) {
+            document.getElementById('inp-is-clonar').checked = on;
+            document.getElementById('box-qtd-clonar').classList.toggle('hidden', !on);
+            if (on) {
+                document.getElementById('inp-is-parcelado').checked = false;
+                document.getElementById('box-qtd').classList.add('hidden');
+            }
+        }
+
+        // Soma N meses a uma data 'YYYY-MM-DD' mantendo o dia (ou o último dia do mês, se não existir)
+        function addMonthsStr(dateStr, n) {
+            const [y, m, d] = dateStr.split('-').map(Number);
+            const total = (m - 1) + n;
+            const ny = y + Math.floor(total / 12), nm = ((total % 12) + 12) % 12;
+            const ultimo = new Date(ny, nm + 1, 0).getDate();
+            return `${ny}-${String(nm + 1).padStart(2, '0')}-${String(Math.min(d, ultimo)).padStart(2, '0')}`;
+        }
+
         function openForm(type, id = null) {
             const form = document.getElementById('main-form');
             form.reset(); removerComprovanteForm();
@@ -532,6 +588,8 @@
             const isInvest = (type === 'rv' || type === 'rf');
             document.getElementById('box-invest').classList.toggle('hidden', type !== 'rv');
             document.getElementById('box-parcelas').classList.toggle('hidden', isInvest || id !== null);
+            document.getElementById('box-clonar').classList.toggle('hidden', isInvest || id !== null);
+            document.getElementById('box-qtd-clonar').classList.add('hidden');
             document.getElementById('box-comprovante').classList.toggle('hidden', isInvest);
             document.getElementById('box-observacoes').classList.toggle('hidden', isInvest);
             document.getElementById('container-categoria').classList.toggle('hidden', isInvest);
@@ -570,7 +628,22 @@
             const comprovante = document.getElementById('form-comprovante-b64').value;
             const compNome = document.getElementById('form-comprovante-nome').value;
 
-            if (isParcelado && !id) {
+            const isClonar = document.getElementById('inp-is-clonar').checked;
+            if (isClonar && !isParcelado && !id && (type === 'receita' || type === 'despesa')) {
+                const meses = Math.max(1, Math.min(60, parseInt(document.getElementById('inp-qtd-clonar').value) || 1));
+                const vencBase = document.getElementById('inp-venc').value;
+                for (let i = 0; i <= meses; i++) {
+                    state[type === 'receita' ? 'receitas' : 'despesas'].push({
+                        id: Date.now() + Math.random(),
+                        descricao: document.getElementById('inp-desc').value,
+                        valor: parseFloat(document.getElementById('inp-valor').value),
+                        venc: addMonthsStr(vencBase, i),
+                        categoria: document.getElementById('inp-cat').value,
+                        status: 'pendente', observacoes: obs,
+                        comprovante: comprovante || null, comprovanteNome: compNome || null
+                    });
+                }
+            } else if (isParcelado && !id) {
                 const qtd = parseInt(document.getElementById('inp-qtd-parcelas').value) || 1;
                 const total = parseFloat(document.getElementById('inp-valor').value);
                 const valorP = Math.floor((total / qtd) * 100) / 100;
@@ -629,14 +702,14 @@
                 let dP = state.despesas.reduce((a,c)=>a+c.valor, 0), dR = state.despesas.filter(i=>i.status==='pago').reduce((a,c)=>a+c.valor, 0);
                 return { recR: rR, desR: dR, finalR: rR - dR, finalP: rP - dP };
             }
-            sorted.forEach(m => {
-                let recM = state.receitas.filter(i => i.venc?.startsWith(m)), desM = state.despesas.filter(i => i.venc?.startsWith(m));
-                let rP = recM.reduce((a,c)=>a+c.valor,0), rR = recM.filter(i=>i.status==='pago').reduce((a,c)=>a+c.valor,0);
-                let dP = desM.reduce((a,c)=>a+c.valor,0), dR = desM.filter(i=>i.status==='pago').reduce((a,c)=>a+c.valor,0);
-                if(m === target) { res.recR = rR; res.desR = dR; }
-                p += (rP - dP); r += (rR - dR);
-                if(m === target) { res.finalR = r; res.finalP = p; }
-            });
+            // Mês específico: cálculo isolado, SEM acumular meses anteriores.
+            // Saldo Previsto = todas as receitas - todas as despesas do mês (independe do status)
+            // Saldo Real = receitas pagas - despesas pagas do mês
+            let recM = state.receitas.filter(i => i.venc?.startsWith(target)), desM = state.despesas.filter(i => i.venc?.startsWith(target));
+            let rP = recM.reduce((a,c)=>a+c.valor,0), rR = recM.filter(i=>i.status==='pago').reduce((a,c)=>a+c.valor,0);
+            let dP = desM.reduce((a,c)=>a+c.valor,0), dR = desM.filter(i=>i.status==='pago').reduce((a,c)=>a+c.valor,0);
+            res.recR = rR; res.desR = dR;
+            res.finalR = rR - dR; res.finalP = rP - dP;
             return res;
         }
 
@@ -719,7 +792,7 @@
                     <span class="font-bold ${d.venc<hojeStr?'text-rose-500':'text-rose-400/80'}">${fmt(d.valor)}</span>
                 </div>`).join('') || '<p class="text-xs text-slate-600 text-center py-4">Sem pendências.</p>';
 
-            renderChart(res.recR, res.desR); lucide.createIcons();
+            renderChart(res.recR, res.desR); safeIcons();
         }
 
         function toggleStatus(type, id) { const list = state[type + 's']; const item = list.find(i => i.id == id); if(item) item.status = item.status === 'pago' ? 'pendente' : 'pago'; save(); }
@@ -729,10 +802,23 @@
         let fChart;
         function renderChart(r, d) {
             const ctx = document.getElementById('chartFluxo');
+            if (typeof Chart === 'undefined' || !ctx) return; // Chart.js indisponível offline: ignora o gráfico
             if (fChart) fChart.destroy();
             fChart = new Chart(ctx, { type: 'doughnut', data: { datasets: [{ data: [r, d], backgroundColor: ['#10b981', '#f43f5e'], borderWidth: 0 }] }, options: { cutout: '80%', plugins: { tooltip: { enabled: false } } } });
         }
 
+        // Estilo mínimo de reserva: se o Tailwind (CDN) não carregar offline, o menu inferior continua visível
+        if (typeof tailwind === 'undefined') {
+            const fb = document.createElement('style');
+            fb.textContent = `
+                nav.fixed { position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; padding: 16px; background: rgba(15,23,42,.97); border-top: 1px solid #1e293b; z-index: 100; }
+                nav.fixed button { background: none; border: 0; color: #94a3b8; font-size: 22px; padding: 8px; }
+                nav.fixed button.text-white { color: #fff; }
+                .hidden { display: none !important; }
+                @media (min-width: 768px) { nav.fixed { display: none; } }
+            `;
+            document.head.appendChild(fb);
+        }
         window.onload = () => {
             document.getElementById('current-date').innerText = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'full' }).format(new Date());
             showTab('dashboard'); // Isso faz os menus aparecerem
